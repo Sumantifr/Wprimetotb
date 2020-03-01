@@ -1,2 +1,2 @@
 # Wprimetotb
-Cards for Wprimetotb MC sample production
+Codes and cards for Wpriem to t b hadronic channel
