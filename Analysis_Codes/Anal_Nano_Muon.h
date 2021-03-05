@@ -5,8 +5,8 @@
 // found on file: root://se01.indiacms.res.in//store/user/chatterj/NanoPost/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/NanoTestPost_2017TTBar/190408_151813/0000/tree_6.root
 //////////////////////////////////////////////////////////
 
-#ifndef Anal_Nano_PROOF_h
-#define Anal_Nano_PROOF_h
+#ifndef Anal_Nano_Muon_h
+#define Anal_Nano_Muon_h
 
 #include <TROOT.h>
 #include <TChain.h>
@@ -37,11 +37,6 @@
 #include "TSystem.h"
 #include "boost/config.hpp"
 #include "boost/lexical_cast.hpp"
-
-#include "TMatrixDBase.h"
-#include "TMatrixD.h"
-
-#include "/cvmfs/cms.cern.ch/slc6_amd64_gcc530/external/lhapdf/6.1.6/include/LHAPDF/LHAPDF.h"
 
 // Header file for the classes stored in the TTree if any.
 
@@ -89,14 +84,6 @@ int getbinid(double val, int nbmx, float* array) {
   return -3;
 }
 
-int getbinid(double val, int nbmx, double* array) {
-  if (val<array[0]) return -2;
-  for (int ix=0; ix<=nbmx; ix++) {
-    if (val < array[ix]) return ix-1;
-  }
-  return -3;
-}
-
 double theta_to_eta(double theta) { return -log(tan(theta/2.)); }
 
 double eta_to_theta(double eta){
@@ -122,7 +109,7 @@ double delta2R(double eta1, double phi1, double eta2, double phi2) {
 double bmasscut_fun(double pt){
 //return (0.5*pt-200);	
 return 60;
-} 
+}
 
 double EW_toppt_cor(double pt){
 return (exp(-1.08872-(pt*0.011998)) + 0.895139);
@@ -144,67 +131,10 @@ Double_t pol1(Double_t* x, Double_t* par){
 return (par[1]*pow(x[0],1)+par[0]);
 }
 
-double Pol0(double* x, double* par){
-return (par[0]);
-}
-
-double Pol1(double* x, double* par){
-return (par[0]+par[1]*x[0]);
-}
-
 double MikkoFunc1(double *x, double *par){
 return (par[3]+par[0]*pow(x[0],par[1])+par[2]*log(x[0])/x[0]);
 }
 
-double Parabol(double* x, double* par){
-double xx = x[0]-par[0] ;
-if(xx<0) {return(par[1]+(par[2]*pow(xx,2)));}
-else { return(par[1]+(par[3]*pow(xx,2))) ; }
-}
-
-double BiFun(double* x, double* par){
-double xx = x[0]-par[0] ;
-if(xx<0) {return(par[1]+(par[2]*xx)+(par[3]*pow(xx,2)));}
-else { return(par[1]+(par[2]*xx)+(par[4]*pow(xx,2))) ; }
-}
-
-double bdF0(double* x, double* par){
-double xx = x[0]-par[0] ;
-if(xx<0) {return(-par[2]-2*par[3]*xx);}
-else {return(-par[2]-2*par[4]*xx);}
-}
-double bdF1(double* x, double* par){
-return 1;
-}
-double bdF2(double* x, double* par){
-return (x[0]-par[0]);
-}
-double bdF3(double* x, double* par){
-return ((x[0]-par[0])*(x[0]-par[0]));
-}
-double bdF4(double* x, double* par){
-return ((x[0]-par[0])*(x[0]-par[0]));
-}
-
-double Pol2(double* x, double* par){
-return (par[0]+par[1]*x[0]+par[2]*x[0]*x[0]);
-}
-
-double bdF0_pol2(double* x, double* par){
-return 1;
-}
-double bdF1_pol2(double* x, double* par){
-return x[0];
-}
-double bdF2_pol2(double* x, double* par){
-return (x[0]*x[0]);
-}
-
-double SF_TOP(double alpha, double beta, double pt0, double pt1)
-{
-	double sfwt = sqrt(exp(alpha-beta*pt0) * exp(alpha-beta*pt1));
-	return sfwt;
-}
 
 // Fixed size dimensions of array or collections stored in the TTree if any.
 
@@ -278,7 +208,7 @@ return 1.0;
 
 }
 
-class Anal_Nano_PROOF : public TSelector {
+class Anal_Nano_Muon : public TSelector {
 public :
    TTree          *fChain;   //!pointer to the analyzed TTree or TChain
   
@@ -286,33 +216,31 @@ public :
    static const int njesmax = 37;
    static const int nbtagmax = 9;
    static const int npartonmax = 200;
+   static const int nSVmax = 100;
+   static const int nTrigObjmax = 100;
    static const int npdfmax = 33;
    static const int nscalemax = 9;
    static const int npsmax = 4;
    static const int npartmx = 100;
-   static const int nSVmax = 100;
-   static const int nTrigObjmax = 100;
 
    float weight;
    float weight_t;
-   float SF_toppt;
    double weightev, weightpass, weightpass_btag;
-   float btag_weight;
-   float btag_weight_unc_up[nbtagmax], btag_weight_unc_dn[nbtagmax];
+   float SF_toppt, SF_flat_toppt;
    int nevent_total;
    bool isMC;
    bool isSignal;
    bool isQCD;
    bool isTTBar;
-   bool isTTHad, isTTSemiLep, isTTDiLep;
    bool isST;
    bool FakeAnalysis;
-   bool TopTagging;
+   bool usePrefireWeight;
    
    char name[100];
    char title[100];
    
    // Declaration of leaf types
+      
    UInt_t          run;
    UInt_t          luminosityBlock;
    ULong64_t       event;
@@ -448,7 +376,6 @@ public :
    Float_t 		   FatJet_GenJeteta[njetmax];
    Float_t 		   FatJet_GenJetphi[njetmax];
    Float_t 		   FatJet_GenJetmass[njetmax];
-   Bool_t		   FatJet_hashtop[njetmax];
    UInt_t          nGenJetAK8;
    Float_t         GenJetAK8_eta[njetmax];   //[nGenJetAK8]
    Float_t         GenJetAK8_mass[njetmax];   //[nGenJetAK8]
@@ -638,6 +565,7 @@ public :
    Bool_t          Muon_tightId[njetmax];   //[nMuon]
    UChar_t         Muon_tkIsoId[njetmax];   //[nMuon]
    Bool_t          Muon_triggerIdLoose[njetmax];   //[nMuon]
+   Float_t         Muon_pt_nearjet[njetmax];
    UInt_t          nPhoton;
    Float_t         Photon_energyErr[njetmax];   //[nPhoton]
    Float_t         Photon_eta[njetmax];   //[nPhoton]
@@ -1880,7 +1808,6 @@ public :
    Float_t         MET_phi_jesCorrelationGroupUncorrelatedDown;
    Float_t         MET_pt_unclustEnDown;
    Float_t         MET_phi_unclustEnDown;
-   
    Float_t         FatJet_pt_raw[njetmax];   //[nFatJet]
    Float_t         FatJet_pt_nom[njetmax];   //[nFatJet]
    Float_t         FatJet_mass_raw[njetmax];   //[nFatJet]
@@ -1895,7 +1822,6 @@ public :
    Float_t         FatJet_msoftdrop_corr_JMS[njetmax];   //[nFatJet]
    Float_t         FatJet_msoftdrop_corr_PUPPI[njetmax];   //[nFatJet]
    Float_t         FatJet_msoftdrop_tau21DDT_nom[njetmax];   //[nFatJet]
-
    Float_t         FatJet_pt_jerUp[njetmax];   //[nFatJet]
    Float_t         FatJet_mass_jerUp[njetmax];   //[nFatJet]
    Float_t         FatJet_mass_jmrUp[njetmax];   //[nFatJet]
@@ -3831,7 +3757,7 @@ public :
    TBranch        *b_MET_phi_jesCorrelationGroupUncorrelatedDown;   //!
    TBranch        *b_MET_pt_unclustEnDown;   //!
    TBranch        *b_MET_phi_unclustEnDown;   //!
-   
+    
    TBranch        *b_FatJet_pt_raw;   //!
    TBranch        *b_FatJet_pt_nom;   //!
    TBranch        *b_FatJet_mass_raw;   //!
@@ -4264,6 +4190,7 @@ public :
    TBranch        *b_PrefireWeight_Up;   //!
    TBranch        *b_PrefireWeight_Down;   //!
    
+   
    TProofOutputFile *OutFile;
    TFile *fileOut;
    
@@ -4297,17 +4224,7 @@ public :
    TH1D *hist_photrig_pass;
    TH1D *hist_hadtrig_pass;
    
-   TH1D *hist_pt_GEN_ak8;
-   TH1D *hist_pt_GEN_ak8_lead;
-   TH1D *hist_eta_GEN_ak8;
-   TH1D *hist_eta_GEN_ak8_lead;
-   
-   TH1D *hist_pt_GEN_ak4;
-   TH1D *hist_pt_GEN_ak4_lead;
-   TH1D *hist_eta_GEN_ak4;
-   TH1D *hist_eta_GEN_ak4_lead;
-   
-   TH1D *hist_mtb_GEN;
+   TH1D *hist_trig_match;;
 
    TH1D *met_corpt;
    TH1D *met_corphi;
@@ -4315,22 +4232,15 @@ public :
    
    TH1D *hist_npv;
    TH1D *hist_npv_final;
-   TH1D *hist_npv_nopuwt;
-   TH1D *hist_npv_final_nopuwt;
    TH1D *hist_npu;
-   TH1D *hist_npu_nopuwt;
 
    TH1D *hist_nmuons;
    TH1D *hist_nelectrons;
    TH1D *hist_nphotons;
-   TH1D *hist_nmuons_trig_pass;
    
    TH1D *hist_mass_hadtopq;
    TH1D *hist_pid_hadtopq;
    TH1D *hist_matchjet_hadtopq;
-   
-   TH1D *hist_jetpt_hastop;
-   TH1D *hist_jetpt_hastop_DAK8pass;
    
    TH1D *hist_jetsdmass_top[noperf_ptbins];
    TH1D *hist_jettau32_top[noperf_ptbins];
@@ -4363,18 +4273,16 @@ public :
    TH1D *hist_jetDeepAK8_tbkg_tausub_21[noperf_ptbins];
    TH1D *hist_jetDeepAK8_tbkg_tausub_22[noperf_ptbins];
 
-   TH1D *hist_jetpt_top;
-   TH1D *hist_jetpt_msd_top;
-   TH1D *hist_jetpt_top_md_deepak8_pass;
-   TH1D *hist_jetpt_msd_top_md_deepak8_pass;
+   TH1D *hist_nmuons_cut;
+   TH1D *hist_nelectrons_cut;
+   TH1D *hist_nphotons_cut;
+   TH1D *hist_mutrig_pass_cut;
+   TH1D *hist_trig_match_cut;
+   TH1D *hist_njetAK4_cut;
+   TH1D *hist_nbjetAK4_cut;
    
-   TH1D *hist_jetpt_all;
-   TH1D *hist_jetpt_all_DAK8pass;
-   TH1D *hist_jetpt_topmsd_all;
-   TH1D *hist_jetpt_topmsd_all_DAK8pass;
-
+ 
    TH1D *hist_njetAK8;
-   TH1D *hist_topcand_AK8;
    TH1D *hist_jetptAK8;
    TH1D *hist_jetrapAK8;
    TH1D *hist_jetmassAK8;
@@ -4399,7 +4307,6 @@ public :
    TH1D *hist_topjetptmatch;
    TH1D *hist_toppartonpt;
    TH1D *hist_topparton_matchedtopjet_pt;
-   TH2D *hist_topjetptmsd_2d;
    TH2D *hist_2D_topjet_subjetmass12;
    TH2D *hist_2D_topjetsdmass_subjetmass1;
    TH2D *hist_2D_topjetsdmass_subjetmass2;
@@ -4439,19 +4346,10 @@ public :
    TH2D *hist_2D_subjetbtag_deepmdtopscore;
    
    static const int ntautag = 2;
-   static const int ntoptag = 8;
-   static const int ntoptag_DAK8 = 8;
+   static const int ntoptag = 4;
    static const int nbtag = 2;
    static const int nsbtag = 2;
-   
-   static const int ntopptbins = 3;
-   float topptbins[ntopptbins+1] = {500,700,1000,7000};
-   
-   static const int ntopsdmassbins = 3;
-   float topsdmassbins[ntopsdmassbins+1] = {0,105,210,400};
-   
-   static const int netabins = 3;
-   float etabins[netabins+1] = {0,0.5,1.4,2.4};
+   static const int ntoptag_DAK8 = 4;
   
    TH2D *hist_2D_sdmass_subbtag_CSVv2_AK8[nbtag][ntautag];
    TH2D *hist_2D_sdmass_subbtag_DeepCSV_AK8[nbtag][ntautag];
@@ -4513,10 +4411,6 @@ public :
    TH2D *hist_2D_sdmass_subbtag_DeepCSV_AK8_md_DeepAK8_3[nbtag][ntautag];
    TH2D *hist_2D_pt_btag_AK4_md_DeepAK8[nsbtag][ntoptag];
    TH2D *hist_2D_pt_btag_AK4_md_DeepAK8_3[nsbtag][ntoptag];
-   TH2D *hist_2D_pt_btag_AK4_md_DeepAK8_beta[nsbtag][ntoptag][netabins];
-   TH2D *hist_2D_pt_btag_AK4_md_DeepAK8_beta2[nsbtag][ntoptag][netabins];
-   TH2D *hist_2D_mtb_btag_AK4_md_DeepAK8_beta[nsbtag][ntoptag][netabins];
-   TH2D *hist_2D_pt_btag_AK4_md_DeepAK8_beta_3[nsbtag][ntoptag][netabins];
    TH2D *hist_2D_sdmass_deeptag_AK8_reg_md_DeepAK8[nbtag][nsbtag];
    TH2D *hist_2D_sdmass_deeptag_AK8_reg_md_DeepAK8_3[nbtag][nsbtag];
    TH2D *hist_2D_sdmass_deeptopscore_AK8_md_DeepAK8[nbtag][nsbtag];
@@ -4524,35 +4418,12 @@ public :
    TH2D *hist_2D_sdmass_deeptopscore_md_AK8_md_DeepAK8[nbtag][nsbtag];
    TH2D *hist_2D_sdmass_deeptopscore_md_AK8_md_DeepAK8_3[nbtag][nsbtag];
    
-   TH2D *hist_2D_pt_btag_AK4_md_DeepAK8_Btag_up[nsbtag][ntoptag][nbtagmax];
-   TH2D *hist_2D_pt_btag_AK4_md_DeepAK8_Btag_dn[nsbtag][ntoptag][nbtagmax];
-   
-   TH2D *hist_2D_pt_btag_AK4_md_DeepAK8_beta_Btag_up[nsbtag][ntoptag][netabins][nbtagmax];
-   TH2D *hist_2D_pt_btag_AK4_md_DeepAK8_beta_Btag_dn[nsbtag][ntoptag][netabins][nbtagmax];
-   
-   TH2D *hist_2D_pt_btag_AK4_md_DeepAK8_beta_JES_up[nsbtag][ntoptag][netabins][njesmax];
-   TH2D *hist_2D_pt_btag_AK4_md_DeepAK8_beta_JES_dn[nsbtag][ntoptag][netabins][njesmax];
-   
-   TH2D *hist_2D_sdmass_deeptopscore_md_AK8_md_DeepAK8_JES_up[nbtag][nsbtag][njesmax];
-   TH2D *hist_2D_sdmass_deeptopscore_md_AK8_md_DeepAK8_JER_up[nbtag][nsbtag];
-   TH2D *hist_2D_sdmass_deeptopscore_md_AK8_md_DeepAK8_JMS_up[nbtag][nsbtag];
-   TH2D *hist_2D_sdmass_deeptopscore_md_AK8_md_DeepAK8_JMR_up[nbtag][nsbtag];
-   TH2D *hist_2D_sdmass_deeptopscore_md_AK8_md_DeepAK8_Btag_up[nbtag][nsbtag][nbtagmax];
-   
-   TH2D *hist_2D_sdmass_deeptopscore_md_AK8_md_DeepAK8_JES_dn[nbtag][nsbtag][njesmax];
-   TH2D *hist_2D_sdmass_deeptopscore_md_AK8_md_DeepAK8_JER_dn[nbtag][nsbtag];
-   TH2D *hist_2D_sdmass_deeptopscore_md_AK8_md_DeepAK8_JMS_dn[nbtag][nsbtag];
-   TH2D *hist_2D_sdmass_deeptopscore_md_AK8_md_DeepAK8_JMR_dn[nbtag][nsbtag];
-   TH2D *hist_2D_sdmass_deeptopscore_md_AK8_md_DeepAK8_Btag_dn[nbtag][nsbtag][nbtagmax];
-   
    TH2D *hist_2D_sdmass_subbtag_CSVv2_AK8_md_DeepAK8_tt[nbtag][ntautag];
    TH2D *hist_2D_sdmass_subbtag_DeepCSV_AK8_md_DeepAK8_tt[nbtag][ntautag];
    TH2D *hist_2D_sdmass_subbtag_CSVv2_AK8_md_DeepAK8_tt_3[nbtag][ntautag];
    TH2D *hist_2D_sdmass_subbtag_DeepCSV_AK8_md_DeepAK8_tt_3[nbtag][ntautag];
    TH2D *hist_2D_pt_btag_AK4_md_DeepAK8_tt[nsbtag][ntoptag];
    TH2D *hist_2D_pt_btag_AK4_md_DeepAK8_tt_3[nsbtag][ntoptag];
-   TH2D *hist_2D_pt_btag_AK4_md_DeepAK8_beta_tt[nsbtag][ntoptag][netabins];
-   TH2D *hist_2D_pt_btag_AK4_md_DeepAK8_beta_tt_3[nsbtag][ntoptag][netabins];
    TH2D *hist_2D_sdmass_deeptag_AK8_reg_md_DeepAK8_tt[nbtag][nsbtag];
    TH2D *hist_2D_sdmass_deeptag_AK8_reg_md_DeepAK8_tt_3[nbtag][nsbtag];
    TH2D *hist_2D_sdmass_deeptopscore_AK8_md_DeepAK8_tt[nbtag][nsbtag];
@@ -4560,13 +4431,11 @@ public :
    TH2D *hist_2D_sdmass_deeptopscore_md_AK8_md_DeepAK8_tt[nbtag][nsbtag];
    TH2D *hist_2D_sdmass_deeptopscore_md_AK8_md_DeepAK8_tt_3[nbtag][nsbtag];
    
-   
    TH1D *hist_delR_AK4_toptagAK8;
    TH1D *hist_deleta_AK4_toptagAK8;
    TH1D *hist_delphi_AK4_toptagAK8;
    TH1D *hist_delphi_AK4_toptagAK8_dRpass;
    TH1D *hist_deleta_AK4_toptagAK8_dRpass;
-   TH1D *hist_deleta_AK4_toptagAK8_dRpass_mtb2000;
    
    TH1D *hist_delR_btag_toptag;
    TH1D *hist_delphi_btag_toptag;
@@ -4582,8 +4451,6 @@ public :
    TH1D *hist_jetbtagdeepflavAK4;
    TH1D *hist_jetpartonflavAK4;
    TH1D *hist_jetpartonflavAK4_btagged;
-   TH1D *hist_bjetptAK4;
-   TH2D *hist_tjetptAK8_bjetptAK4;
    
    TH1D *hist_jetmassAK4_1;
    TH1D *hist_jetbtagAK4_1;
@@ -4625,19 +4492,28 @@ public :
    // high b pt //
    
    TH1D *hist_biso_mass_1;
+   TH1D *hist_biso_mass_deepak8cut_1;
+   TH1D *hist_biso_mass_msdcut_1;
    TH1D *hist_biso_tbmassdiff_1;
    TH1D *hist_biso_isomass_1;
    TH1D *hist_biso_isopt_1;
    TH1D *hist_biso_TopAK8score_1;
    TH1D *hist_biso_TopAK8score_MD_1;
-   TH1D *hist_biso_TopAK8score_masscut_1;
-   TH1D *hist_biso_TopAK8score_MD_masscut_1;
    TH1D *hist_biso_WAK8score_1;
    TH1D *hist_biso_WAK8score_MD_1;
    
-   TH1D *hist_biso_mass_btag_1[nbtag];
-   TH1D *hist_biso_TopAK8score_MD_btag_1[nbtag];
-   TH1D *hist_biso_WAK8score_MD_btag_1[nbtag];
+   TH1D *hist_biso_mass_wb_1[2];
+   TH1D *hist_biso_tbmassdiff_wb_1[2];
+   TH1D *hist_biso_isomass_wb_1[2];
+   TH1D *hist_biso_isopt_wb_1[2];
+   TH1D *hist_biso_TopAK8score_wb_1[2];
+   TH1D *hist_biso_TopAK8score_MD_wb_1[2];
+   TH1D *hist_biso_WAK8score_wb_1[2];
+   TH1D *hist_biso_WAK8score_MD_wb_1[2];
+   TH1D *hist_bjetpass_wb_1[2];
+   TH1D *hist_bjetfail_wb_1[2];
+   
+   TH1D *hist_bjetAK8genmass_wb_1[2];
    
    TH2D *hist_2d_biso_AK4mass_pt_1[ntoptag][nsbtag];
    TH2D *hist_2d_biso_AK8sdmass_pt_1[ntoptag][nsbtag];
@@ -4668,6 +4544,13 @@ public :
    TH1D *hist_bjetAK8genmass_1;
    TH2D *hist_genmass_tbcor;
    
+   // t iso //
+   
+   TH1D *hist_tiso_mass;
+   TH1D *hist_tiso_mass_deepak8cut;
+   TH1D *hist_tiso_mass_deepak8cut_flattoppt;
+   TH1D *hist_tiso_mass_mwcut;
+   
    // high b pt end //
    
    TH1D *hist_tbmass[ntoptag][nbtag][nsbtag];
@@ -4694,6 +4577,85 @@ public :
    TH1D *hist_ht_tau32[ntoptag][nbtag][nsbtag];
    
    TH3D *hist_3D_topjetsdmass_topjettau32_tbmass[ntoptag][nbtag][nsbtag];
+   
+   // low b pt //
+   
+   TH1D *hist_tbmass_1[ntoptag][nbtag][nsbtag];
+   TH1D *hist_tbpt_1[ntoptag][nbtag][nsbtag];
+   TH1D *hist_tbrap_1[ntoptag][nbtag][nsbtag];
+   TH1D *hist_tbpt_frac_1[ntoptag][nbtag][nsbtag];
+   TH1D *hist_tbtheta_diff_1[ntoptag][nbtag][nsbtag];
+   TH1D *hist_tbphi_diff_1[ntoptag][nbtag][nsbtag];
+   TH1D *hist_partonflav_AK4_1[ntoptag][nbtag][nsbtag];
+   
+   TH1D *hist_topjetpt_sel_1[ntoptag][nbtag][nsbtag];
+   TH1D *hist_topjetsdmass_sel_1[ntoptag][nbtag][nsbtag];
+   TH1D *hist_topjetdeeptopscore_sel_1[ntoptag][nbtag][nsbtag];
+   TH1D *hist_topjetdeepmdtopscore_sel_1[ntoptag][nbtag][nsbtag];
+   TH1D *hist_topjetsbtag_sel_1[ntoptag][nbtag][nsbtag];
+   TH1D *hist_topjetsdeepCSV_sel_1[ntoptag][nbtag][nsbtag];
+   TH1D *hist_topjettau32_sel_1[ntoptag][nbtag][nsbtag];
+   TH1D *hist_bjetpt_sel_1[ntoptag][nbtag][nsbtag];
+   TH1D *hist_bjetmass_sel_1[ntoptag][nbtag][nsbtag];
+   TH1D *hist_bjetbtag_sel_1[ntoptag][nbtag][nsbtag];
+   TH1D *hist_bjetmatch_AK8Topscore_sel_1[ntoptag][nbtag][nsbtag];
+   TH1D *hist_bjetmatch_AK8Wscore_sel_1[ntoptag][nbtag][nsbtag];
+   
+   // low b pt end //
+   
+   // no bmass cut //
+    
+   TH1D *hist_tbmass_2[ntoptag][nbtag][nsbtag];
+   TH1D *hist_tbpt_2[ntoptag][nbtag][nsbtag];
+   TH1D *hist_tbrap_2[ntoptag][nbtag][nsbtag];
+   TH1D *hist_tbpt_frac_2[ntoptag][nbtag][nsbtag];
+   TH1D *hist_tbtheta_diff_2[ntoptag][nbtag][nsbtag];
+   TH1D *hist_tbphi_diff_2[ntoptag][nbtag][nsbtag];
+   TH1D *hist_partonflav_AK4_2[ntoptag][nbtag][nsbtag];
+   
+   TH1D *hist_topjetpt_sel_2[ntoptag][nbtag][nsbtag];
+   TH1D *hist_topjetsdmass_sel_2[ntoptag][nbtag][nsbtag];
+   TH1D *hist_topjetdeeptopscore_sel_2[ntoptag][nbtag][nsbtag];
+   TH1D *hist_topjetdeepmdtopscore_sel_2[ntoptag][nbtag][nsbtag];
+   TH1D *hist_topjetsbtag_sel_2[ntoptag][nbtag][nsbtag];
+   TH1D *hist_topjetsdeepCSV_sel_2[ntoptag][nbtag][nsbtag];
+   TH1D *hist_topjettau32_sel_2[ntoptag][nbtag][nsbtag];
+   TH1D *hist_bjetpt_sel_2[ntoptag][nbtag][nsbtag];
+   TH1D *hist_bjetmass_sel_2[ntoptag][nbtag][nsbtag];
+   TH1D *hist_bjetbtag_sel_2[ntoptag][nbtag][nsbtag];
+   TH1D *hist_bjetmatch_AK8Topscore_sel_2[ntoptag][nbtag][nsbtag];
+   TH1D *hist_bjetmatch_AK8Wscore_sel_2[ntoptag][nbtag][nsbtag];
+    
+    // no bmass cut end //
+    
+   // high ht //
+    
+   TH1D *hist_tbmass_3[ntoptag][nbtag][nsbtag];
+   TH1D *hist_tbpt_3[ntoptag][nbtag][nsbtag];
+   TH1D *hist_tbrap_3[ntoptag][nbtag][nsbtag];
+   TH1D *hist_tbpt_frac_3[ntoptag][nbtag][nsbtag];
+   TH1D *hist_tbtheta_diff_3[ntoptag][nbtag][nsbtag];
+   TH1D *hist_tbphi_diff_3[ntoptag][nbtag][nsbtag];
+   TH1D *hist_partonflav_AK4_3[ntoptag][nbtag][nsbtag];
+   
+   TH1D *hist_topjetpt_sel_3[ntoptag][nbtag][nsbtag];
+   TH1D *hist_topjetsdmass_sel_3[ntoptag][nbtag][nsbtag];
+   TH1D *hist_topjetdeeptopscore_sel_3[ntoptag][nbtag][nsbtag];
+   TH1D *hist_topjetdeepmdtopscore_sel_3[ntoptag][nbtag][nsbtag];
+   TH1D *hist_topjetsbtag_sel_3[ntoptag][nbtag][nsbtag];
+   TH1D *hist_topjetsdeepCSV_sel_3[ntoptag][nbtag][nsbtag];
+   TH1D *hist_topjettau32_sel_3[ntoptag][nbtag][nsbtag];
+   TH1D *hist_bjetpt_sel_3[ntoptag][nbtag][nsbtag];
+   TH1D *hist_bjetmass_sel_3[ntoptag][nbtag][nsbtag];
+   TH1D *hist_bjetbtag_sel_3[ntoptag][nbtag][nsbtag];
+   TH1D *hist_bjetmatch_AK8Topscore_sel_3[ntoptag][nbtag][nsbtag];
+   TH1D *hist_bjetmatch_AK8Wscore_sel_3[ntoptag][nbtag][nsbtag];
+   
+   TH1D *hist_ht_tau32_3[ntoptag][nbtag][nsbtag];
+    
+    
+    // high ht end //
+    
     
     // deepAK8 based SR //
     
@@ -4703,7 +4665,6 @@ public :
    TH1D *hist_partonflav_AK4_DeepAK8[ntoptag_DAK8][nbtag][nsbtag];
    
    TH1D *hist_topjetpt_sel_DeepAK8[ntoptag_DAK8][nbtag][nsbtag];
-   TH1D *hist_topjetpt_msdbin_sel_DeepAK8[ntoptag_DAK8][nbtag][nsbtag][ntopsdmassbins];
    TH1D *hist_topjetsdmass_sel_DeepAK8[ntoptag_DAK8][nbtag][nsbtag];
    TH1D *hist_topjetdeeptopscore_sel_DeepAK8[ntoptag_DAK8][nbtag][nsbtag];
    TH1D *hist_topjetdeepmdtopscore_sel_DeepAK8[ntoptag_DAK8][nbtag][nsbtag];
@@ -4716,92 +4677,27 @@ public :
    TH1D *hist_bjetmatch_AK8Topscore_sel_DeepAK8[ntoptag_DAK8][nbtag][nsbtag];
    TH1D *hist_bjetmatch_AK8Wscore_sel_DeepAK8[ntoptag_DAK8][nbtag][nsbtag];
    
-   TH1D *hist_ht_DeepAK8[ntoptag_DAK8][nbtag][nsbtag]; 
-   
-   // Mass decorrelated
-   
    TH1D *hist_tbmass_md_DeepAK8[ntoptag_DAK8][nbtag][nsbtag];
    TH1D *hist_tbpt_md_DeepAK8[ntoptag_DAK8][nbtag][nsbtag];
    TH1D *hist_tbrap_md_DeepAK8[ntoptag_DAK8][nbtag][nsbtag];
    TH1D *hist_partonflav_AK4_md_DeepAK8[ntoptag_DAK8][nbtag][nsbtag];
    
-   TH1D *hist_tbmass_md_DeepAK8_fine[ntoptag_DAK8][nbtag][nsbtag];
-   TH1D *hist_tbmass_md_DeepAK8_fine_puup[ntoptag_DAK8][nbtag][nsbtag];
-   TH1D *hist_tbmass_md_DeepAK8_fine_pudn[ntoptag_DAK8][nbtag][nsbtag];
-   TH2D *h2d_mtb_npu[ntoptag_DAK8][nbtag][nsbtag];
+   TH1D *hist_ht_DeepAK8[ntoptag_DAK8][nbtag][nsbtag]; 
    
-   TH1D *hist_tbmass_md_DeepAK8_eta1[ntoptag_DAK8][nbtag][nsbtag][netabins];
-   TH1D *hist_tbmass_md_DeepAK8_eta2[ntoptag_DAK8][nbtag][nsbtag][netabins];
-   
-   TH1D *hist_tbmass_md_DeepAK8_dY[ntoptag_DAK8][nbtag][nsbtag];
-   
-   TH1D *hist_tbmass_md_DeepAK8_trigwt[ntoptag_DAK8][nbtag][nsbtag];
-   
-   TH1D *hist_tbmass_md_DeepAK8_pfup[ntoptag_DAK8][nbtag][nsbtag];
-   TH1D *hist_tbmass_md_DeepAK8_pfdn[ntoptag_DAK8][nbtag][nsbtag];
-   
-   TH1D *hist_tbmass_md_DeepAK8_2[ntoptag_DAK8][nbtag][nsbtag];
-   
-   TH1D *hist_tbmass_md_DeepAK8_pfup_2[ntoptag_DAK8][nbtag][nsbtag];
-   TH1D *hist_tbmass_md_DeepAK8_pfdn_2[ntoptag_DAK8][nbtag][nsbtag];
-   
-   TH1D *hist_tbmass_md_DeepAK8_dAK8up[ntoptag_DAK8][nbtag][nsbtag];
-   TH1D *hist_tbmass_md_DeepAK8_dAK8dn[ntoptag_DAK8][nbtag][nsbtag];
-   
-   TH1D *hist_tbmass_md_DeepAK8_puup[ntoptag_DAK8][nbtag][nsbtag];
-   TH1D *hist_tbmass_md_DeepAK8_pudn[ntoptag_DAK8][nbtag][nsbtag];
-   
-   TH1D *hist_tbmass_md_DeepAK8_prefireup[ntoptag_DAK8][nbtag][nsbtag];
-   TH1D *hist_tbmass_md_DeepAK8_prefiredn[ntoptag_DAK8][nbtag][nsbtag];
-   
-   TH1D *hist_tbmass_md_DeepAK8_bcorup[ntoptag_DAK8][nbtag][nsbtag];
-   TH1D *hist_tbmass_md_DeepAK8_bcordn[ntoptag_DAK8][nbtag][nsbtag];
-   
-   TH1D *hist_tbmass_md_DeepAK8_bcorup_2[ntoptag_DAK8][nbtag][nsbtag];
-   TH1D *hist_tbmass_md_DeepAK8_bcordn_2[ntoptag_DAK8][nbtag][nsbtag];
-   
-   TH1D *hist_tbmass_md_DeepAK8_noptw[ntoptag_DAK8][nbtag][nsbtag];
-   TH1D *hist_tbmass_md_DeepAK8_alphaup[ntoptag_DAK8][nbtag][nsbtag];
-   TH1D *hist_tbmass_md_DeepAK8_alphadn[ntoptag_DAK8][nbtag][nsbtag];
-   TH1D *hist_tbmass_md_DeepAK8_betaup[ntoptag_DAK8][nbtag][nsbtag];
-   TH1D *hist_tbmass_md_DeepAK8_betadn[ntoptag_DAK8][nbtag][nsbtag];
-   
-   TH1D *hist_tbmass_md_DeepAK8_ptbin[ntoptag_DAK8][nbtag][nsbtag][ntopptbins];
-   TH2D *hist_2D_sdmass_deeptopscore_md_AK8_md_DeepAK8_ptbin[nbtag][nsbtag][ntopptbins];
-   
-   TH1D *hist_tbmass_md_DeepAK8_ptbin_tt[ntoptag_DAK8][nbtag][nsbtag][ntopptbins];
-   TH2D *hist_2D_sdmass_deeptopscore_md_AK8_md_DeepAK8_ptbin_tt[nbtag][nsbtag][ntopptbins];
+   // Mass decorrelated
    
    TH1D *hist_topjetpt_sel_md_DeepAK8[ntoptag_DAK8][nbtag][nsbtag];
-   TH1D *hist_topjetpt_msdbin_sel_md_DeepAK8[ntoptag_DAK8][nbtag][nsbtag][ntopsdmassbins];
    TH1D *hist_topjetsdmass_sel_md_DeepAK8[ntoptag_DAK8][nbtag][nsbtag];
    TH1D *hist_topjetdeeptopscore_sel_md_DeepAK8[ntoptag_DAK8][nbtag][nsbtag];
    TH1D *hist_topjetdeepmdtopscore_sel_md_DeepAK8[ntoptag_DAK8][nbtag][nsbtag];
    TH1D *hist_topjetsbtag_sel_md_DeepAK8[ntoptag_DAK8][nbtag][nsbtag];
    TH1D *hist_topjetsdeepCSV_sel_md_DeepAK8[ntoptag_DAK8][nbtag][nsbtag];
    TH1D *hist_topjettau32_sel_md_DeepAK8[ntoptag_DAK8][nbtag][nsbtag];
-   TH1D *hist_partonflav_AK8_md_DeepAK8[ntoptag_DAK8][nbtag][nsbtag];
-   TH1D *hist_bjetpt_sel_md_DeepAK8_beta[ntoptag_DAK8][nbtag][nsbtag][netabins];
    TH1D *hist_bjetpt_sel_md_DeepAK8[ntoptag_DAK8][nbtag][nsbtag];
    TH1D *hist_bjetmass_sel_md_DeepAK8[ntoptag_DAK8][nbtag][nsbtag];
    TH1D *hist_bjetbtag_sel_md_DeepAK8[ntoptag_DAK8][nbtag][nsbtag];
    TH1D *hist_bjetmatch_AK8Topscore_sel_md_DeepAK8[ntoptag_DAK8][nbtag][nsbtag];
    TH1D *hist_bjetmatch_AK8Wscore_sel_md_DeepAK8[ntoptag_DAK8][nbtag][nsbtag];
-   TH1D *hist_bjetmatch_sdmass_sel_md_DeepAK8[ntoptag_DAK8][nbtag][nsbtag]; 
-   
-   TH1D *hist_topjetdeepmdtopscore_sel_md_DeepAK8up[ntoptag_DAK8][nbtag][nsbtag];
-   TH1D *hist_topjetdeepmdtopscore_sel_md_DeepAK8dn[ntoptag_DAK8][nbtag][nsbtag];
-   
-   TH1D *hist_bjetpt_sel_md_DeepAK8_Btag_up[ntoptag_DAK8][nbtag][nsbtag][nbtagmax];
-   TH1D *hist_bjetpt_sel_md_DeepAK8_Btag_dn[ntoptag_DAK8][nbtag][nsbtag][nbtagmax];
-   
-   TH1D *hist_bjetpt_sel_md_DeepAK8_JES_up[ntoptag_DAK8][nbtag][nsbtag][njesmax];
-   TH1D *hist_bjetpt_sel_md_DeepAK8_JES_dn[ntoptag_DAK8][nbtag][nsbtag][njesmax];
-   
-   TH2D *hist_tbmass_topjetpt_md_DeepAK8[ntoptag_DAK8][nbtag][nsbtag];
-   TH2D *hist_tbmass_topjeteta_md_DeepAK8[ntoptag_DAK8][nbtag][nsbtag];
-   TH2D *hist_tbmass_bjetpt_md_DeepAK8[ntoptag_DAK8][nbtag][nsbtag];
-   TH2D *hist_tbmass_bjeteta_md_DeepAK8[ntoptag_DAK8][nbtag][nsbtag];
    
    TH1D *hist_ht_md_DeepAK8[ntoptag_DAK8][nbtag][nsbtag]; 
    
@@ -4812,39 +4708,6 @@ public :
    TH1D *hist_tbmass_md_DeepAK8_PS[ntoptag_DAK8][nbtag][nsbtag][npsmax];
    TH1D *hist_topjetsdmass_sel_md_DeepAK8_PS[ntoptag_DAK8][nbtag][nsbtag][npsmax];
    
-   TH1D *hist_tbmass_md_DeepAK8_Btag_up[ntoptag_DAK8][nbtag][nsbtag][nbtagmax];
-   TH1D *hist_topjetsdmass_sel_md_DeepAK8_Btag_up[ntoptag_DAK8][nbtag][nsbtag][nbtagmax];
-   TH1D *hist_tbmass_md_DeepAK8_Btag_dn[ntoptag_DAK8][nbtag][nsbtag][nbtagmax];
-   TH1D *hist_topjetsdmass_sel_md_DeepAK8_Btag_dn[ntoptag_DAK8][nbtag][nsbtag][nbtagmax];
-   
-   TH1D *hist_tbmass_md_DeepAK8_JER_up[ntoptag_DAK8][nbtag][nsbtag];
-   TH1D *hist_topjetsdmass_sel_md_DeepAK8_JER_up[ntoptag_DAK8][nbtag][nsbtag];
-   TH1D *hist_tbmass_md_DeepAK8_JER_dn[ntoptag_DAK8][nbtag][nsbtag];
-   TH1D *hist_topjetsdmass_sel_md_DeepAK8_JER_dn[ntoptag_DAK8][nbtag][nsbtag];
-   
-   TH1D *hist_tbmass_md_DeepAK8_JMR_up[ntoptag_DAK8][nbtag][nsbtag];
-   TH1D *hist_topjetsdmass_sel_md_DeepAK8_JMR_up[ntoptag_DAK8][nbtag][nsbtag];
-   TH1D *hist_tbmass_md_DeepAK8_JMR_dn[ntoptag_DAK8][nbtag][nsbtag];
-   TH1D *hist_topjetsdmass_sel_md_DeepAK8_JMR_dn[ntoptag_DAK8][nbtag][nsbtag];
-   
-   TH1D *hist_topjetsdmass_sel_md_DeepAK8up[ntoptag_DAK8][nbtag][nsbtag];
-   TH1D *hist_topjetsdmass_sel_md_DeepAK8dn[ntoptag_DAK8][nbtag][nsbtag];
-   
-   TH1D *hist_tbmass_md_DeepAK8_JES_up[ntoptag_DAK8][nbtag][nsbtag][njesmax];
-   TH1D *hist_topjetsdmass_sel_md_DeepAK8_JES_up[ntoptag_DAK8][nbtag][nsbtag][njesmax];
-   TH1D *hist_tbmass_md_DeepAK8_JES_dn[ntoptag_DAK8][nbtag][nsbtag][njesmax];
-   TH1D *hist_topjetsdmass_sel_md_DeepAK8_JES_dn[ntoptag_DAK8][nbtag][nsbtag][njesmax];
-   
-   TH1D *hist_tbmass_md_DeepAK8_JES_up_2[ntoptag_DAK8][nbtag][nsbtag][njesmax];
-   TH1D *hist_tbmass_md_DeepAK8_JES_dn_2[ntoptag_DAK8][nbtag][nsbtag][njesmax];
-   
-   TH1D *hist_topjetpt_sel_md_DeepAK8_JES_up[ntoptag_DAK8][nbtag][nsbtag][njesmax];
-   TH1D *hist_topjetpt_sel_md_DeepAK8_JES_dn[ntoptag_DAK8][nbtag][nsbtag][njesmax];
-   
-   TH1D *hist_tbmass_md_DeepAK8_JMS_up[ntoptag_DAK8][nbtag][nsbtag];
-   TH1D *hist_topjetsdmass_sel_md_DeepAK8_JMS_up[ntoptag_DAK8][nbtag][nsbtag];
-   TH1D *hist_tbmass_md_DeepAK8_JMS_dn[ntoptag_DAK8][nbtag][nsbtag];
-   TH1D *hist_topjetsdmass_sel_md_DeepAK8_JMS_dn[ntoptag_DAK8][nbtag][nsbtag];
     
    TH1D *hist_tbmass_md_DeepAK8_3[ntoptag_DAK8][nbtag][nsbtag];
    TH1D *hist_tbpt_md_DeepAK8_3[ntoptag_DAK8][nbtag][nsbtag];
@@ -4863,7 +4726,6 @@ public :
    TH1D *hist_bjetbtag_sel_md_DeepAK8_3[ntoptag_DAK8][nbtag][nsbtag];
    TH1D *hist_bjetmatch_AK8Topscore_sel_md_DeepAK8_3[ntoptag_DAK8][nbtag][nsbtag];
    TH1D *hist_bjetmatch_AK8Wscore_sel_md_DeepAK8_3[ntoptag_DAK8][nbtag][nsbtag]; 
-   TH1D *hist_bjetmatch_sdmass_sel_md_DeepAK8_3[ntoptag_DAK8][nbtag][nsbtag]; 
    
    TH1D *hist_ht_md_DeepAK8_3[ntoptag_DAK8][nbtag][nsbtag]; 
    
@@ -4874,10 +4736,7 @@ public :
    TH1D *hist_tbrap_md_DeepAK8_tt[ntoptag_DAK8][nbtag][nsbtag];
    TH1D *hist_partonflav_AK4_md_DeepAK8_tt[ntoptag_DAK8][nbtag][nsbtag];
    
-   TH1D *hist_tbmass_md_DeepAK8_tt_deepak8pass[ntoptag_DAK8][nbtag][nsbtag];
-   
    TH1D *hist_topjetpt_sel_md_DeepAK8_tt[ntoptag_DAK8][nbtag][nsbtag];
-   TH1D *hist_topjetpt_msdbin_sel_md_DeepAK8_tt[ntoptag_DAK8][nbtag][nsbtag][ntopsdmassbins];
    TH1D *hist_topjetsdmass_sel_md_DeepAK8_tt[ntoptag_DAK8][nbtag][nsbtag];
    TH1D *hist_topjetdeeptopscore_sel_md_DeepAK8_tt[ntoptag_DAK8][nbtag][nsbtag];
    TH1D *hist_topjetdeepmdtopscore_sel_md_DeepAK8_tt[ntoptag_DAK8][nbtag][nsbtag];
@@ -4889,10 +4748,6 @@ public :
    TH1D *hist_bjetbtag_sel_md_DeepAK8_tt[ntoptag_DAK8][nbtag][nsbtag];
    TH1D *hist_bjetmatch_AK8Topscore_sel_md_DeepAK8_tt[ntoptag_DAK8][nbtag][nsbtag];
    TH1D *hist_bjetmatch_AK8Wscore_sel_md_DeepAK8_tt[ntoptag_DAK8][nbtag][nsbtag];
-   TH1D *hist_bjetmatch_sdmass_sel_md_DeepAK8_tt[ntoptag_DAK8][nbtag][nsbtag];
-   
-   TH1D *hist_topjetpt_sel_md_DeepAK8_tt_deepak8pass[ntoptag_DAK8][nbtag][nsbtag];
-   TH1D *hist_topjetsdmass_sel_md_DeepAK8_tt_deepak8pass[ntoptag_DAK8][nbtag][nsbtag];
    
    TH1D *hist_ht_md_DeepAK8_tt[ntoptag_DAK8][nbtag][nsbtag]; 
     
@@ -4913,7 +4768,6 @@ public :
    TH1D *hist_bjetbtag_sel_md_DeepAK8_tt_3[ntoptag_DAK8][nbtag][nsbtag];
    TH1D *hist_bjetmatch_AK8Topscore_sel_md_DeepAK8_tt_3[ntoptag_DAK8][nbtag][nsbtag];
    TH1D *hist_bjetmatch_AK8Wscore_sel_md_DeepAK8_tt_3[ntoptag_DAK8][nbtag][nsbtag]; 
-   TH1D *hist_bjetmatch_sdmass_sel_md_DeepAK8_tt_3[ntoptag_DAK8][nbtag][nsbtag];
    
    TH1D *hist_ht_md_DeepAK8_tt_3[ntoptag_DAK8][nbtag][nsbtag]; 
     
@@ -4937,879 +4791,100 @@ public :
    TH1D *hist_AK8bCand_DeeptagScore_MDDeepAK8_1[ntoptag][nbtag][nsbtag];
    TH1D *hist_AK8bCand_MD_DeeptagScore_MDDeepAK8[ntoptag][nbtag][nsbtag];
    
-    // trigger histograms //
+   // trigger histograms //
     
-   static const int trig_msdbins = 3;
-   double trig_msd_vals[trig_msdbins+1] = {0,105,210,4000};
-    
-   TH1D *hist_ht_mutrig[trig_msdbins];
-   TH1D *hist_pt_mutrig[trig_msdbins];
-   TH1D *hist_ht_emutrig[trig_msdbins];
-   TH1D *hist_pt_emutrig[trig_msdbins];
-   TH1D *hist_bpt_emutrig[trig_msdbins];
-   TH1D *hist_ptsum_emutrig[trig_msdbins];
-   TH1D *hist_mtb_emutrig[trig_msdbins];
+   TH1D *hist_ht_mutrig;
+   TH1D *hist_pt_mutrig;
+   TH1D *hist_ht_emutrig;
+   TH1D *hist_pt_emutrig;
+   TH1D *hist_bpt_emutrig;
+   TH1D *hist_ptsum_emutrig;
+   TH1D *hist_mtb_emutrig;
    
-   TH1D *hist_ht_HT1050_wemutrig[trig_msdbins];
-   TH1D *hist_ht_AK4Pt500_wemutrig[trig_msdbins];
-   TH1D *hist_ht_AK8Pt500_wemutrig[trig_msdbins];
-   TH1D *hist_ht_AK8PFJet420_TrimMass30_wemutrig[trig_msdbins];
-   TH1D *hist_ht_AK8DiPFJet300_200_TrimMass30_wemutrig[trig_msdbins]; 
-   TH1D *hist_ht_AK8PFHT900_TrimMass50_wemutrig[trig_msdbins]; 
-   TH1D *hist_ht_all_wemutrig[trig_msdbins];
+   TH1D *hist_ht_HT1050_wemutrig;
+   TH1D *hist_ht_AK4Pt500_wemutrig;
+   TH1D *hist_ht_AK8Pt500_wemutrig;
+   TH1D *hist_ht_AK8PFJet420_TrimMass30_wemutrig;
+   TH1D *hist_ht_AK8DiPFJet300_200_TrimMass30_wemutrig; 
+   TH1D *hist_ht_AK8PFHT900_TrimMass50_wemutrig; 
+   TH1D *hist_ht_all_wemutrig;
    
-   TH1D *hist_pt_HT1050_wemutrig[trig_msdbins];
-   TH1D *hist_pt_AK4Pt500_wemutrig[trig_msdbins];
-   TH1D *hist_pt_AK8Pt500_wemutrig[trig_msdbins];
-   TH1D *hist_pt_AK8PFJet420_TrimMass30_wemutrig[trig_msdbins];
-   TH1D *hist_pt_AK8DiPFJet300_200_TrimMass30_wemutrig[trig_msdbins]; 
-   TH1D *hist_pt_AK8PFHT900_TrimMass50_wemutrig[trig_msdbins]; 
-   TH1D *hist_pt_all_wemutrig[trig_msdbins];
+   TH1D *hist_pt_HT1050_wemutrig;
+   TH1D *hist_pt_AK4Pt500_wemutrig;
+   TH1D *hist_pt_AK8Pt500_wemutrig;
+   TH1D *hist_pt_AK8PFJet420_TrimMass30_wemutrig;
+   TH1D *hist_pt_AK8DiPFJet300_200_TrimMass30_wemutrig; 
+   TH1D *hist_pt_AK8PFHT900_TrimMass50_wemutrig; 
+   TH1D *hist_pt_all_wemutrig;
    
-   TH1D *hist_bpt_HT1050_wemutrig[trig_msdbins];
-   TH1D *hist_bpt_AK4Pt500_wemutrig[trig_msdbins];
-   TH1D *hist_bpt_AK8Pt500_wemutrig[trig_msdbins];
-   TH1D *hist_bpt_AK8PFJet420_TrimMass30_wemutrig[trig_msdbins];
-   TH1D *hist_bpt_AK8DiPFJet300_200_TrimMass30_wemutrig[trig_msdbins]; 
-   TH1D *hist_bpt_AK8PFHT900_TrimMass50_wemutrig[trig_msdbins]; 
-   TH1D *hist_bpt_all_wemutrig[trig_msdbins];
+   TH1D *hist_bpt_HT1050_wemutrig;
+   TH1D *hist_bpt_AK4Pt500_wemutrig;
+   TH1D *hist_bpt_AK8Pt500_wemutrig;
+   TH1D *hist_bpt_AK8PFJet420_TrimMass30_wemutrig;
+   TH1D *hist_bpt_AK8DiPFJet300_200_TrimMass30_wemutrig; 
+   TH1D *hist_bpt_AK8PFHT900_TrimMass50_wemutrig; 
+   TH1D *hist_bpt_all_wemutrig;
    
-   TH1D *hist_ptsum_HT1050_wemutrig[trig_msdbins];
-   TH1D *hist_ptsum_AK4Pt500_wemutrig[trig_msdbins];
-   TH1D *hist_ptsum_AK8Pt500_wemutrig[trig_msdbins];
-   TH1D *hist_ptsum_AK8PFJet420_TrimMass30_wemutrig[trig_msdbins];
-   TH1D *hist_ptsum_AK8DiPFJet300_200_TrimMass30_wemutrig[trig_msdbins]; 
-   TH1D *hist_ptsum_AK8PFHT900_TrimMass50_wemutrig[trig_msdbins]; 
-   TH1D *hist_ptsum_all_wemutrig[trig_msdbins];
+   TH1D *hist_ptsum_HT1050_wemutrig;
+   TH1D *hist_ptsum_AK4Pt500_wemutrig;
+   TH1D *hist_ptsum_AK8Pt500_wemutrig;
+   TH1D *hist_ptsum_AK8PFJet420_TrimMass30_wemutrig;
+   TH1D *hist_ptsum_AK8DiPFJet300_200_TrimMass30_wemutrig; 
+   TH1D *hist_ptsum_AK8PFHT900_TrimMass50_wemutrig; 
+   TH1D *hist_ptsum_all_wemutrig;
    
-   TH1D *hist_mtb_HT1050_wemutrig[trig_msdbins];
-   TH1D *hist_mtb_AK4Pt500_wemutrig[trig_msdbins];
-   TH1D *hist_mtb_AK8Pt500_wemutrig[trig_msdbins];
-   TH1D *hist_mtb_AK8PFJet420_TrimMass30_wemutrig[trig_msdbins];
-   TH1D *hist_mtb_AK8DiPFJet300_200_TrimMass30_wemutrig[trig_msdbins]; 
-   TH1D *hist_mtb_AK8PFHT900_TrimMass50_wemutrig[trig_msdbins]; 
-   TH1D *hist_mtb_all_wemutrig[trig_msdbins];
+   TH1D *hist_mtb_HT1050_wemutrig;
+   TH1D *hist_mtb_AK4Pt500_wemutrig;
+   TH1D *hist_mtb_AK8Pt500_wemutrig;
+   TH1D *hist_mtb_AK8PFJet420_TrimMass30_wemutrig;
+   TH1D *hist_mtb_AK8DiPFJet300_200_TrimMass30_wemutrig; 
+   TH1D *hist_mtb_AK8PFHT900_TrimMass50_wemutrig; 
+   TH1D *hist_mtb_all_wemutrig;
+   
    
    TF1 *bpfrat;
-   
-   TF1 *bpfrat_beta[netabins];
-   TF1 *bpfrat_val_beta[netabins];
-   
-   TF1 *bpfrat_pol2[netabins];
-   TF1 *bpfrat_val_pol2[netabins];
-   
    TF1 *tagpfrat_tau32;
    TF1 *tagpfrat_MDAK8;
    
-   TMatrixD err1;
-   TMatrixD err;
-   TMatrixD err2;
-   TMatrixD err_pol2;
-   
-   TF1 *fun_bdF[5][netabins];
-   TMatrixD cov_bpfrat_beta[netabins];
-   TF1 *fun_val_bdF[5][netabins];
-   TMatrixD cov_bpfrat_val_beta[netabins];
-   
-   TF1 *fun_bdF_pol2[3][netabins];
-   TMatrixD cov_bpfrat_pol2[netabins];
-   TF1 *fun_val_bdF_pol2[3][netabins];
-   TMatrixD cov_bpfrat_val_pol2[netabins];
-   
-   TMatrixD rvar;//(1,5);
-   TMatrixD cvar;//(5,1);
-   
-   TMatrixD rvar2;//(1,5);
-   TMatrixD cvar2;//(5,1);
-
-float COV_sig_data[netabins][5][5] = {{{0}}};
-float COV_sig_mc[netabins][5][5] = {{{0}}};
-float COV_val_data[netabins][5][5] = {{{0}}};
-float COV_val_mc[netabins][5][5] = {{{0}}};
-
-float COV_sig_data_pol2[netabins][3][3] = {{{0}}};
-float COV_sig_mc_pol2[netabins][3][3] = {{{0}}};
-float COV_val_data_pol2[netabins][3][3] = {{{0}}};
-float COV_val_mc_pol2[netabins][3][3] = {{{0}}};
-
-//2016//
-/*
-float COV_sig_data_16[netabins][5][5] = {
-{
-{3.74784e-05,5.53899e-07,-1.24892e-08,-4.15539e-11,7.50989e-12},
-{5.53899e-07,1.3177e-06,-2.67971e-09,-2.09471e-11,1.01084e-12},
-{-1.24892e-08,-2.67971e-09,2.19178e-11,9.18454e-14,-1.34459e-14},
-{-4.15539e-11,-2.09471e-11,9.18454e-14,7.35175e-16,-5.02231e-17},
-{7.50989e-12,1.01084e-12,-1.34459e-14,-5.02231e-17,1.14662e-17}
-},
-{
-{2.26604e-05,5.84882e-07,-9.76249e-09,-2.76416e-11,4.89282e-12},
-{5.84882e-07,1.1061e-06,-1.52792e-09,-1.04138e-11,4.12999e-13},
-{-9.76249e-09,-1.52792e-09,1.26286e-11,3.95405e-14,-6.24177e-15},
-{-2.76416e-11,-1.04138e-11,3.95405e-14,2.2158e-16,-1.73542e-17},
-{4.89282e-12,4.12999e-13,-6.24177e-15,-1.73542e-17,4.01204e-18}
-},
-{
-{4.99589e-05,1.66556e-06,-2.73896e-08,-4.48344e-11,1.27751e-11},
-{1.66556e-06,3.18344e-06,-3.2035e-09,-1.31388e-11,7.05857e-13},
-{-2.73896e-08,-3.2035e-09,2.69413e-11,4.9988e-14,-1.19937e-14},
-{-4.48344e-11,-1.31388e-11,4.9988e-14,1.41356e-16,-2.04055e-17},
-{1.27751e-11,7.05857e-13,-1.19937e-14,-2.04055e-17,6.35324e-18}
-}
-};
-*/
-
-static const int nohtbins = 30;
-     
-double htbins[nohtbins+1] = {300, 330, 362, 395, 430, 468,
-     507, 548, 592, 638, 686, 737, 790, 846, 905, 967,
-     1032, 1101, 1172, 1248, 1327, 1410, 1497, 1588, 1784, 2000,
-     2116, 2500, 2941, 3637, 5000} ; 
-
-float trig_weight_factors[ntopsdmassbins][nohtbins];
-
-float trig_weight_factors_2016_QCD[ntopsdmassbins][nohtbins] ={
- {1,1,1,1,1.10345,0.805232,0.182536,0.197765,0.380912,0.670897,0.834252,0.918474,0.982272,1.0125,1.00699,1.00193,1.00054,1.00024,1.00011,1,1.00011,1,1,1,1,1.0011,1,1,1,1},
- {1,1,1,1,1,1,1.12,0.808403,0.643965,0.847031,0.985109,0.995466,0.999472,1.0007,1.00054,1.00009,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
- {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
- };
-float trig_weight_factors_2016_TT[ntopsdmassbins][nohtbins] ={
- {1,1,1,1,1.0704,1.09308,0.759866,0.764611,0.957048,1.09061,1.10632,1.07927,1.0546,1.02967,1.01028,1.00242,1.00029,0.999902,0.999861,0.99987,1.00011,1,0.999135,1,1,1.0011,1,1,1,1},
- {1,1,1,1,1,1,1.04278,0.972386,0.965671,1.03579,1.02911,1.00574,1.00067,1.00018,1.0003,1.00005,0.999761,0.999835,0.999962,0.99983,0.999896,1,1,1,1,1,1,1,1,1},
- {1,1,1,1,1,1,1,1,1,1,1,0.994339,1,1,0.999469,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
- };
-float trig_weight_factors_2016_ST[ntopsdmassbins][nohtbins] ={
- {1,1,1,1,1.08177,1.05229,0.621771,0.588201,0.75973,0.956921,1.03433,1.05128,1.0467,1.0289,1.00468,1.00274,1.00054,1.00024,1.00011,1,1.00011,1,1,1,1,1.0011,1,1,1,1},
- {1,1,1,1,1,1,1.12,1.00739,0.855615,0.995367,1.0131,1.00596,1.00192,1.0007,1.00054,1.00009,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
- {1,1,1,1,1,1,1,1,1,1,1,0.849112,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
- };
-
-float trig_weight_factors_2017_QCD[ntopsdmassbins][nohtbins]={
-{1.52547,1,1.52041,1.27411,0.954823,1.63933,1.49198,1.78913,1.63537,1.67684,1.75807,1.71015,1.65438,1.49059,1.25432,1.09214,1.02392,1.00513,1.00158,1.00038,1.00021,1.00052,1.00025,1.00011,1,1,0.992649,1.00118,1,1.03017},
-{1,1,1,1,1,644855,3.99427,1.15384,1.26838,2.61535,3.64925,3.31482,2.35012,1.6682,1.28066,1.07543,1.01339,1.0023,1.00063,1.00038,1.00067,1.00151,1,1.00037,1,1,1,1,1,1},
-{1,1,1,1,1,1,1,1,1,1,5.68444,1.01553,1.33748,1.29369,1.11957,1.03858,1.01762,1.00597,1.00064,1,1,1,1,1,1,1,1,1,1,1}
- };
-float trig_weight_factors_2017_TT[ntopsdmassbins][nohtbins]={
-{1.52547,0.869586,1.52041,1.20361,2.66645,4.91677,16.7263,17.1385,11.7532,7.81608,5.92001,4.12231,2.84473,2.02241,1.48749,1.18026,1.04225,1.00709,0.999004,1.00094,1.00056,0.999149,1.00025,0.997346,1,1,1.00034,1.00118,1,1.03017},
-{1,1,1,1,1,487617,3.92897,4.19968,4.32724,3.99868,3.95255,3.17049,2.30299,1.67155,1.28043,1.07588,1.01315,1.00246,1.00053,1.00038,1.00067,1.00151,1,1.00037,1,1,1,1,1,1},
-{1,1,1,1,1,1,1,1,1,1,4.26425,1.37182,1.32734,1.27765,1.1428,1.0539,1.02123,1.00597,1.00064,1,1,1,1,1,1,1,1,1,1,1}
- };
-float trig_weight_factors_2017_ST[ntopsdmassbins][nohtbins]{
-{1.52547,1,1.52041,1.27411,3.03556,3.83096,9.5946,11.198,8.27829,5.7801,4.76236,3.71654,2.67955,1.94486,1.46723,1.1766,1.04315,1.00835,1.00216,1.00094,1.00056,1.00075,1.00025,1.00011,1,1,1.00034,1.00118,1,1.03017},
-{1,1,1,1,1,197.61,8.34002,1.73837,4.15467,2.85729,2.96534,2.54389,2.1116,1.63588,1.27316,1.07704,1.01339,1.00257,1.00063,1.00038,1.00067,1.00151,1,1.00037,1,1,1,1,1,1},
-{1,1,1,1,1,1,1,1,1,1,5.68444,1.54298,1.42353,0.933951,1.14851,1.05392,1.02123,1.00597,1.00064,1,1,1,1,1,1,1,1,1,1,1}
- };
-
-float trig_weight_factors_2018_QCD[ntopsdmassbins][nohtbins]{
-{1.52547,1,1.52041,1.27411,0.954823,1.63933,1.49198,1.78913,1.63537,1.67684,1.75807,1.71015,1.65438,1.49059,1.25432,1.09214,1.02392,1.00513,1.00158,1.00038,1.00021,1.00052,1.00025,1.00011,1,1,0.992649,1.00118,1,1.03017},
-{1,1,1,1,1,644855,3.99427,1.15384,1.26838,2.61535,3.64925,3.31482,2.35012,1.6682,1.28066,1.07543,1.01339,1.0023,1.00063,1.00038,1.00067,1.00151,1,1.00037,1,1,1,1,1,1},
-{1,1,1,1,1,1,1,1,1,1,5.68444,1.01553,1.33748,1.29369,1.11957,1.03858,1.01762,1.00597,1.00064,1,1,1,1,1,1,1,1,1,1,1}
- };
-float trig_weight_factors_2018_TT[ntopsdmassbins][nohtbins]{
-{1.52547,0.869586,1.52041,1.20361,2.66645,4.91677,16.7263,17.1385,11.7532,7.81608,5.92001,4.12231,2.84473,2.02241,1.48749,1.18026,1.04225,1.00709,0.999004,1.00094,1.00056,0.999149,1.00025,0.997346,1,1,1.00034,1.00118,1,1.03017},
-{1,1,1,1,1,487617,3.92897,4.19968,4.32724,3.99868,3.95255,3.17049,2.30299,1.67155,1.28043,1.07588,1.01315,1.00246,1.00053,1.00038,1.00067,1.00151,1,1.00037,1,1,1,1,1,1},
-{1,1,1,1,1,1,1,1,1,1,4.26425,1.37182,1.32734,1.27765,1.1428,1.0539,1.02123,1.00597,1.00064,1,1,1,1,1,1,1,1,1,1,1}
- };
-float trig_weight_factors_2018_ST[ntopsdmassbins][nohtbins]{
-{1.52547,1,1.52041,1.27411,3.03556,3.83096,9.5946,11.198,8.27829,5.7801,4.76236,3.71654,2.67955,1.94486,1.46723,1.1766,1.04315,1.00835,1.00216,1.00094,1.00056,1.00075,1.00025,1.00011,1,1,1.00034,1.00118,1,1.03017},
-{1,1,1,1,1,197.61,8.34002,1.73837,4.15467,2.85729,2.96534,2.54389,2.1116,1.63588,1.27316,1.07704,1.01339,1.00257,1.00063,1.00038,1.00067,1.00151,1,1.00037,1,1,1,1,1,1},
-{1,1,1,1,1,1,1,1,1,1,5.68444,1.54298,1.42353,0.933951,1.14851,1.05392,1.02123,1.00597,1.00064,1,1,1,1,1,1,1,1,1,1,1}
- };
-
-float COV_sig_data_16[netabins][5][5] = {
-{
-{8.38261e-05,-3.4952e-06,-1.29067e-08,-7.9054e-12,9.02347e-12},
-{-3.4952e-06,1.26032e-06,2.31293e-09,9.70524e-13,-2.28678e-12},
-{-1.29067e-08,2.31293e-09,1.37812e-11,1.18223e-14,-1.06458e-14},
-{-7.9054e-12,9.70524e-13,1.18223e-14,1.19601e-17,-8.55441e-18},
-{9.02347e-12,-2.28678e-12,-1.06458e-14,-8.55441e-18,1.40521e-17}
-},
-{
-{2.5313e-05,-1.0531e-06,-4.4157e-09,-2.50584e-12,2.37317e-12},
-{-1.0531e-06,7.1497e-07,6.68214e-10,-1.02852e-13,-7.22047e-13},
-{-4.4157e-09,6.68214e-10,6.86638e-12,6.32603e-15,-4.43088e-15},
-{-2.50584e-12,-1.02852e-13,6.32603e-15,7.09259e-18,-3.76175e-18},
-{2.37317e-12,-7.22047e-13,-4.43088e-15,-3.76175e-18,4.28967e-18}
-},
-{
-{8.49207e-06,8.55054e-07,-5.22105e-09,-1.76269e-11,2.11133e-12},
-{8.55054e-07,1.21078e-06,-1.78709e-09,-1.08204e-11,5.20475e-13},
-{-5.22105e-09,-1.78709e-09,7.58219e-12,2.7148e-14,-2.9969e-15},
-{-1.76269e-11,-1.08204e-11,2.7148e-14,1.97715e-16,-9.70129e-18},
-{2.11133e-12,5.20475e-13,-2.9969e-15,-9.70129e-18,1.3843e-18}
-}
-};
-
-float COV_sig_mc_16[netabins][5][5] = {
-{
-{2.75558e-05,-6.61072e-07,-9.14807e-09,-1.98593e-11,5.07326e-12},
-{-6.61072e-07,1.99466e-06,-2.49102e-09,-9.32039e-12,6.44864e-13},
-{-9.14807e-09,-2.49102e-09,1.83436e-11,3.56739e-14,-9.13502e-15},
-{-1.98593e-11,-9.32039e-12,3.56739e-14,1.09842e-16,-1.61588e-17},
-{5.07326e-12,6.44864e-13,-9.13502e-15,-1.61588e-17,5.79534e-18}
-},
-{
-{1.48929e-05,3.49576e-07,-6.08694e-09,-1.78587e-11,2.77039e-12},
-{3.49576e-07,1.97302e-06,-3.19226e-09,-1.75113e-11,1.00944e-12},
-{-6.08694e-09,-3.19226e-09,1.40331e-11,4.78526e-14,-6.09757e-15},
-{-1.78587e-11,-1.75113e-11,4.78526e-14,3.4282e-16,-1.87912e-17},
-{2.77039e-12,1.00944e-12,-6.09757e-15,-1.87912e-17,3.2159e-18}
-},
-{
-{0.000125145,-2.4519e-06,-6.21502e-08,-7.34891e-11,3.33752e-11},
-{-2.4519e-06,6.35667e-06,-3.88561e-09,-1.30298e-11,1.86562e-13},
-{-6.21502e-08,-3.88561e-09,4.96425e-11,6.18487e-14,-2.4216e-14},
-{-7.34891e-11,-1.30298e-11,6.18487e-14,1.04382e-16,-2.78767e-17},
-{3.33752e-11,1.86562e-13,-2.4216e-14,-2.78767e-17,1.3747e-17}
-}
-};
-/*  
-float COV_val_data_16[netabins][5][5] = {
-{
-{2.98641e-06,-8.52838e-09,-6.90377e-10,-2.61754e-12,4.23692e-13},
-{-8.52838e-09,4.80943e-08,-9.00314e-11,-8.39693e-13,2.81211e-14},
-{-6.90377e-10,-9.00314e-11,1.23482e-12,5.018e-15,-8.33126e-16},
-{-2.61754e-12,-8.39693e-13,5.018e-15,3.69852e-17,-3.01343e-18},
-{4.23692e-13,2.81211e-14,-8.33126e-16,-3.01343e-18,8.82602e-19}
-},
-{
-{1.82528e-06,-7.53099e-09,-6.03246e-10,-1.77283e-12,3.57393e-13},
-{-7.53099e-09,4.77399e-08,-6.2671e-11,-5.12697e-13,1.48979e-14},
-{-6.03246e-10,-6.2671e-11,8.24224e-13,2.60766e-15,-4.86025e-16},
-{-1.77283e-12,-5.12697e-13,2.60766e-15,1.40067e-17,-1.37634e-18},
-{3.57393e-13,1.48979e-14,-4.86025e-16,-1.37634e-18,3.97448e-19}
-},
-{
-{2.48917e-06,7.70129e-08,-1.23374e-09,-2.89854e-12,5.73736e-13},
-{7.70129e-08,1.69159e-07,-2.16959e-10,-1.10884e-12,5.78693e-14},
-{-1.23374e-09,-2.16959e-10,1.44316e-12,3.68743e-15,-6.36932e-16},
-{-2.89854e-12,-1.10884e-12,3.68743e-15,1.58164e-17,-1.47358e-18},
-{5.73736e-13,5.78693e-14,-6.36932e-16,-1.47358e-18,3.47376e-19}
-}
-};
-*/
-float COV_val_data_16[netabins][5][5] = {
-{
-{1.13705e-05,-6.60902e-07,-1.80584e-09,-1.0187e-12,1.28169e-12},
-{-6.60902e-07,1.63633e-07,3.53141e-10,1.82743e-13,-2.82203e-13},
-{-1.80584e-09,3.53141e-10,1.17356e-12,7.78541e-16,-8.54624e-16},
-{-1.0187e-12,1.82743e-13,7.78541e-16,5.74811e-19,-5.43857e-19},
-{1.28169e-12,-2.82203e-13,-8.54624e-16,-5.43857e-19,1.19911e-18}
-},
-{
-{6.51138e-07,2.74539e-09,-2.35854e-10,-6.85318e-13,1.33639e-13},
-{2.74539e-09,2.03768e-08,-2.74762e-11,-2.0569e-13,7.00522e-15},
-{-2.35854e-10,-2.74762e-11,3.1863e-13,9.85803e-16,-1.81516e-16},
-{-6.85318e-13,-2.0569e-13,9.85803e-16,4.99099e-18,-5.03355e-19},
-{1.33639e-13,7.00522e-15,-1.81516e-16,-5.03355e-19,1.40904e-19}
-},
-{
-{5.85213e-07,4.32612e-08,-3.23107e-10,-1.07768e-12,1.37753e-13},
-{4.32612e-08,5.77265e-08,-8.60731e-11,-5.27397e-13,2.52788e-14},
-{-3.23107e-10,-8.60731e-11,4.27867e-13,1.47604e-15,-1.77872e-16},
-{-1.07768e-12,-5.27397e-13,1.47604e-15,9.5373e-18,-5.53716e-19},
-{1.37753e-13,2.52788e-14,-1.77872e-16,-5.53716e-19,8.93638e-20}
-}
-};
-
-float COV_val_mc_16[netabins][5][5] = {
-{
-{1.54188e-06,4.12865e-08,-6.1454e-10,-1.81093e-12,3.03625e-13},
-{4.12865e-08,9.13505e-08,-1.47686e-10,-9.23792e-13,4.61542e-14},
-{-6.1454e-10,-1.47686e-10,1.00551e-12,3.32128e-15,-4.94356e-16},
-{-1.81093e-12,-9.23792e-13,3.32128e-15,2.05364e-17,-1.46782e-18},
-{3.03625e-13,4.61542e-14,-4.94356e-16,-1.46782e-18,3.18138e-19}
-},
-{
-{1.27897e-06,4.12675e-08,-5.98196e-10,-1.53702e-12,2.73932e-13},
-{4.12675e-08,8.31456e-08,-1.13626e-10,-6.13103e-13,3.10187e-14},
-{-5.98196e-10,-1.13626e-10,7.79996e-13,2.13365e-15,-3.42042e-16},
-{-1.53702e-12,-6.13103e-13,2.13365e-15,9.85117e-18,-8.5093e-19},
-{2.73932e-13,3.10187e-14,-3.42042e-16,-8.5093e-19,1.90907e-19}
-},
-{
-{4.03422e-06,1.96324e-07,-2.21252e-09,-5.12685e-12,9.84934e-13},
-{1.96324e-07,3.57561e-07,-4.66035e-10,-2.06296e-12,1.2784e-13},
-{-2.21252e-09,-4.66035e-10,2.46769e-12,6.01434e-15,-1.03077e-15},
-{-5.12685e-12,-2.06296e-12,6.01434e-15,2.47159e-17,-2.28227e-18},
-{9.84934e-13,1.2784e-13,-1.03077e-15,-2.28227e-18,5.10712e-19}
-}
-};
-
-/*
-float COV_sig_data_pol2_16[netabins][3][3] = {
-{
-{9.52001e-05,-9.996e-08,2.42115e-11},
-{-9.996e-08,1.08015e-10,-2.69523e-14},
-{2.42115e-11,-2.69523e-14,6.98687e-18}
-},
-{
-{4.73916e-05,-4.54824e-08,9.64679e-12},
-{-4.54824e-08,4.51191e-11,-9.87774e-15},
-{9.64679e-12,-9.87774e-15,2.25924e-18}
-},
-{
-{9.27299e-05,-7.84511e-08,1.43611e-11},
-{-7.84511e-08,6.90294e-11,-1.3024e-14},
-{1.43611e-11,-1.3024e-14,2.55205e-18}
-}
-};
-*/
-float COV_sig_data_pol2_16[netabins][3][3] = {
-{
-{9.89018e-05,-1.03916e-07,2.51989e-11},
-{-1.03916e-07,1.12263e-10,-2.80204e-14},
-{2.51989e-11,-2.80204e-14,7.25819e-18}
-},
-{
-{5.04895e-05,-4.87901e-08,1.04591e-11},
-{-4.87901e-08,4.8666e-11,-1.07535e-14},
-{1.04591e-11,-1.07535e-14,2.47684e-18}
-},
-{
-{9.32129e-05,-7.90041e-08,1.45219e-11},
-{-7.90041e-08,6.96586e-11,-1.32024e-14},
-{1.45219e-11,-1.32024e-14,2.60006e-18}
-}
-};
-
-float COV_sig_mc_pol2_16[netabins][3][3] = {
-{
-{8.57052e-05,-7.21943e-08,1.37566e-11},
-{-7.21943e-08,6.31344e-11,-1.24219e-14},
-{1.37566e-11,-1.24219e-14,2.53803e-18}
-},
-{
-{6.57371e-05,-5.56591e-08,1.05696e-11},
-{-5.56591e-08,4.89302e-11,-9.59138e-15},
-{1.05696e-11,-9.59138e-15,1.95312e-18}
-},
-{
-{0.000192016,-1.49784e-07,2.55788e-11},
-{-1.49784e-07,1.21628e-10,-2.13582e-14},
-{2.55788e-11,-2.13582e-14,3.8658e-18}
-}
-};
-/*
-float COV_val_data_pol2_16[netabins][3][3] = {
-{
-{5.2216e-06,-5.93926e-09,1.57159e-12},
-{-5.93926e-09,6.93669e-12,-1.89165e-15},
-{1.57159e-12,-1.89165e-15,5.36864e-19}
-},
-{
-{2.95538e-06,-3.12955e-09,7.45889e-13},
-{-3.12955e-09,3.40874e-12,-8.36801e-16},
-{7.45889e-13,-8.36801e-16,2.14059e-19}
-},
-{
-{5.01102e-06,-4.46991e-09,8.67151e-13},
-{-4.46991e-09,4.14644e-12,-8.31085e-16},
-{8.67151e-13,-8.31085e-16,1.73863e-19}
-}
-};
-*/
-float COV_val_data_pol2_16[netabins][3][3] = {
-{
-{5.44251e-06,-6.1955e-09,1.64183e-12},
-{-6.1955e-09,7.23626e-12,-1.97474e-15},
-{1.64183e-12,-1.97474e-15,5.60292e-19}
-},
-{
-{3.14915e-06,-3.34999e-09,8.04061e-13},
-{-3.34999e-09,3.66064e-12,-9.03681e-16},
-{8.04061e-13,-9.03681e-16,2.31955e-19}
-},
-{
-{5.12749e-06,-4.58792e-09,8.94679e-13},
-{-4.58792e-09,4.26707e-12,-8.59506e-16},
-{8.94679e-13,-8.59506e-16,1.80622e-19}
-}
-};
-float COV_val_mc_pol2_16[netabins][3][3] = {
-{
-{3.9401e-06,-3.73515e-09,7.91748e-13},
-{-3.73515e-09,3.66688e-12,-8.03625e-16},
-{7.91748e-13,-8.03625e-16,1.84076e-19}
-},
-{
-{2.65365e-06,-2.406e-09,4.75437e-13},
-{-2.406e-09,2.26797e-12,-4.64103e-16},
-{4.75437e-13,-4.64103e-16,9.96332e-20}
-},
-{
-{9.19578e-06,-7.71609e-09,1.40958e-12},
-{-7.71609e-09,6.75088e-12,-1.27275e-15},
-{1.40958e-12,-1.27275e-15,2.49211e-19}
-}
-};
-
-float COV_sig_data_pol2_16_btight[netabins][3][3] = {
-{
-{3.74741e-05,-3.75891e-08,8.59406e-12},
-{-3.75891e-08,3.88494e-11,-9.15484e-15},
-{8.59406e-12,-9.15484e-15,2.24439e-18}
-},
-{
-{1.9926e-05,-1.87022e-08,3.88808e-12},
-{-1.87022e-08,1.81484e-11,-3.88985e-15},
-{3.88808e-12,-3.88985e-15,8.68386e-19}
-},
-{
-{3.1915e-05,-2.65384e-08,4.81862e-12},
-{-2.65384e-08,2.29409e-11,-4.29089e-15},
-{4.81862e-12,-4.29089e-15,8.31859e-19}
-}
-};
-
-float COV_sig_mc_pol2_16_btight[netabins][3][3] = {
-{
-{3.69031e-05,-2.97733e-08,5.43975e-12},
-{-2.97733e-08,2.49427e-11,-4.69928e-15},
-{5.43975e-12,-4.69928e-15,9.16506e-19}
-},
-{
-{2.36828e-05,-1.85419e-08,3.16139e-12},
-{-1.85419e-08,1.50734e-11,-2.64397e-15},
-{3.16139e-12,-2.64397e-15,4.79911e-19}
-},
-{
-{6.34326e-05,-4.85462e-08,8.17096e-12},
-{-4.85462e-08,3.87531e-11,-6.71249e-15},
-{8.17096e-12,-6.71249e-15,1.19781e-18}
-}
-};
-
-float COV_val_data_pol2_16_btight[netabins][3][3] = {
-{
-{1.76579e-06,-1.89334e-09,4.61343e-13},
-{-1.89334e-09,2.09054e-12,-5.27317e-16},
-{4.61343e-13,-5.27317e-16,1.3975e-19}
-},
-{
-{1.14166e-06,-1.18122e-09,2.74052e-13},
-{-1.18122e-09,1.25732e-12,-3.0033e-16},
-{2.74052e-13,-3.0033e-16,7.47062e-20}
-},
-{
-{1.59588e-06,-1.39838e-09,2.66802e-13},
-{-1.39838e-09,1.27375e-12,-2.50877e-16},
-{2.66802e-13,-2.50877e-16,5.14866e-20}
-}
-};
-
-float COV_val_mc_pol2_16_btight[netabins][3][3] = {
-{
-{1.4877e-06,-1.34518e-09,2.68064e-13},
-{-1.34518e-09,1.26103e-12,-2.59483e-16},
-{2.68064e-13,-2.59483e-16,5.57054e-20}
-},
-{
-{1.07227e-06,-9.52016e-10,1.83588e-13},
-{-9.52016e-10,8.77962e-13,-1.75007e-16},
-{1.83588e-13,-1.75007e-16,3.64937e-20}
-},
-{
-{2.74344e-06,-2.25874e-09,4.04567e-13},
-{-2.25874e-09,1.94005e-12,-3.585e-16},
-{4.04567e-13,-3.585e-16,6.87285e-20}
-}
-};
-
-//2017//
-  
-float COV_sig_data_17[netabins][5][5] = {
-{
-{6.09118e-05,-2.88079e-06,-1.12996e-08,-7.21584e-12,7.18596e-12},
-{-2.88079e-06,1.01897e-06,1.79497e-09,7.2186e-13,-1.55799e-12},
-{-1.12996e-08,1.79497e-09,1.02056e-11,8.43361e-15,-7.03226e-15},
-{-7.21584e-12,7.2186e-13,8.43361e-15,8.22455e-18,-5.45842e-18},
-{7.18596e-12,-1.55799e-12,-7.03226e-15,-5.45842e-18,8.04262e-18}
-},
-{
-{1.39775e-05,-6.1237e-07,-2.87201e-09,-1.77517e-12,1.56904e-12},
-{-6.1237e-07,3.98605e-07,3.94271e-10,-2.91851e-14,-3.97196e-13},
-{-2.87201e-09,3.94271e-10,3.89617e-12,3.5242e-15,-2.44576e-15},
-{-1.77517e-12,-2.91851e-14,3.5242e-15,3.87236e-18,-2.05196e-18},
-{1.56904e-12,-3.97196e-13,-2.44576e-15,-2.05196e-18,2.25158e-18}
-},
-{
-{1.47291e-05,-6.8183e-07,-5.44689e-09,-4.16899e-12,3.27962e-12},
-{-6.8183e-07,6.60335e-07,3.20198e-10,-3.66088e-13,-4.37515e-13},
-{-5.44689e-09,3.20198e-10,5.70918e-12,5.30805e-15,-3.4444e-15},
-{-4.16899e-12,-3.66088e-13,5.30805e-15,6.2391e-18,-2.94991e-18},
-{3.27962e-12,-4.37515e-13,-3.4444e-15,-2.94991e-18,2.65744e-18}
-}
-};
-
-
-float COV_sig_mc_17[netabins][5][5] = {
-{
-{1.37256e-05,-3.93602e-07,-4.57503e-09,-3.65961e-12,2.62048e-12},
-{-3.93602e-07,5.93807e-07,6.77077e-12,-6.36555e-13,-2.3703e-13},
-{-4.57503e-09,6.77077e-12,5.51599e-12,5.54201e-15,-3.20685e-15},
-{-3.65961e-12,-6.36555e-13,5.54201e-15,7.19013e-18,-2.96971e-18},
-{2.62048e-12,-2.3703e-13,-3.20685e-15,-2.96971e-18,2.47427e-18}
-},
-{
-{9.69158e-06,-5.88524e-07,-4.63291e-09,-3.63053e-12,2.85801e-12},
-{-5.88524e-07,5.08417e-07,1.1434e-10,-3.60058e-13,-2.40276e-13},
-{-4.63291e-09,1.1434e-10,3.90307e-12,3.52382e-15,-2.2547e-15},
-{-3.63053e-12,-3.60058e-13,3.52382e-15,4.04246e-18,-1.87573e-18},
-{2.85801e-12,-2.40276e-13,-2.2547e-15,-1.87573e-18,1.53008e-18}
-},
-{
-{5.60774e-05,-4.12331e-06,-2.42042e-08,-1.80214e-11,1.53337e-11},
-{-4.12331e-06,1.60066e-06,1.5613e-09,-2.47829e-14,-1.41287e-12},
-{-2.42042e-08,1.5613e-09,1.36707e-11,1.10844e-14,-8.23227e-15},
-{-1.80214e-11,-2.47829e-14,1.10844e-14,1.1451e-17,-6.2467e-18},
-{1.53337e-11,-1.41287e-12,-8.23227e-15,-6.2467e-18,5.63148e-18}
-}
-};
-  
-float COV_val_data_17[netabins][5][5] = {
-{
-{7.90256e-06,-4.41735e-07,-1.25307e-09,-7.17872e-13,8.99862e-13},
-{-4.41735e-07,1.08221e-07,2.32711e-10,1.20228e-13,-1.91883e-13},
-{-1.25307e-09,2.32711e-10,8.18904e-13,5.59426e-16,-6.06169e-16},
-{-7.17872e-13,1.20228e-13,5.59426e-16,4.28472e-19,-3.95941e-19},
-{8.99862e-13,-1.91883e-13,-6.06169e-16,-3.95941e-19,8.67503e-19}
-},
-{
-{2.6231e-07,-6.60343e-09,-7.43845e-11,-2.76621e-13,4.16563e-14},
-{-6.60343e-09,1.10171e-08,-1.48477e-11,-1.05995e-13,3.80457e-15},
-{-7.43845e-11,-1.48477e-11,1.45779e-13,4.48574e-16,-7.64241e-17},
-{-2.76621e-13,-1.05995e-13,4.48574e-16,2.39332e-18,-2.10204e-19},
-{4.16563e-14,3.80457e-15,-7.64241e-17,-2.10204e-19,5.43964e-20}
-},
-{
-{4.39238e-07,1.50172e-08,-2.20928e-10,-5.22809e-13,1.01007e-13},
-{1.50172e-08,3.0056e-08,-3.99278e-11,-1.98874e-13,1.09329e-14},
-{-2.20928e-10,-3.99278e-11,2.54126e-13,6.53572e-16,-1.10327e-16},
-{-5.22809e-13,-1.98874e-13,6.53572e-16,2.86769e-18,-2.57857e-19},
-{1.01007e-13,1.09329e-14,-1.10327e-16,-2.57857e-19,5.87986e-20}
-}
-};
-
-float COV_val_mc_17[netabins][5][5] = {
-{
-{1.20956e-06,-4.81794e-08,-2.36899e-10,-1.42927e-13,1.24186e-13},
-{-4.81794e-08,3.75574e-08,3.02269e-11,-9.43378e-15,-3.40352e-14},
-{-2.36899e-10,3.02269e-11,3.53128e-13,3.22509e-16,-2.22893e-16},
-{-1.42927e-13,-9.43378e-15,3.22509e-16,3.61836e-19,-1.87588e-19},
-{1.24186e-13,-3.40352e-14,-2.22893e-16,-1.87588e-19,2.06245e-19}
-},
-{
-{3.22239e-07,1.0395e-08,-1.66571e-10,-3.46346e-13,7.46482e-14},
-{1.0395e-08,2.02921e-08,-2.35415e-11,-1.10662e-13,5.81279e-15},
-{-1.66571e-10,-2.35415e-11,1.67778e-13,3.78392e-16,-7.12665e-17},
-{-3.46346e-13,-1.10662e-13,3.78392e-16,1.37177e-18,-1.46541e-19},
-{7.46482e-14,5.81279e-15,-7.12665e-17,-1.46541e-19,3.68107e-20}
-},
-{
-{1.60917e-06,-9.53247e-08,-5.82491e-10,-3.92262e-13,3.60732e-13},
-{-9.53247e-08,7.63382e-08,5.27552e-11,-1.68599e-14,-5.99531e-14},
-{-5.82491e-10,5.27552e-11,6.11211e-13,4.99187e-16,-3.78384e-16},
-{-3.92262e-13,-1.68599e-14,4.99187e-16,4.99575e-19,-2.86225e-19},
-{3.60732e-13,-5.99531e-14,-3.78384e-16,-2.86225e-19,2.96687e-19}
-}
-};  
-
-float COV_sig_data_pol2_17[netabins][3][3] = {
-{
-{2.43504e-05,-2.39572e-08,5.30951e-12},
-{-2.39572e-08,2.43779e-11,-5.59156e-15},
-{5.30951e-12,-5.59156e-15,1.34348e-18}
-},
-{
-{1.06196e-05,-9.8264e-09,2.01184e-12},
-{-9.8264e-09,9.42721e-12,-1.99461e-15},
-{2.01184e-12,-1.99461e-15,4.40813e-19}
-},
-{
-{1.89909e-05,-1.60461e-08,2.97591e-12},
-{-1.60461e-08,1.40811e-11,-2.69044e-15},
-{2.97591e-12,-2.69044e-15,5.33042e-19}
-}
-};
-
-float COV_sig_mc_pol2_17[netabins][3][3] = {
-{
-{2.15611e-05,-1.77214e-08,3.26947e-12},
-{-1.77214e-08,1.5194e-11,-2.89922e-15},
-{3.26947e-12,-2.89922e-15,5.74715e-19}
-},
-{
-{1.37522e-05,-1.08839e-08,1.87245e-12},
-{-1.08839e-08,8.9583e-12,-1.58227e-15},
-{1.87245e-12,-1.58227e-15,2.8748e-19}
-},
-{
-{4.74106e-05,-3.62415e-08,6.04669e-12},
-{-3.62415e-08,2.86603e-11,-4.90008e-15},
-{6.04669e-12,-4.90008e-15,8.61585e-19}
-}
-};
-
-float COV_val_data_pol2_17[netabins][3][3] = {
-{
-{1.30906e-06,-1.40025e-09,3.40641e-13},
-{-1.40025e-09,1.54403e-12,-3.88846e-16},
-{3.40641e-13,-3.88846e-16,1.02788e-19}
-},
-{
-{5.22205e-07,-5.24015e-10,1.17017e-13},
-{-5.24015e-10,5.43061e-13,-1.25215e-16},
-{1.17017e-13,-1.25215e-16,3.01802e-20}
-},
-{
-{9.1738e-07,-8.03355e-10,1.53323e-13},
-{-8.03355e-10,7.31452e-13,-1.44228e-16},
-{1.53323e-13,-1.44228e-16,2.96783e-20}
-}
-};
-
-float COV_val_mc_pol2_17[netabins][3][3] = {
-{
-{1.01983e-06,-9.39164e-10,1.91426e-13},
-{-9.39164e-10,8.98334e-13,-1.89266e-16},
-{1.91426e-13,-1.89266e-16,4.16064e-20}
-},
-{
-{5.39074e-07,-4.72619e-10,8.8941e-14},
-{-4.72619e-10,4.31668e-13,-8.39495e-17},
-{8.8941e-14,-8.39495e-17,1.70545e-20}
-},
-{
-{1.86472e-06,-1.54718e-09,2.80403e-13},
-{-1.54718e-09,1.33642e-12,-2.49734e-16},
-{2.80403e-13,-2.49734e-16,4.84112e-20}
-}
-};
-
-
-//2018//
-
-float COV_sig_data_18[netabins][5][5] = {
-{
-{3.97767e-05,-1.57969e-06,-6.40059e-09,-3.97398e-12,4.12826e-12},
-{-1.57969e-06,6.62436e-07,1.06336e-09,3.51812e-13,-1.05819e-12},
-{-6.40059e-09,1.06336e-09,7.25515e-12,6.44168e-15,-5.33314e-15},
-{-3.97398e-12,3.51812e-13,6.44168e-15,6.83761e-18,-4.41448e-18},
-{4.12826e-12,-1.05819e-12,-5.33314e-15,-4.41448e-18,6.57721e-18}
-},
-{
-{9.75316e-06,-4.0577e-07,-2.07447e-09,-1.31721e-12,1.12142e-12},
-{-4.0577e-07,2.99725e-07,2.55322e-10,-6.91917e-14,-2.7916e-13},
-{-2.07447e-09,2.55322e-10,2.94814e-12,2.74098e-15,-1.86754e-15},
-{-1.31721e-12,-6.91917e-14,2.74098e-15,3.12344e-18,-1.60661e-18},
-{1.12142e-12,-2.7916e-13,-1.86754e-15,-1.60661e-18,1.70038e-18}
-},
-{
-{1.17925e-05,-4.89279e-07,-4.44824e-09,-3.49497e-12,2.63375e-12},
-{-4.89279e-07,5.17504e-07,1.92383e-10,-3.47368e-13,-3.03792e-13},
-{-4.44824e-09,1.92383e-10,4.66598e-12,4.42076e-15,-2.75907e-15},
-{-3.49497e-12,-3.47368e-13,4.42076e-15,5.2684e-18,-2.41676e-18},
-{2.63375e-12,-3.03792e-13,-2.75907e-15,-2.41676e-18,2.08341e-18}
-}
-};
-
-
-float COV_sig_mc_18[netabins][5][5] = {
-{
-{1.62608e-05,-4.949e-07,-5.32721e-09,-4.2639e-12,3.05605e-12},
-{-4.949e-07,7.02732e-07,4.93449e-11,-7.56277e-13,-3.06275e-13},
-{-5.32721e-09,4.93449e-11,6.60747e-12,6.76451e-15,-3.87237e-15},
-{-4.2639e-12,-7.56277e-13,6.76451e-15,9.12337e-18,-3.64452e-18},
-{3.05605e-12,-3.06275e-13,-3.87237e-15,-3.64452e-18,3.00387e-18}
-},
-{
-{1.45086e-05,-6.12046e-07,-6.13207e-09,-4.9114e-12,3.61404e-12},
-{-6.12046e-07,6.704e-07,1.64629e-10,-4.97084e-13,-3.25025e-13},
-{-6.13207e-09,1.64629e-10,5.55051e-12,5.1652e-15,-3.16779e-15},
-{-4.9114e-12,-4.97084e-13,5.1652e-15,6.07192e-18,-2.72186e-18},
-{3.61404e-12,-3.25025e-13,-3.16779e-15,-2.72186e-18,2.24561e-18}
-},
-{
-{1.98708e-05,-7.78141e-07,-7.52154e-09,-7.01411e-12,4.74579e-12},
-{-7.78141e-07,1.62513e-06,-9.73134e-10,-2.77528e-12,-9.31412e-14},
-{-7.52154e-09,-9.73134e-10,1.07839e-11,1.20094e-14,-6.17861e-15},
-{-7.01411e-12,-2.77528e-12,1.20094e-14,1.79819e-17,-6.16421e-18},
-{4.74579e-12,-9.31412e-14,-6.17861e-15,-6.16421e-18,4.5069e-18}
-}
-};
-  
-float COV_val_data_18[netabins][5][5] = {
-{
-{1.18823e-06,-4.27345e-08,-2.87141e-10,-1.97961e-13,1.54633e-13},
-{-4.27345e-08,4.22179e-08,2.26397e-11,-2.13324e-14,-3.02739e-14},
-{-2.87141e-10,2.26397e-11,3.96422e-13,3.70991e-16,-2.41298e-16},
-{-1.97961e-13,-2.13324e-14,3.70991e-16,4.2442e-19,-2.08633e-19},
-{1.54633e-13,-3.02739e-14,-2.41298e-16,-2.08633e-19,2.06865e-19}
-},
-{
-{1.53615e-07,4.25885e-09,-6.58463e-11,-1.42962e-13,3.29307e-14},
-{4.25885e-09,7.54122e-09,-1.05073e-11,-7.3843e-14,2.92223e-15},
-{-6.58463e-11,-1.05073e-11,9.84604e-14,3.06916e-16,-5.18464e-17},
-{-1.42962e-13,-7.3843e-14,3.06916e-16,1.66222e-18,-1.45028e-19},
-{3.29307e-14,2.92223e-15,-5.18464e-17,-1.45028e-19,3.63973e-20}
-},
-{
-{3.46413e-07,-1.97903e-09,-1.52056e-10,-2.75855e-13,7.57408e-14},
-{-1.97903e-09,1.94397e-08,-1.96768e-11,-8.58518e-14,4.12173e-15},
-{-1.52056e-10,-1.96768e-11,1.7672e-13,3.39552e-16,-8.16134e-17},
-{-2.75855e-13,-8.58518e-14,3.39552e-16,9.91601e-19,-1.43051e-19},
-{7.57408e-14,4.12173e-15,-8.16134e-17,-1.43051e-19,4.69881e-20}
-}
-};
-
-float COV_val_mc_18[netabins][5][5] = {
-{
-{1.18843e-06,-4.27457e-08,-2.87216e-10,-1.98023e-13,1.54696e-13},
-{-4.27457e-08,4.2219e-08,2.26448e-11,-2.13267e-14,-3.0278e-14},
-{-2.87216e-10,2.26448e-11,3.96426e-13,3.70981e-16,-2.41307e-16},
-{-1.98023e-13,-2.13267e-14,3.70981e-16,4.2439e-19,-2.08634e-19},
-{1.54696e-13,-3.0278e-14,-2.41307e-16,-2.08634e-19,2.06877e-19}
-},
-{
-{5.9482e-07,4.91907e-09,-2.43013e-10,-4.66902e-13,1.20506e-13},
-{4.91907e-09,2.58102e-08,-2.72557e-11,-1.35163e-13,5.56833e-15},
-{-2.43013e-10,-2.72557e-11,2.88059e-13,6.03473e-16,-1.40783e-16},
-{-4.66902e-13,-1.35163e-13,6.03473e-16,1.91537e-18,-2.68923e-19},
-{1.20506e-13,5.56833e-15,-1.40783e-16,-2.68923e-19,9.03825e-20}
-},
-{
-{1.06026e-06,6.41185e-08,-5.88712e-10,-1.42261e-12,2.59195e-13},
-{6.41185e-08,9.52635e-08,-1.34476e-10,-5.84078e-13,3.87309e-14},
-{-5.88712e-10,-1.34476e-10,6.61314e-13,1.68032e-15,-2.74331e-16},
-{-1.42261e-12,-5.84078e-13,1.68032e-15,7.42925e-18,-6.36089e-19},
-{2.59195e-13,3.87309e-14,-2.74331e-16,-6.36089e-19,1.35029e-19}
-}
-};
-
-float COV_sig_data_pol2_18[netabins][3][3] = {
-{
-{2.06221e-05,-2.03037e-08,4.54102e-12},
-{-2.03037e-08,2.06341e-11,-4.76094e-15},
-{4.54102e-12,-4.76094e-15,1.14371e-18}
-},
-{
-{8.5973e-06,-7.86019e-09,1.5927e-12},
-{-7.86019e-09,7.448e-12,-1.55809e-15},
-{1.5927e-12,-1.55809e-15,3.39775e-19}
-},
-{
-{1.54248e-05,-1.29069e-08,2.3792e-12},
-{-1.29069e-08,1.12293e-11,-2.13455e-15},
-{2.3792e-12,-2.13455e-15,4.21027e-19}
-}
-};
-
-float COV_sig_mc_pol2_18[netabins][3][3] = {
-{
-{2.83292e-05,-2.30822e-08,4.23426e-12},
-{-2.30822e-08,1.95622e-11,-3.70564e-15},
-{4.23426e-12,-3.70564e-15,7.28291e-19}
-},
-{
-{1.87875e-05,-1.52871e-08,2.72421e-12},
-{-1.52871e-08,1.29498e-11,-2.3783e-15},
-{2.72421e-12,-2.3783e-15,4.52457e-19}
-},
-{
-{5.44824e-05,-4.32064e-08,7.69751e-12},
-{-4.32064e-08,3.57374e-11,-6.55459e-15},
-{7.69751e-12,-6.55459e-15,1.23642e-18}
-}
-};
-
-float COV_val_data_pol2_18[netabins][3][3] = {
-{
-{8.52426e-07,-9.07056e-10,2.19393e-13},
-{-9.07056e-10,9.95468e-13,-2.4934e-16},
-{2.19393e-13,-2.4934e-16,6.55773e-20}
-},
-{
-{3.49619e-07,-3.49914e-10,7.78939e-14},
-{-3.49914e-10,3.61616e-13,-8.30647e-17},
-{7.78939e-14,-8.30647e-17,1.99225e-20}
-},
-{
-{6.05298e-07,-5.30498e-10,1.01487e-13},
-{-5.30498e-10,4.83612e-13,-9.55884e-17},
-{1.01487e-13,-9.55884e-17,1.97075e-20}
-}
-};
-
-float COV_val_mc_pol2_18[netabins][3][3] = {
-{
-{1.12833e-06,-1.01962e-09,2.03077e-13},
-{-1.01962e-09,9.58339e-13,-1.97266e-16},
-{2.03077e-13,-1.97266e-16,4.23281e-20}
-},
-{
-{9.53952e-07,-8.8309e-10,1.80235e-13},
-{-8.8309e-10,8.48495e-13,-1.792e-16},
-{1.80235e-13,-1.792e-16,3.96307e-20}
-},
-{
-{2.59652e-06,-2.14938e-09,3.90565e-13},
-{-2.14938e-09,1.85428e-12,-3.47947e-16},
-{3.90565e-13,-3.47947e-16,6.78571e-20}
-}
-};
-
-
-
    TF1 *bpfrat_val;
-//   TF1 *bpfrat_val_beta[netabins];
    TF1 *tagpfrat_tau32_val;
    TF1 *tagpfrat_MDAK8_val;
    TF1 *tagpfrat_MDAK8_val2;
-   
-   float lepptcut = 30;
     
    float HTcut = 900;
-   float AK8ptcut = 507.1;//548.1;//507.1;
+   float AK8ptcut = 507.1;//450;
    float AK8ptcut_in = 200;
-   float AK4ptcut_in = 40;
-   float AK4ptcut_fi = 548.1;//548.1;
+   float AK4ptcut_in = 30;
+   float AK4ptcut_fi = 548.1;//400;
    float AK8subptcut = 30;
    float AK4masscut = 100;
    float jeteta_cut = 2.4;
    float tau32_cut = 0.54;
    float tau32_cut_loose = 10;//0.85;
    
-   float rapidity_cut = 1.8;
-
    // 2016 //
 //   float btagvalue = 0.8484; //0.9535; //tight 0.8484; // medium //csvv2 
-//   float btagvalue_deepCSV = 0.6321; //0.8953  ;//tight  0.6321; //medium // deepcsv 
+ //  float btagvalue_deepCSV = 0.6321; //0.8953  ;//tight  0.6321; //medium // deepcsv 
 //   float btagvalue_deepFlavB = 0.45; //0.7221; // 0.3093;  // medium	//deepflav
 	
    // 2017 //
 //   float btagvalue = 0.8838;//0.9693;//tight 0.8838; //csvv2 medium
 //   float btagvalue_deepCSV =  0.4941;//0.65;//myvalue 0.8001;// tight 0.4941; // deepcsv medium
 //   float btagvalue_deepFlavB = 0.6; //0.6; // my final value //0.3033; //0.55;// my value 0.7489; // tight 0.3033; //deepflav medium
-
-   // 2018 //
-//   float btagvalue = 0.8838; 
-//   float btagvalue_deepCSV = 0.4184; //0.7527  ;//tight  0.4184; //medium // deepcsv 
-//   float btagvalue_deepFlavB = 0.6;  //0.7264; ;//tight   0.2770;  // medium	//deepflav
-
+	
    float btagvalue ;
    float btagvalue_deepCSV;
-   float btagvalue_deepFlavB;
-   
+   float btagvalue_deepFlavB;	
+	
    float dR_cut = 1.2;
    float dphi_cut = M_PI/2.;
+   float lepptcut = 55;
    
    float btagvalue_deepCSV_m = 0.4941;
    float btagvalue_deepCSV_t = 0.8001;
-
    float tau32_cut_1 = 0.65;
    float tau32_cut_2 = 0.4;
-
+  
 //   float deepak8_cut = 0.895; // 2017 1% mistag rate //0.843;//0.391;
 //   float deepak8_cut_md = 0.578; // 2017 0.5% mistag rate //0.843;//0.391;
 //   float deepak8_cut = 0.937; // 2016 0.5% mistag rate
@@ -5817,16 +4892,14 @@ float COV_val_mc_pol2_18[netabins][3][3] = {
 //   float deepak8_cut = 0.898; // 2018 0.5% mistag rate
 //   float deepak8_cut_md = 0.559; // 2018 0.5% mistag rate
 
-  float deepak8_cut;
-  float deepak8_cut_md;
-
+   float deepak8_cut;
+   float deepak8_cut_md;
+   
    float deepak8_Wcut = 0.981;
    float deepak8_Wcut_md = 0.802;
    
    static const int noAK8ptbins = 4;
    float AK8ptbins[noAK8ptbins+1] = {300,400,480,600,10000};
-   
-   float minmasscut = 0;
    
    float topmasslow = 105;
    float topmasshigh = 210;
@@ -5848,7 +4921,7 @@ float COV_val_mc_pol2_18[netabins][3][3] = {
 					2050,2100,2150,2200,2300,2400,2500,2600,2700,2800,2900,3000,3100,3200,3300,3400,3500,3600,
 					3800,4000,4500,5000};
    
-   static const int noptbins = 52 ;
+   static const int noptbins = 44 ;
    static const int nobptbins = 32;//9;
  
    static const int norhobins = 51;
@@ -5861,7 +4934,7 @@ float COV_val_mc_pol2_18[netabins][3][3] = {
    double ptbins[noptbins+1] = {30, 37, 43, 49, 56, 64, 74, 84,
      97, 114, 133, 153, 174, 196, 220, 245, 272, 300, 330, 362, 395, 430, 468,
      507, 548, 592, 638, 686, 737, 790, 846, 905, 967,
-     1032, 1101, 1172, 1248, 1327, 1410, 1497, 1588, 1684, 1784, 1890, 2000, 2116, 2238, 2366, 2500, 2640, 2787, 2941, 3103};
+     1032, 1101, 1172, 1248, 1327, 1410, 1497, 1588, 1684, 1784, 1890, 2000};
 	 // 2116, 2238, 2366, 2500, 2640, 2787, 2941, 3103, 3273, 3450, 3637, 3832,
     // 4037, 4252, 4477, 5000} ;
    
@@ -5870,17 +4943,14 @@ float COV_val_mc_pol2_18[netabins][3][3] = {
      97, 114, 133, 153, 174, 196, 220, 245, 272, 300, 330, 362, 395, 430, 468,
      507, 548, 592, 638, 686, 737, 790, 846, 905, 967, 1172, 1497, 2000};
     
-   float perf_ptbins[noperf_ptbins+1] = {300,500,700,1000,3000}; 
-   
-   float qcd_md_deepak8_eff[noperf_ptbins] = {0.027,0.027,0.035,0.045};
+   float perf_ptbins[noperf_ptbins+1] = {300,500,700,1000,100000}; 
     
    float betarange[netarange+1] = {0,0.6,1.2,2.4};
    
    double pu_data[80] = {2.15411e-05,5.6992e-05,0.000127209,0.000284562,0.000628243,0.00130454,0.00248809,0.00434675,0.00699958,0.0104813,0.014724,0.0195614,0.0247524,0.0300163,0.0350706,0.0396636,0.0435963,0.0467326,0.0489994,0.0503793,0.0509,0.0506223,0.0496295,0.0480181,0.0458916,0.0433545,0.0405093,0.0374531,0.0342757,0.0310578,0.02787,0.0247719,0.0218122,0.0190285,0.0164478,0.0140877,0.011957,0.010057,0.00838287,0.0069247,0.00566889,0.00459925,0.00369801,0.00294673,0.00232704,0.0018212,0.00141253,0.00108574,0.000827064,0.000624371,0.000467131,0.000346366,0.000254531,0.000185382,0.000133825,9.57567e-05,6.79199e-05,4.77594e-05,3.3297e-05,2.30198e-05,1.57847e-05,1.07379e-05,7.2494e-06,4.85952e-06,3.23649e-06,2.14353e-06,1.41347e-06,9.29544e-07,6.11011e-07,4.02633e-07,2.66985e-07,1.78963e-07,1.21892e-07,8.47946e-08,6.05156e-08,4.4429e-08,3.35702e-08,2.6054e-08,2.06895e-08,1.67288e-08};
 
    double pu_MC[80] = {1.76003e-05,2.63752e-05,5.17764e-05,8.93703e-05,0.00010729,0.000139737,0.000241458,0.000725216,0.00129534,0.0024431,0.00503314,0.0092062,0.0146853,0.0204755,0.0267466,0.0337681,0.040181,0.0449554,0.0491183,0.0524606,0.0548204,0.0560606,0.0554619,0.0536665,0.0513695,0.0476493,0.0435073,0.0393303,0.0350598,0.0306642,0.0272167,0.0236864,0.0208034,0.0182563,0.0160933,0.0142631,0.012782,0.0115606,0.0105507,0.00957065,0.00885585,0.00826288,0.00758751,0.0069752,0.00622485,0.00547198,0.00483291,0.0040488,0.00337946,0.0027023,0.00212516,0.00160003,0.00117206,0.00085644,0.00056259,0.000367971,0.000246554,0.000160166,0.000101268,6.68301e-05,3.96657e-05,2.67149e-05,2.02967e-05,2.01132e-05,1.41779e-05,1.33955e-05,1.33216e-05,1.33078e-05,1.34937e-05,1.51125e-05,1.49794e-05,1.42329e-05,1.28154e-05,1.34488e-05,1.35528e-05,0,0,0,0,0};
-
-//   double pu_rat17[100] = {0.000349139,0.0494244,0.0550583,0.0868762,0.0890973,0.127646,0.157756,0.197357,0.142307,0.450653,0.573772,0.724296,0.748964,0.753009,0.800193,0.849205,0.934488,1.02547,1.10455,1.16029,1.21521,1.26439,1.30349,1.32947,1.33878,1.34613,1.35251,1.35274,1.35446,1.34071,1.30643,1.25088,1.18394,1.11849,1.03882,0.973938,0.93495,0.89719,0.841632,0.804349,0.807898,0.848681,0.91417,1.02053,1.16536,1.33074,1.50073,1.57316,1.61508,1.52999,1.3599,1.18733,0.984448,0.769307,0.580557,0.420071,0.295849,0.203954,0.141305,0.0991562,0.0717071,0.0515937,0.0393459,0.0295183,0.0232182,0.0170967,0.0125657,0.0105301,0.00923461,0.00843191,0.00734179,0.00520827,0.00554619,0.00531438,0.0030063,0.00378597,0.00252698,0.00213592,0.000840044,0.000668234,0.000238454,0.000301504,0.000168228,8.43442e-05,0.000128126,0.000105654,3.70585e-05,2.7205e-05,2.49273e-05,8.16048e-06,4.77775e-05,4.69319e-05,8.48453e-05,5.11914e-05,8.38762e-06,1.4865e-06,2.75894e-05,5.48744e-06,2.14826e-06,3.68344e-07};
+  
    double pu_rat17[100] = {0.184787,3.79003,3.41318,2.56169,1.62063,1.51684,1.27726,1.26113,0.614194,1.45583,1.49278,1.48366,1.33344,1.16929,1.07775,1.05425,1.08018,1.12791,1.16472,1.18895,1.21256,1.2385,1.26002,1.27057,1.27251,1.27173,1.27087,1.26708,1.27459,1.25156,1.22231,1.16957,1.11026,1.03788,0.968477,0.910741,0.866555,0.835536,0.788241,0.750281,0.758567,0.79348,0.858783,0.959118,1.09448,1.25686,1.41898,1.49494,1.53091,1.46185,1.33675,1.15523,0.950739,0.750143,0.569498,0.410964,0.289908,0.198831,0.137468,0.0967062,0.0692654,0.0509306,0.0384321,0.0299769,0.0240993,0.0170652,0.0124912,0.0107738,0.00962441,0.00883465,0.00829001,0.00803282,0.0078523,0.00788393,0.00629992,0.00534141,0.00546467,0.00547334,0.00592796,0.00592861,0.00624358,0.00643277,0.00651252,0.00487991,0.00427507,0.00466825,0.00400731,0.00487422,0.0048154,0.00462831,0.00371936,0.00384877,0.00172295,0.00205589,0.00618057,0.003259,0,0,0,0};
    double pu_rat17_up[100] = {0.178992,3.27102,2.79307,2.57516,1.39487,1.34319,1.23368,1.15366,0.494409,0.942598,1.06276,1.03109,1.01116,0.904216,0.825826,0.796697,0.811205,0.867756,0.932998,0.985497,1.03408,1.08505,1.12857,1.15501,1.1651,1.16695,1.17204,1.18246,1.20999,1.21206,1.20809,1.17863,1.14084,1.08891,1.03752,0.993071,0.95677,0.929451,0.879146,0.832972,0.828535,0.839762,0.868305,0.920017,1.00058,1.11339,1.24912,1.34572,1.44829,1.48763,1.49045,1.42965,1.31614,1.166,0.993993,0.802787,0.630059,0.477004,0.360771,0.274989,0.211373,0.165255,0.131414,0.107083,0.0891493,0.064786,0.0482185,0.0419048,0.0374053,0.0340798,0.0316022,0.0302138,0.0291769,0.0290428,0.023128,0.01966,0.020291,0.0206234,0.0227871,0.0233585,0.0253166,0.0269401,0.0282591,0.0220026,0.0200819,0.022903,0.0205816,0.0262654,0.0272823,0.0276255,0.0234329,0.0256411,0.0121589,0.0153934,0.0491761,0.027596,0,0,0,0};
    double pu_rat17_dn[100] = {0.193294,4.19484,4.45873,2.47598,1.86911,1.69223,1.33271,1.41359,0.888937,2.16776,2.18378,2.06454,1.74543,1.53951,1.43826,1.42375,1.43283,1.43299,1.42332,1.40779,1.39383,1.38957,1.39141,1.39303,1.39175,1.3814,1.36055,1.32982,1.30823,1.25667,1.20167,1.1248,1.04328,0.954728,0.87675,0.816267,0.773147,0.747541,0.715911,0.703578,0.746748,0.827213,0.943586,1.08963,1.24865,1.39347,1.48264,1.43477,1.32354,1.1237,0.906995,0.690058,0.50081,0.350321,0.237698,0.154823,0.099652,0.0630517,0.0406514,0.0269448,0.0183673,0.0129834,0.00951646,0.00728689,0.00581121,0.00412079,0.00304304,0.00265998,0.00241094,0.00224079,0.002119,0.00205616,0.00199868,0.00198159,0.00155356,0.00128494,0.00127604,0.00123525,0.00128814,0.00123622,0.00124541,0.00122396,0.00117878,0.000838107,0.00069499,0.000716697,0.000579737,0.0006631,0.000614823,0.000553572,0.000415994,0.000401861,0.000167673,0.000186188,0.000520112,0.000254473,0,0,0,0};
@@ -5889,9 +4959,9 @@ float COV_val_mc_pol2_18[netabins][3][3] = {
    double pu_rat16_up[100] = {0.323632,0.757628,1.13844,0.838277,0.995368,1.0786,0.719714,0.345182,0.504351,0.60627,0.633794,0.731941,0.828284,0.917174,0.958354,0.990304,1.02376,1.05169,1.05114,1.02817,1.0057,0.997764,1.01463,1.03755,1.05665,1.08588,1.11913,1.15394,1.19208,1.23585,1.24624,1.26966,1.25819,1.22921,1.18324,1.10585,1.00459,0.886452,0.765789,0.654404,0.531798,0.423485,0.329565,0.250409,0.189287,0.138533,0.0967281,0.0683142,0.047497,0.0325214,0.0214946,0.0146031,0.0095695,0.00614978,0.0043091,0.00305056,0.00221997,0.00187861,0.00198466,0.0024027,0.00383849,0.00447581,0.00519436,0.00625013,0.00677324,0.00618513,0.005439,0.00605281,0.00549063,0.00471326,0.00387696,0.00421262,0.00350947,0.00294617,0.00285097,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
    double pu_rat16_dn[100] = {0.344112,1.22832,1.26582,1.08892,1.2203,1.31689,0.912527,0.762007,1.10079,1.34454,1.48998,1.52638,1.4987,1.50861,1.49484,1.44637,1.36695,1.29754,1.22745,1.16669,1.12555,1.09034,1.06374,1.03998,1.01783,1.00639,0.995607,0.98391,0.972505,0.959983,0.91466,0.873487,0.806578,0.731577,0.651992,0.561942,0.467416,0.373316,0.287326,0.214697,0.149552,0.100106,0.0643017,0.0396644,0.023984,0.0138603,0.00755841,0.00413608,0.00222283,0.00118804,0.00063654,0.000386056,0.000272434,0.000242664,0.000291798,0.000393216,0.000538729,0.000764926,0.00112959,0.0016076,0.00269961,0.00312853,0.00352046,0.00406384,0.00420435,0.00365555,0.00305527,0.00322686,0.00277438,0.0022544,0.00175318,0.00179875,0.0014132,0.00111745,0.00101725,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
    
-   double pu_rat18[100] =  {0,13.0204,57.5634,19.082,12.1118,8.99654,6.66583,4.91429,3.59483,2.74519,2.23511,1.90123,1.70431,1.57807,1.50263,1.4648,1.45006,1.45373,1.46061,1.46339,1.45963,1.43638,1.4021,1.35249,1.301,1.24853,1.20344,1.16808,1.13747,1.1148,1.09898,1.08944,1.08188,1.077,1.07364,1.069,1.06282,1.05298,1.03554,1.01205,0.979753,0.936484,0.885825,0.827701,0.760395,0.692411,0.620801,0.550926,0.48254,0.419756,0.361541,0.310761,0.266044,0.227951,0.194841,0.167998,0.145255,0.125278,0.109776,0.0961932,0.0837946,0.0738915,0.0643919,0.0565295,0.0493426,0.0422786,0.0363522,0.0314853,0.026336,0.022446,0.0189216,0.0164908,0.0137806,0.0114497,0.00946543,0.00846572,0.0066371,0.00564392,0.00468337,0.00390401,0.00355194,0.00233117,0.00205709,0.0015375,0.00122804,0.00095344,0.000598666,0.000539365,0.000235921,0.000101888,6.25912e-05,6.00391e-05,1.95961e-05,2.71883e-05,1.75359e-05,6.18118e-06,2.54377e-06,1.48936e-06,2.02377e-06,2.56097e-07};
-   double pu_rat18_up[100] = {0,11.3701,49.1593,16.3978,10.4484,7.79227,5.70396,4.15872,3.02768,2.28549,1.82582,1.52983,1.3595,1.2554,1.19605,1.1684,1.16115,1.17185,1.18964,1.20936,1.22873,1.23491,1.23159,1.21107,1.18259,1.14644,1.11133,1.08136,1.05384,1.03331,1.01987,1.01367,1.01107,1.01298,1.01865,1.02593,1.03512,1.0447,1.05099,1.0554,1.05447,1.04466,1.02824,1.00332,0.965566,0.923431,0.871249,0.814665,0.752156,0.689408,0.624858,0.564,0.505617,0.452167,0.402,0.359344,0.321227,0.285921,0.258403,0.233682,0.210464,0.192413,0.174424,0.159861,0.146181,0.131623,0.119227,0.10899,0.0963316,0.086803,0.0773651,0.0712667,0.0629173,0.0552031,0.0481823,0.0455058,0.0376989,0.0339163,0.0298286,0.0264131,0.0255965,0.0179475,0.0169746,0.0136435,0.0117583,0.00988318,0.00674005,0.00661599,0.00316237,0.00149674,0.0010104,0.00106782,0.000384941,0.000591271,0.000423128,0.000165822,7.60044e-05,4.96232e-05,7.51979e-05,1.05862e-05};
-   double pu_rat18_dn[100] = {0,15.0557,67.8751,22.3278,14.1211,10.4821,7.88069,5.86513,4.31762,3.35551,2.78627,2.40097,2.16428,2.00485,1.9056,1.85092,1.82051,1.80608,1.78719,1.75544,1.71117,1.64481,1.57234,1.49261,1.42092,1.35612,1.3043,1.26517,1.23118,1.20443,1.18302,1.16596,1.14834,1.13047,1.11055,1.08517,1.05388,1.01479,0.96502,0.907499,0.841466,0.767187,0.68971,0.610695,0.530471,0.45611,0.385995,0.32355,0.268127,0.221267,0.181416,0.149012,0.122387,0.100955,0.0832931,0.0694147,0.0579993,0.0482614,0.0406839,0.0341693,0.0284128,0.0238208,0.0196651,0.0163071,0.0134164,0.0108213,0.00875349,0.00713274,0.00561523,0.00450669,0.00357902,0.00293888,0.00231295,0.00180802,0.00140385,0.00117654,0.000861839,0.000682485,0.000525487,0.000404909,0.00033922,0.000204219,0.000164688,0.000112084,8.12391e-05,5.70485e-05,3.2298e-05,2.61592e-05,1.02574e-05,3.96059e-06,2.16985e-06,1.85204e-06,5.36884e-07,6.60936e-07,3.78607e-07,1.19189e-07,4.4536e-08,2.4673e-08,3.47283e-08,5.35281e-09};
+   double pu_rat18[100] = {0.332136,0.962193,1.20337,0.953956,1.09428,1.19764,0.789015,0.492152,0.747769,0.883546,0.966658,1.07117,1.12602,1.18204,1.20012,1.20987,1.1994,1.18141,1.1441,1.09757,1.06572,1.05093,1.05129,1.05066,1.04841,1.05855,1.07068,1.08196,1.09531,1.11184,1.0946,1.08417,1.04056,0.98214,0.912153,0.821718,0.718354,0.607989,0.500971,0.405178,0.308788,0.228402,0.163573,0.113394,0.0776009,0.051062,0.031858,0.0199973,0.0123033,0.00743405,0.00433781,0.00262109,0.00156357,0.000968549,0.000734598,0.000668329,0.00072343,0.000927116,0.00132969,0.0018984,0.00324026,0.00383716,0.00442283,0.00523648,0.00556154,0.00496787,0.00426864,0.00463808,0.00410515,0.00343628,0.00275464,0.00291527,0.00236412,0.00193081,0.00181666,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+   double pu_rat18_up[100] = {0.323632,0.757628,1.13844,0.838277,0.995368,1.0786,0.719714,0.345182,0.504351,0.60627,0.633794,0.731941,0.828284,0.917174,0.958354,0.990304,1.02376,1.05169,1.05114,1.02817,1.0057,0.997764,1.01463,1.03755,1.05665,1.08588,1.11913,1.15394,1.19208,1.23585,1.24624,1.26966,1.25819,1.22921,1.18324,1.10585,1.00459,0.886452,0.765789,0.654404,0.531798,0.423485,0.329565,0.250409,0.189287,0.138533,0.0967281,0.0683142,0.047497,0.0325214,0.0214946,0.0146031,0.0095695,0.00614978,0.0043091,0.00305056,0.00221997,0.00187861,0.00198466,0.0024027,0.00383849,0.00447581,0.00519436,0.00625013,0.00677324,0.00618513,0.005439,0.00605281,0.00549063,0.00471326,0.00387696,0.00421262,0.00350947,0.00294617,0.00285097,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+   double pu_rat18_dn[100] = {0.344112,1.22832,1.26582,1.08892,1.2203,1.31689,0.912527,0.762007,1.10079,1.34454,1.48998,1.52638,1.4987,1.50861,1.49484,1.44637,1.36695,1.29754,1.22745,1.16669,1.12555,1.09034,1.06374,1.03998,1.01783,1.00639,0.995607,0.98391,0.972505,0.959983,0.91466,0.873487,0.806578,0.731577,0.651992,0.561942,0.467416,0.373316,0.287326,0.214697,0.149552,0.100106,0.0643017,0.0396644,0.023984,0.0138603,0.00755841,0.00413608,0.00222283,0.00118804,0.00063654,0.000386056,0.000272434,0.000242664,0.000291798,0.000393216,0.000538729,0.000764926,0.00112959,0.0016076,0.00269961,0.00312853,0.00352046,0.00406384,0.00420435,0.00365555,0.00305527,0.00322686,0.00277438,0.0022544,0.00175318,0.00179875,0.0014132,0.00111745,0.00101725,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
    
    double logrhobins[norhobins+1] = {-0.088059,0.0942625,0.276584,0.458906,0.641227,0.823549,1.00587,1.18819,1.37051,1.55283,1.73516,1.91748,2.0998,2.28212,2.46444,2.64676,2.82909,3.01141,3.19373,3.37605,3.55837,3.74069,3.92302,4.10534,4.28766,4.46998,4.6523,4.83462,5.01694,5.19927,5.38159,5.56391,5.74623,5.92855,6.11087,6.2932,6.47552,6.65784,6.84016,7.02248,7.2048,7.38712,7.56945,7.75177,7.93409,8.11641,8.29873,8.48105,8.66338,8.8457,9.02802,9.21034};
     
@@ -5901,81 +4971,106 @@ float COV_val_mc_pol2_18[netabins][3][3] = {
    double tau32SF_nom[3][4] = {{0.859549,0.882645,0.863011,0.977778},{0.629492,1.33655,1.62628,0.586884},{1.51485,0.855309,0.747111,1.50843}}; 
    double tau32SF_tight[3][4] = {{0.795027,0.80322,0.741334,0.738192},{0.606943,1.58914,1.01724,1.11726},{1.32298,0.842836,1.95535,1.2135}};
    double tau32SF_loose[3][4] = {{0.91259,0.899487,0.901451,0.991445},{0.805296,1.18465,0.807588,0.97255},{1.49036,1.17164,1.41092,1.37033}};
-  							
-   double DeepAK8_SF_16[noAK8ptbins] = {1.01,0.88,0.94,1.01};  // 2016  for 0.5% WP
-   double DeepAK8_MD_SF_16[noAK8ptbins] = {0.89,1.02,0.93,1.0};  // 2016  for 0.5% WP
-   double DeepAK8_MD_SF_16_up[noAK8ptbins] = {0.97,1.07,0.97,1.05};	
-   double DeepAK8_MD_SF_16_dn[noAK8ptbins] = {0.81,0.97,0.89,0.95};
    
-   double DeepAK8_SF_17[noAK8ptbins] = {0.97,0.97,0.95,1.03};   // 2017  for 0.5% WP
-   double DeepAK8_MD_SF_17[noAK8ptbins] = {0.95,1.00,0.98,0.98};  // 2017  for 0.5% WP
-   double DeepAK8_MD_SF_17_up[noAK8ptbins] = {1.01,1.04,1.02,1.02};	
-   double DeepAK8_MD_SF_17_dn[noAK8ptbins] = {0.89,0.96,0.94,0.94};	   
+   double DeepAK8_SF_16[noAK8ptbins] = {1.02,0.95,1.00,1.05};  // 2016  for 0.5% WP
+   double DeepAK8_MD_SF_16[noAK8ptbins] = {1.06,0.99,1.01,1.06};  // 2016  for 0.5% WP
+   double DeepAK8_MD_SF_16_up[noAK8ptbins] = {1.14,1.03,1.06,1.12};	
+   double DeepAK8_MD_SF_16_dn[noAK8ptbins] = {0.98,0.95,0.96,1.00};
    
-   double DeepAK8_SF_18[noAK8ptbins] = {0.89,1.06,1.00,0.99};  // 2018  for 0.5% WP
-   double DeepAK8_MD_SF_18[noAK8ptbins] = {0.90,0.97,0.98,0.95};  // 2018  for 0.5% WP
-   double DeepAK8_MD_SF_18_up[noAK8ptbins] = {0.95,1.00,1.01,0.98};	
-   double DeepAK8_MD_SF_18_dn[noAK8ptbins] = {0.85,0.94,0.95,0.92};	
+   double DeepAK8_SF_17[noAK8ptbins] = {1.08,0.97,0.90,0.95};   // 2017  for 0.5% WP
+   double DeepAK8_MD_SF_17[noAK8ptbins] = {0.99,0.94,0.92,0.95};  // 2017  for 0.5% WP
+   double DeepAK8_MD_SF_17_up[noAK8ptbins] = {1.07,0.98,0.96,1.0};	
+   double DeepAK8_MD_SF_17_dn[noAK8ptbins] = {0.91,0.90,0.88,0.9};	   
+   
+   double DeepAK8_SF_18[noAK8ptbins] = {0.99,1.06,1.04,0.95};  // 2018  for 0.5% WP
+   double DeepAK8_MD_SF_18[noAK8ptbins] = {0.98,0.98,0.98,0.92};  // 2018  for 0.5% WP
+   double DeepAK8_MD_SF_18_up[noAK8ptbins] = {1.03,1.01,1.01,0.97};	
+   double DeepAK8_MD_SF_18_dn[noAK8ptbins] = {0.93,0.95,0.95,0.88};	
    
    double DeepAK8_SF[noAK8ptbins]={0};
    double DeepAK8_MD_SF[noAK8ptbins]={0};
    double DeepAK8_MD_SF_up[noAK8ptbins]={0};
    double DeepAK8_MD_SF_dn[noAK8ptbins]={0};
    
-   double cortt_sdmass[nsdmassbins] = {0.704431,0.797327,0.957664,0.718151,0.691868,0.893276,0.510895,0.725355,0.789391,0.847687,0.911654,0.892455,0.892299,0.81116,0.713741,1.12043,0.9146,0.806993,1.34569,0.943199};
-
-   double cor_b_sdmass_mc_18[2][nsdmassbins] = {
-    {0.923822,1.04154,1.0317,1.12539,1.28814,1.12933,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-	{1.00665,0.950334,0.92359,1.02488,1.12131,1.22944,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
-   };  //2018 QCD
-   
-   double cor_b_sdmass_data_18[2][nsdmassbins] = {
-    {0.933685,0.955174,1.02156,1.19531,1.33257,1.38726,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-	{0.970126,0.900778,0.991004,1.1816,1.37485,1.41539,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
-   };  //2018 Data
-   
- 
-   double cor_b_sdmass_mc_16[2][nsdmassbins] = {
-    {0.987142,1.06626,0.928712,1.00808,0.98586,1.13492,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-	{1.10974,0.991804,0.783162,0.767303,0.802142,0.838826,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
-   };  //2016 QCD
-   
-   double cor_b_sdmass_data_16[2][nsdmassbins] = {
-    {1.00931,1.07519,0.949899,0.883415,0.917168,0.908525,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-	{1.07408,1.02367,0.843254,0.784695,0.758625,0.785022,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
-   };  //2016 Data
-    
- 
-  double cor_b_tight_sdmass_mc_16[2][nsdmassbins] = {
-   {0.944359,0.986263,0.968458,1.14505,1.20321,1.44714,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-   {1.01366,0.956484,0.917361,0.984545,1.10504,1.19774,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
-    };  //2016 QCD b tight
-    
-  double cor_b_tight_sdmass_data_16[2][nsdmassbins] = {
-    {0.972227,1.02831,1.00535,0.995104,1.11508,1.0687,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-	{1.01784,0.998772,0.91469,0.980248,0.990516,1.04135,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
-   };  //2016 Data b tight
-      
+        
+   static const int nohtbins = 30;
      
-   double cor_b_sdmass_mc_17[2][nsdmassbins] = {
-    {0.894106,1.00168,1.08224,1.23211,1.42184,1.44549,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-	{0.948099,0.965375,1.01162,1.14372,1.32161,1.33012,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
-   };  //2017 QCD
+   double htbins[nohtbins+1] = {300, 330, 362, 395, 430, 468,
+     507, 548, 592, 638, 686, 737, 790, 846, 905, 967,
+     1032, 1101, 1172, 1248, 1327, 1410, 1497, 1588, 1784, 2000,
+     2116, 2500, 2941, 3637, 5000} ; 
+     
+   static const int muetabins = 4;
+   static const int muetabins_2016 = 26;
+   static const int muptbins = 6;
+   static const int muptbins_trg = 5;//7;
+   static const int muptbins_trg_18 = 6;
    
-   double cor_b_sdmass_data_17[2][nsdmassbins] = {
-    {0.929639,0.981946,1.03214,1.18439,1.32073,1.29275,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-	{0.96212,0.915459,1.01051,1.18366,1.35503,1.43479,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
-   };  //2017 Data
- 
-   double cor_b_sdmass_mc[2][nsdmassbins] = {{0}};
-   double cor_b_sdmass_data[2][nsdmassbins] = {{0}};
+   float mueta_bins[muetabins+1] = {0,0.9,1.2,2.1,2.4};
+   float mueta_bins_2016[muetabins_2016+1] = 
+      {-2.4,-2.3,-2.2,-2.1,-2.0,-1.7,-1.6,-1.5,-1.2,-0.8,-0.5,-0.3,-0.2,
+	   0,
+	   0.2,0.3,0.5,0.8,1.2,1.5,1.6,1.7,2.0,2.1,2.2,2.3,2.4};
+	   
+   float mupt_bins[muptbins+1] = {20,25,30,40,50,60,5000};
+   float mupt_bins_trig[muptbins_trg+1] = {52,55,60,120,200,5000};
+   float mupt_bins_trig_18[muptbins_trg_18+1] = {52,56,60,120,200,300,5000};
+   
+   double muid_SF[muetabins][muptbins] = {
+										  {0.9911,0.9874,0.9908,0.9892,0.9856,0.9898},
+										  {0.9927,0.9851,0.9865,0.9849,0.9839,0.9841},
+										  {0.9924,0.9891,0.9946,0.9926,0.99064,0.992},
+										  {0.9758,0.9745,0.9787,0.9782,0.9674,0.977}
+									  };
+									  
+  double muid_SF18[muetabins][muptbins] = {
+										  {0.991389,0.99143477,0.99137556,0.99144126,0.991686185,0.9905799},
+										  {0.9859874,0.9839878,0.9838238,0.98421665,0.9830,0.9816889},
+										  {0.9914728,0.991185,0.990798,0.989993,0.99077967,0.9886367},
+										  {0.9762337,0.973594,0.973965,0.973888,0.9737076,0.96775}
+									  };									  
+   
+   double muiso_SF[muetabins][muptbins] = {
+										  {0.9931,0.9964,0.9983,0.9994,0.9998,1.0002},
+										  {0.9957,0.9933,0.9977,0.9990,0.9994,1.0002},
+										  {0.9967,0.9988,0.9989,0.9994,0.9997,1.0004},
+										  {0.9974,0.9988,0.9991,0.9998,1.0002,0.9993}
+									  };
+  double muiso_SF18[muetabins][muptbins] = {
+										  {0.99228,0.99546,0.99768,0.999203,0.99948,0.99988},
+										  {0.99519,0.99625,0.99791,0.999226,0.99996,1.000296},
+										  {1.01335,1.00659,1.00207,1.000712,1.00050,1.000319},
+										  {1.02687,1.01424,1.00531,1.001713,1.00114,1.00136}
+									  };									  
+									  
+  /*
+   double mutrg_SF[muetabins][muptbins_trg] = {
+										  {0.9705,0.9729,0.9722,0.9719,0.9705,0.9698,0.9626},
+										  {0.9515,0.9544,0.9525,0.9518,0.9449,0.9343,0.9267},
+										  {0.9901,0.9966,0.994,0.9902,0.9874,0.9928,0.9828},
+										  {0.8622,0.9108,0.9317,0.9442,0.9485,0.9727,0.8435}
+									  }; */ //for IsoMu27
+  									  
+   double mutrg_SF[muetabins][muptbins_trg] = {
+										  {0.968175,0.97021,0.96960,0.967606,0.956581},
+										  {0.945035,0.94765,0.94421,0.932597,0.921535},
+										  {0.977479,0.98467,0.98526,0.988689,0.973156},
+										  {0.846076,0.88530,0.92205,0.963763,0.872992}
+									  }; //for HLT50
+									  
+   double mutrg_SF18[muetabins][muptbins_trg_18] = {
+										  {0.93852,0.93878,0.93732,0.92894,0.916203,0.89302},
+										  {0.94292,0.94456,0.94161,0.93404,0.911648,0.88197},
+										  {0.91539,0.91975,0.92162,0.92332,0.913725,0.90493},
+										  {0.80103,0.82503,0.83853,0.85033,0.832598,0.81840}
+									  }; //for HLT50									  
    
    float sfwt_tau32;
    float sfwt_deepak8;
-   float  sfwt_deepak8_md, sfwt_deepak8_md_up, sfwt_deepak8_md_dn; 
+   float  sfwt_deepak8_md; 
 
-   Anal_Nano_PROOF(TTree * /*tree*/ =0) : fChain(0) { }
-   virtual ~Anal_Nano_PROOF() { }
+   Anal_Nano_Muon(TTree * /*tree*/ =0) : fChain(0) { }
+   virtual ~Anal_Nano_Muon() { }
    virtual Int_t   Version() const { return 2; }
    virtual void    Begin(TTree *tree);
    virtual void    SlaveBegin(TTree *tree);
@@ -5990,13 +5085,13 @@ float COV_val_mc_pol2_18[netabins][3][3] = {
    virtual void    SlaveTerminate();
    virtual void    Terminate();
 
-   ClassDef(Anal_Nano_PROOF,0);
+   ClassDef(Anal_Nano_Muon,0);
 };
 
 #endif
 
-#ifdef Anal_Nano_PROOF_cxx
-void Anal_Nano_PROOF::Init(TTree *tree)
+#ifdef Anal_Nano_Muon_cxx
+void Anal_Nano_Muon::Init(TTree *tree)
 {
    // The Init() function is called when the selector needs to initialize
    // a new tree or chain. Typically here the branch addresses and branch
@@ -6095,9 +5190,6 @@ void Anal_Nano_PROOF::Init(TTree *tree)
    fChain->SetBranchAddress("FatJet_deepTagMD_ZvsQCD", FatJet_deepTagMD_ZvsQCD, &b_FatJet_deepTagMD_ZvsQCD);
    fChain->SetBranchAddress("FatJet_deepTagMD_bbvsLight", FatJet_deepTagMD_bbvsLight, &b_FatJet_deepTagMD_bbvsLight);
    fChain->SetBranchAddress("FatJet_deepTagMD_ccvsLight", FatJet_deepTagMD_ccvsLight, &b_FatJet_deepTagMD_ccvsLight);
-   fChain->SetBranchAddress("FatJet_deepTag_H", FatJet_deepTag_H, &b_FatJet_deepTag_H);
-   fChain->SetBranchAddress("FatJet_deepTag_QCD", FatJet_deepTag_QCD, &b_FatJet_deepTag_QCD);
-   fChain->SetBranchAddress("FatJet_deepTag_QCDothers", FatJet_deepTag_QCDothers, &b_FatJet_deepTag_QCDothers);
    fChain->SetBranchAddress("FatJet_deepTag_TvsQCD", FatJet_deepTag_TvsQCD, &b_FatJet_deepTag_TvsQCD);
    fChain->SetBranchAddress("FatJet_deepTag_WvsQCD", FatJet_deepTag_WvsQCD, &b_FatJet_deepTag_WvsQCD);
    fChain->SetBranchAddress("FatJet_deepTag_ZvsQCD", FatJet_deepTag_ZvsQCD, &b_FatJet_deepTag_ZvsQCD);
@@ -6232,27 +5324,12 @@ void Anal_Nano_PROOF::Init(TTree *tree)
    fChain->SetBranchAddress("METFixEE2017_pt", &METFixEE2017_pt, &b_METFixEE2017_pt);
    fChain->SetBranchAddress("METFixEE2017_sumEt", &METFixEE2017_sumEt, &b_METFixEE2017_sumEt);
    */ 
-   
-   fChain->SetBranchAddress("METFixEE2017_MetUnclustEnUpDeltaX", &METFixEE2017_MetUnclustEnUpDeltaX, &b_METFixEE2017_MetUnclustEnUpDeltaX);
-   fChain->SetBranchAddress("METFixEE2017_MetUnclustEnUpDeltaY", &METFixEE2017_MetUnclustEnUpDeltaY, &b_METFixEE2017_MetUnclustEnUpDeltaY);
-   fChain->SetBranchAddress("METFixEE2017_covXX", &METFixEE2017_covXX, &b_METFixEE2017_covXX);
-   fChain->SetBranchAddress("METFixEE2017_covXY", &METFixEE2017_covXY, &b_METFixEE2017_covXY);
-   fChain->SetBranchAddress("METFixEE2017_covYY", &METFixEE2017_covYY, &b_METFixEE2017_covYY);
-   fChain->SetBranchAddress("METFixEE2017_phi", &METFixEE2017_phi, &b_METFixEE2017_phi);
-   fChain->SetBranchAddress("METFixEE2017_pt", &METFixEE2017_pt, &b_METFixEE2017_pt);
-   fChain->SetBranchAddress("METFixEE2017_significance", &METFixEE2017_significance, &b_METFixEE2017_significance);
-   fChain->SetBranchAddress("METFixEE2017_sumEt", &METFixEE2017_sumEt, &b_METFixEE2017_sumEt);
-   
    fChain->SetBranchAddress("GenMET_phi", &GenMET_phi, &b_GenMET_phi);
    fChain->SetBranchAddress("GenMET_pt", &GenMET_pt, &b_GenMET_pt);
    fChain->SetBranchAddress("MET_MetUnclustEnUpDeltaX", &MET_MetUnclustEnUpDeltaX, &b_MET_MetUnclustEnUpDeltaX);
    fChain->SetBranchAddress("MET_MetUnclustEnUpDeltaY", &MET_MetUnclustEnUpDeltaY, &b_MET_MetUnclustEnUpDeltaY);
-   fChain->SetBranchAddress("MET_covXX", &MET_covXX, &b_MET_covXX);
-   fChain->SetBranchAddress("MET_covXY", &MET_covXY, &b_MET_covXY);
-   fChain->SetBranchAddress("MET_covYY", &MET_covYY, &b_MET_covYY);
    fChain->SetBranchAddress("MET_phi", &MET_phi, &b_MET_phi);
    fChain->SetBranchAddress("MET_pt", &MET_pt, &b_MET_pt);
-   fChain->SetBranchAddress("MET_significance", &MET_significance, &b_MET_significance);
    fChain->SetBranchAddress("MET_sumEt", &MET_sumEt, &b_MET_sumEt);
    fChain->SetBranchAddress("nMuon", &nMuon, &b_nMuon);
    fChain->SetBranchAddress("Muon_dxy", Muon_dxy, &b_Muon_dxy);
@@ -6261,7 +5338,6 @@ void Anal_Nano_PROOF::Init(TTree *tree)
    fChain->SetBranchAddress("Muon_dzErr", Muon_dzErr, &b_Muon_dzErr);
    fChain->SetBranchAddress("Muon_eta", Muon_eta, &b_Muon_eta);
    fChain->SetBranchAddress("Muon_ip3d", Muon_ip3d, &b_Muon_ip3d);
-   fChain->SetBranchAddress("Muon_jetPtRelv2", Muon_jetPtRelv2, &b_Muon_jetPtRelv2);
    fChain->SetBranchAddress("Muon_jetRelIso", Muon_jetRelIso, &b_Muon_jetRelIso);
    fChain->SetBranchAddress("Muon_mass", Muon_mass, &b_Muon_mass);
    fChain->SetBranchAddress("Muon_miniPFRelIso_all", Muon_miniPFRelIso_all, &b_Muon_miniPFRelIso_all);
@@ -6470,17 +5546,10 @@ void Anal_Nano_PROOF::Init(TTree *tree)
    fChain->SetBranchAddress("HLT_AK8PFJet380_TrimMass30", &HLT_AK8PFJet380_TrimMass30, &b_HLT_AK8PFJet380_TrimMass30);
    fChain->SetBranchAddress("HLT_AK8PFJet400_TrimMass30", &HLT_AK8PFJet400_TrimMass30, &b_HLT_AK8PFJet400_TrimMass30);
    fChain->SetBranchAddress("HLT_AK8PFJet420_TrimMass30", &HLT_AK8PFJet420_TrimMass30, &b_HLT_AK8PFJet420_TrimMass30);
-   fChain->SetBranchAddress("HLT_AK8PFHT700_TrimR0p1PT0p03Mass50", &HLT_AK8PFHT700_TrimR0p1PT0p03Mass50, &b_HLT_AK8PFHT700_TrimR0p1PT0p03Mass50);
    fChain->SetBranchAddress("HLT_AK8PFHT750_TrimMass50", &HLT_AK8PFHT750_TrimMass50, &b_HLT_AK8PFHT750_TrimMass50);
    fChain->SetBranchAddress("HLT_AK8PFHT800_TrimMass50", &HLT_AK8PFHT800_TrimMass50, &b_HLT_AK8PFHT800_TrimMass50);
    fChain->SetBranchAddress("HLT_AK8PFHT850_TrimMass50", &HLT_AK8PFHT850_TrimMass50, &b_HLT_AK8PFHT850_TrimMass50);
    fChain->SetBranchAddress("HLT_AK8PFHT900_TrimMass50", &HLT_AK8PFHT900_TrimMass50, &b_HLT_AK8PFHT900_TrimMass50);
-   fChain->SetBranchAddress("HLT_AK8DiPFJet300_200_TrimMass30_BTagCSV_p20", &HLT_AK8DiPFJet300_200_TrimMass30_BTagCSV_p20, &b_HLT_AK8DiPFJet300_200_TrimMass30_BTagCSV_p20);
-   fChain->SetBranchAddress("HLT_AK8DiPFJet280_200_TrimMass30_BTagCSV_p20", &HLT_AK8DiPFJet280_200_TrimMass30_BTagCSV_p20, &b_HLT_AK8DiPFJet280_200_TrimMass30_BTagCSV_p20);
-   fChain->SetBranchAddress("HLT_AK8DiPFJet280_200_TrimMass30_BTagCSV_p087", &HLT_AK8DiPFJet280_200_TrimMass30_BTagCSV_p087, &b_HLT_AK8DiPFJet280_200_TrimMass30_BTagCSV_p087);
-   fChain->SetBranchAddress("HLT_AK8DiPFJet300_200_TrimMass30_BTagCSV_p087", &HLT_AK8DiPFJet300_200_TrimMass30_BTagCSV_p087, &b_HLT_AK8DiPFJet300_200_TrimMass30_BTagCSV_p087);
-   fChain->SetBranchAddress("HLT_AK8DiPFJet300_200_TrimMass30", &HLT_AK8DiPFJet300_200_TrimMass30, &b_HLT_AK8DiPFJet300_200_TrimMass30);
-   fChain->SetBranchAddress("HLT_AK8DiPFJet280_200_TrimMass30", &HLT_AK8DiPFJet280_200_TrimMass30, &b_HLT_AK8DiPFJet280_200_TrimMass30);
    fChain->SetBranchAddress("HLT_CaloJet500_NoJetID", &HLT_CaloJet500_NoJetID, &b_HLT_CaloJet500_NoJetID);
    fChain->SetBranchAddress("HLT_CaloJet550_NoJetID", &HLT_CaloJet550_NoJetID, &b_HLT_CaloJet550_NoJetID);
    fChain->SetBranchAddress("HLT_Trimuon5_3p5_2_Upsilon_Muon", &HLT_Trimuon5_3p5_2_Upsilon_Muon, &b_HLT_Trimuon5_3p5_2_Upsilon_Muon);
@@ -6648,8 +5717,6 @@ void Anal_Nano_PROOF::Init(TTree *tree)
    fChain->SetBranchAddress("HLT_PFHT680", &HLT_PFHT680, &b_HLT_PFHT680);
    fChain->SetBranchAddress("HLT_PFHT780", &HLT_PFHT780, &b_HLT_PFHT780);
    fChain->SetBranchAddress("HLT_PFHT890", &HLT_PFHT890, &b_HLT_PFHT890);
-   fChain->SetBranchAddress("HLT_PFHT800", &HLT_PFHT800, &b_HLT_PFHT800);
-   fChain->SetBranchAddress("HLT_PFHT900", &HLT_PFHT900, &b_HLT_PFHT900);
    fChain->SetBranchAddress("HLT_PFHT1050", &HLT_PFHT1050, &b_HLT_PFHT1050);
    fChain->SetBranchAddress("HLT_PFHT500_PFMET100_PFMHT100_IDTight", &HLT_PFHT500_PFMET100_PFMHT100_IDTight, &b_HLT_PFHT500_PFMET100_PFMHT100_IDTight);
    fChain->SetBranchAddress("HLT_PFHT500_PFMET110_PFMHT110_IDTight", &HLT_PFHT500_PFMET110_PFMHT110_IDTight, &b_HLT_PFHT500_PFMET110_PFMHT110_IDTight);
@@ -7536,7 +6603,6 @@ void Anal_Nano_PROOF::Init(TTree *tree)
    fChain->SetBranchAddress("MET_phi_jesCorrelationGroupUncorrelatedDown", &MET_phi_jesCorrelationGroupUncorrelatedDown, &b_MET_phi_jesCorrelationGroupUncorrelatedDown);
    fChain->SetBranchAddress("MET_pt_unclustEnDown", &MET_pt_unclustEnDown, &b_MET_pt_unclustEnDown);
    fChain->SetBranchAddress("MET_phi_unclustEnDown", &MET_phi_unclustEnDown, &b_MET_phi_unclustEnDown);
-   
    fChain->SetBranchAddress("FatJet_pt_raw", FatJet_pt_raw, &b_FatJet_pt_raw);
    fChain->SetBranchAddress("FatJet_pt_nom", FatJet_pt_nom, &b_FatJet_pt_nom);
    fChain->SetBranchAddress("FatJet_mass_raw", FatJet_mass_raw, &b_FatJet_mass_raw);
@@ -7551,7 +6617,6 @@ void Anal_Nano_PROOF::Init(TTree *tree)
    fChain->SetBranchAddress("FatJet_msoftdrop_corr_JMS", FatJet_msoftdrop_corr_JMS, &b_FatJet_msoftdrop_corr_JMS);
    fChain->SetBranchAddress("FatJet_msoftdrop_corr_PUPPI", FatJet_msoftdrop_corr_PUPPI, &b_FatJet_msoftdrop_corr_PUPPI);
    fChain->SetBranchAddress("FatJet_msoftdrop_tau21DDT_nom", FatJet_msoftdrop_tau21DDT_nom, &b_FatJet_msoftdrop_tau21DDT_nom);
-
    fChain->SetBranchAddress("FatJet_pt_jerUp", FatJet_pt_jerUp, &b_FatJet_pt_jerUp);
    fChain->SetBranchAddress("FatJet_mass_jerUp", FatJet_mass_jerUp, &b_FatJet_mass_jerUp);
    fChain->SetBranchAddress("FatJet_mass_jmrUp", FatJet_mass_jmrUp, &b_FatJet_mass_jmrUp);
@@ -7896,7 +6961,6 @@ void Anal_Nano_PROOF::Init(TTree *tree)
    fChain->SetBranchAddress("FatJet_pt_jesCorrelationGroupUncorrelatedDown", FatJet_pt_jesCorrelationGroupUncorrelatedDown, &b_FatJet_pt_jesCorrelationGroupUncorrelatedDown);
    fChain->SetBranchAddress("FatJet_mass_jesCorrelationGroupUncorrelatedDown", FatJet_mass_jesCorrelationGroupUncorrelatedDown, &b_FatJet_mass_jesCorrelationGroupUncorrelatedDown);
    fChain->SetBranchAddress("FatJet_msoftdrop_jesCorrelationGroupUncorrelatedDown", FatJet_msoftdrop_jesCorrelationGroupUncorrelatedDown, &b_FatJet_msoftdrop_jesCorrelationGroupUncorrelatedDown);
-/*
    fChain->SetBranchAddress("Jet_CSVbtagSF", Jet_CSVbtagSF, &b_Jet_CSVbtagSF);
    fChain->SetBranchAddress("Jet_CSVbtagSF_up", Jet_CSVbtagSF_up, &b_Jet_CSVbtagSF_up);
    fChain->SetBranchAddress("Jet_CSVbtagSF_down", Jet_CSVbtagSF_down, &b_Jet_CSVbtagSF_down);
@@ -7921,7 +6985,7 @@ void Anal_Nano_PROOF::Init(TTree *tree)
    fChain->SetBranchAddress("Jet_CSVbtagSF_shape_down_cferr2", Jet_CSVbtagSF_shape_down_cferr2, &b_Jet_CSVbtagSF_shape_down_cferr2);
    fChain->SetBranchAddress("Jet_deepCSVbtagSF", Jet_deepCSVbtagSF, &b_Jet_deepCSVbtagSF);
    fChain->SetBranchAddress("Jet_deepCSVbtagSF_up", Jet_deepCSVbtagSF_up, &b_Jet_deepCSVbtagSF_up);
-   fChain->SetBranchAddress("Jet_deepCSVbtagSF_down", Jet_deepCSVbtagSF_down, &b_Jet_deepCSVbtagSF_down);  
+   fChain->SetBranchAddress("Jet_deepCSVbtagSF_down", Jet_deepCSVbtagSF_down, &b_Jet_deepCSVbtagSF_down);
    fChain->SetBranchAddress("Jet_deepCSVbtagSF_shape", Jet_deepCSVbtagSF_shape, &b_Jet_deepCSVbtagSF_shape);
    fChain->SetBranchAddress("Jet_deepCSVbtagSF_shape_up_jes", Jet_deepCSVbtagSF_shape_up_jes, &b_Jet_deepCSVbtagSF_shape_up_jes);
    fChain->SetBranchAddress("Jet_deepCSVbtagSF_shape_down_jes", Jet_deepCSVbtagSF_shape_down_jes, &b_Jet_deepCSVbtagSF_shape_down_jes);
@@ -7941,7 +7005,6 @@ void Anal_Nano_PROOF::Init(TTree *tree)
    fChain->SetBranchAddress("Jet_deepCSVbtagSF_shape_down_cferr1", Jet_deepCSVbtagSF_shape_down_cferr1, &b_Jet_deepCSVbtagSF_shape_down_cferr1);
    fChain->SetBranchAddress("Jet_deepCSVbtagSF_shape_up_cferr2", Jet_deepCSVbtagSF_shape_up_cferr2, &b_Jet_deepCSVbtagSF_shape_up_cferr2);
    fChain->SetBranchAddress("Jet_deepCSVbtagSF_shape_down_cferr2", Jet_deepCSVbtagSF_shape_down_cferr2, &b_Jet_deepCSVbtagSF_shape_down_cferr2);
-*/
    fChain->SetBranchAddress("Jet_deepflavbtagSF", Jet_deepflavbtagSF, &b_Jet_deepflavbtagSF);
    fChain->SetBranchAddress("Jet_deepflavbtagSF_up", Jet_deepflavbtagSF_up, &b_Jet_deepflavbtagSF_up);
    fChain->SetBranchAddress("Jet_deepflavbtagSF_down", Jet_deepflavbtagSF_down, &b_Jet_deepflavbtagSF_down);
@@ -7963,18 +7026,13 @@ void Anal_Nano_PROOF::Init(TTree *tree)
    fChain->SetBranchAddress("Jet_deepflavbtagSF_shape_up_cferr1", Jet_deepflavbtagSF_shape_up_cferr1, &b_Jet_deepflavbtagSF_shape_up_cferr1);
    fChain->SetBranchAddress("Jet_deepflavbtagSF_shape_down_cferr1", Jet_deepflavbtagSF_shape_down_cferr1, &b_Jet_deepflavbtagSF_shape_down_cferr1);
    fChain->SetBranchAddress("Jet_deepflavbtagSF_shape_up_cferr2", Jet_deepflavbtagSF_shape_up_cferr2, &b_Jet_deepflavbtagSF_shape_up_cferr2);
-   fChain->SetBranchAddress("Jet_deepflavbtagSF_shape_down_cferr2", Jet_deepflavbtagSF_shape_down_cferr2, &b_Jet_deepflavbtagSF_shape_down_cferr2);
-   fChain->SetBranchAddress("puWeight", &puWeight, &b_puWeight);
-   fChain->SetBranchAddress("puWeightUp", &puWeightUp, &b_puWeightUp);
-   fChain->SetBranchAddress("puWeightDown", &puWeightDown, &b_puWeightDown);
    fChain->SetBranchAddress("PrefireWeight", &PrefireWeight, &b_PrefireWeight);
    fChain->SetBranchAddress("PrefireWeight_Up", &PrefireWeight_Up, &b_PrefireWeight_Up);
    fChain->SetBranchAddress("PrefireWeight_Down", &PrefireWeight_Down, &b_PrefireWeight_Down);
 
-   gSystem->Load("/cvmfs/cms.cern.ch/slc6_amd64_gcc700/external/lhapdf/6.2.1-ikaegh/lib/libLHAPDF.so");
 }
 
-Bool_t Anal_Nano_PROOF::Notify()
+Bool_t Anal_Nano_Muon::Notify()
 {
    // The Notify() function is called when a new file is opened. This
    // can be either for a new TTree in a TChain or when when a new TTree
@@ -7985,4 +7043,4 @@ Bool_t Anal_Nano_PROOF::Notify()
    return kTRUE;
 }
 
-#endif // #ifdef Anal_Nano_PROOF_cxx
+#endif // #ifdef Anal_Nano_Muon_cxx

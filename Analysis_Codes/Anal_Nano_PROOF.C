@@ -15,6 +15,10 @@
 //#define Anal_2018
 //#define HEM_Cor_ON
 
+//#define B_Tight
+
+#define LHAPDFX
+
 // The class definition in Anal_Nano_PROOF.h has been generated automatically
 // by the ROOT utility TTree::MakeSelector(). This class is derived
 // from the ROOT class TSelector. For more information on the TSelector
@@ -80,7 +84,7 @@ void Anal_Nano_PROOF::SlaveBegin(TTree * /*tree*/)
 
    TString option = GetOption();
 
-   OutFile = new TProofOutputFile("Output_JetHT_2016G_NanoAODv5.root");
+   OutFile = new TProofOutputFile("Output_trial.root");
  // fOutput->Add(OutFile);
 
     fileOut = OutFile->OpenFile("RECREATE");
@@ -93,11 +97,14 @@ void Anal_Nano_PROOF::SlaveBegin(TTree * /*tree*/)
    
    isMC = false;
    isQCD = false;
-   FakeAnalysis = false;
+   FakeAnalysis = true;
    isSignal = false;
    isTTBar = false;
    isTTHad = false; isTTSemiLep = false; isTTDiLep = false;
    isST = false;
+   
+   TopTagging = true;
+   if(!isMC){ TopTagging = false; }
    
    Tout = new TTree("Tout", "WeightInfo");
 
@@ -265,6 +272,55 @@ void Anal_Nano_PROOF::SlaveBegin(TTree * /*tree*/)
    hist_photrig_pass= new TH1D(name,title,2,-0.5,1.5);
    hist_photrig_pass->Sumw2();
    
+   if(isMC){
+   
+   sprintf(name,"PT_GEN_AK8");
+   sprintf(title,"P_{T} of AK8 GEN jets");
+   hist_pt_GEN_ak8 = new TH1D(name,title,noptbins,ptbins);
+   hist_pt_GEN_ak8->Sumw2();
+   
+   sprintf(name,"PT_GEN_AK8_Lead");
+   sprintf(title,"P_{T} of leading AK8 GEN jet");
+   hist_pt_GEN_ak8_lead = new TH1D(name,title,noptbins,ptbins);
+   hist_pt_GEN_ak8_lead->Sumw2();
+   
+   sprintf(name,"PT_GEN_AK4");
+   sprintf(title,"P_{T} of AK4 GEN jets");
+   hist_pt_GEN_ak4 = new TH1D(name,title,noptbins,ptbins);
+   hist_pt_GEN_ak4->Sumw2();
+   
+   sprintf(name,"PT_GEN_AK4_Lead");
+   sprintf(title,"P_{T} of leading AK4 GEN jet");
+   hist_pt_GEN_ak4_lead = new TH1D(name,title,noptbins,ptbins);
+   hist_pt_GEN_ak4_lead->Sumw2();
+   
+   sprintf(name,"Eta_GEN_AK8");
+   sprintf(title,"Rapidity of AK8 GEN jets");
+   hist_eta_GEN_ak8 = new TH1D(name,title,50,-5.,5.);
+   hist_eta_GEN_ak8->Sumw2();
+   
+   sprintf(name,"Eta_GEN_AK8_Lead");
+   sprintf(title,"Rapidity of leading AK8 GEN jet");
+   hist_eta_GEN_ak8_lead = new TH1D(name,title,50,-5.,5.);
+   hist_eta_GEN_ak8_lead->Sumw2();
+   
+   sprintf(name,"Eta_GEN_AK4");
+   sprintf(title,"Rapidity of AK4 GEN jets");
+   hist_eta_GEN_ak4 = new TH1D(name,title,50,-5.,5.);
+   hist_eta_GEN_ak4->Sumw2();
+   
+   sprintf(name,"Eta_GEN_AK4_Lead");
+   sprintf(title,"Rapidity of leading AK4 GEN jet");
+   hist_eta_GEN_ak4_lead = new TH1D(name,title,50,-5.,5.);
+   hist_eta_GEN_ak4_lead->Sumw2();
+   
+   sprintf(name,"M_tb_GEN");
+   sprintf(title,"M_{tb} spectra at GEN level");
+   hist_mtb_GEN = new TH1D(name,title,nvwpmbin,wpmbins);
+   hist_mtb_GEN->Sumw2();
+   
+	}
+   
    sprintf(name,"Had_Trigger_Passed");
    sprintf(title,"Hadronic trigger passing score");
    hist_hadtrig_pass= new TH1D(name,title,2,-0.5,1.5);
@@ -284,7 +340,12 @@ void Anal_Nano_PROOF::SlaveBegin(TTree * /*tree*/)
    sprintf(title,"# of photons");
    hist_nphotons= new TH1D(name,title,5,-0.5,4.5);
    hist_nphotons->Sumw2();
-  
+   
+   sprintf(name,"N_Muons_trigpass");
+   sprintf(title,"# of muons (passing hadronic trigger)");
+   hist_nmuons_trig_pass= new TH1D(name,title,5,-0.5,4.5);
+   hist_nmuons_trig_pass->Sumw2();
+   
    sprintf(name,"MET_corpt");
    sprintf(title,"Corrected MET p_{T}");
    met_corpt = new TH1D(name,title,100,0,200);
@@ -1232,9 +1293,17 @@ void Anal_Nano_PROOF::SlaveBegin(TTree * /*tree*/)
 			hist_2D_pt_btag_AK4_md_DeepAK8_beta[isb][it][ieta] = new TH2D(name,title,noptbins,ptbins,20,0,1.0);
 			hist_2D_pt_btag_AK4_md_DeepAK8_beta[isb][it][ieta]->Sumw2();
 			
+			sprintf(name,"H2D_AK4_pt_btag_MD_DeepAK8_TopTag%i_Subjetbtag%i_AK8CHS_bEtaBin%i_2",it+1,isb+1,ieta+1);
+			hist_2D_pt_btag_AK4_md_DeepAK8_beta2[isb][it][ieta] = new TH2D(name,title,noptbins,ptbins,20,0,1.0);
+			hist_2D_pt_btag_AK4_md_DeepAK8_beta2[isb][it][ieta]->Sumw2();
+			
 			sprintf(name,"H2D_AK4_pt_btag_MD_DeepAK8_TopTag%i_Subjetbtag%i_AK8CHS_bEtaBin%i_ttbar",it+1,isb+1,ieta+1);
 			hist_2D_pt_btag_AK4_md_DeepAK8_beta_tt[isb][it][ieta] = new TH2D(name,title,noptbins,ptbins,20,0,1.0);
 			hist_2D_pt_btag_AK4_md_DeepAK8_beta_tt[isb][it][ieta]->Sumw2();
+			
+			sprintf(name,"H2D_mtbt_btag_MD_DeepAK8_TopTag%i_Subjetbtag%i_AK8CHS_bEtaBin%i",it+1,isb+1,ieta+1);
+			hist_2D_mtb_btag_AK4_md_DeepAK8_beta[isb][it][ieta] = new TH2D(name,title,nvwpmbin,wpmbins,20,0,1.0);
+			hist_2D_mtb_btag_AK4_md_DeepAK8_beta[isb][it][ieta]->Sumw2();
 			
 			for(int ibunc=0; ibunc<nbtagmax; ibunc++){
 				sprintf(name,"H2D_AK4_pt_btag_MD_DeepAK8_TopTag%i_Subjetbtag%i_AK8CHS_bEtaBin%i_BTag%i_up",it+1,isb+1,ieta+1,ibunc);
@@ -1590,6 +1659,16 @@ void Anal_Nano_PROOF::SlaveBegin(TTree * /*tree*/)
    hist_biso_TopAK8score_MD_1 = new TH1D(name,title,100,-0.001,0.999);
    hist_biso_TopAK8score_MD_1->Sumw2();
    
+   sprintf(name,"IsoCheck_bjet_AK8_TopTagScore_masscut_highbpt");
+   sprintf(title,"Top-tag score of AK8 jet associated to b-Jet to b-Jet (M_{SD} > 60 GeV)");
+   hist_biso_TopAK8score_masscut_1 = new TH1D(name,title,100,-0.001,0.999);
+   hist_biso_TopAK8score_masscut_1->Sumw2();
+   
+   sprintf(name,"IsoCheck_bjet_AK8_MDTopTagScore_masscut_highbpt");
+   sprintf(title,"MD Top-tag score of AK8 jet associated to b-Jet to b-Jet (M_{SD} > 60 GeV)");
+   hist_biso_TopAK8score_MD_masscut_1 = new TH1D(name,title,100,-0.001,0.999);
+   hist_biso_TopAK8score_MD_masscut_1->Sumw2();
+   
    sprintf(name,"IsoCheck_bjet_AK8_WTagScore_highbpt");
    sprintf(title,"W-tag score of AK8 jet associated to b-Jet to b-Jet");
    hist_biso_WAK8score_1 = new TH1D(name,title,100,-0.001,0.999);
@@ -1848,310 +1927,6 @@ void Anal_Nano_PROOF::SlaveBegin(TTree * /*tree*/)
    hist_ht_tau32[it][ib][isb] = new TH1D(name,title,nvwpmbin,wpmbins);
    hist_ht_tau32[it][ib][isb]->Sumw2();
 
-   // Low b pt //
-   
-   sprintf(name,"tb_Mass_toptag%i_btag%i_subbtag%i_lowbpt",it,ib,isb);
-   sprintf(title,"Mass of tb Pair | Top WP %i B WP %i SubB WP %i",it+1,ib+1,isb+1);
-   hist_tbmass_1[it][ib][isb] = new TH1D(name,title,nvwpmbin,wpmbins);
-   hist_tbmass_1[it][ib][isb]->Sumw2();
-   
-   sprintf(name,"tb_Pt_toptag%i_btag%i_subbtag%i_lowbpt",it,ib,isb);
-   sprintf(title,"Pt of tb Pair | Top WP %i B WP %i SubB WP %i",it+1,ib+1,isb+1);
-   hist_tbpt_1[it][ib][isb] = new TH1D(name,title,noptbins,ptbins);
-   hist_tbpt_1[it][ib][isb]->Sumw2();
-   
-   sprintf(name,"tb_y_toptag%i_btag%i_subbtag%i_lowbpt",it,ib,isb);
-   sprintf(title,"Rapidity of tb Pair | Top WP %i B WP %i SubB WP %i",it+1,ib+1,isb+1);
-   hist_tbrap_1[it][ib][isb] = new TH1D(name,title,50,-5.,5.);
-   hist_tbrap_1[it][ib][isb]->Sumw2();
-   
-   sprintf(name,"tb_z_toptag%i_btag%i_subbtag%i_lowbpt",it,ib,isb);
-   sprintf(title,"Min(p_{T}^{t},p_{T}^{b}) / (p_{T}^{t}+p_{T}^{b})  | Top WP %i B WP %i SubB WP %i",it+1,ib+1,isb+1); 
-   hist_tbpt_frac_1[it][ib][isb] = new TH1D(name,title,50,0,0.5);
-   hist_tbpt_frac_1[it][ib][isb]->Sumw2();
-   
-   sprintf(name,"tb_deltheta_toptag%i_btag%i_subbtag%i_lowbpt",it,ib,isb);
-   sprintf(title,"cos(#Delta#theta^{tb}) | Top WP %i B WP %i SubB WP %i ",it+1,ib+1,isb+1);
-   hist_tbtheta_diff_1[it][ib][isb] = new TH1D(name,title,50,-1.,+1.);
-   hist_tbtheta_diff_1[it][ib][isb]->Sumw2();
-   
-   sprintf(name,"tb_delphi_toptag%i_btag%i_subbtag%i_lowbpt",it,ib,isb);
-   sprintf(title,"#Delta#phi^{tb} | Top WP %i B WP %i SubB WP %i",it+1,ib+1,isb+1);
-   hist_tbphi_diff_1[it][ib][isb] = new TH1D(name,title,150,-M_PI,M_PI);
-   hist_tbphi_diff_1[it][ib][isb]->Sumw2();
-   
-   sprintf(name,"BCandidate_Jet_Parton_Flavour_toptag%i_btag%i_subbtag%i_lowbpt",it,ib,isb);
-   sprintf(title,"BCandidate Jet Parton Flavour | Top WP %i B WP %i SubB WP %i",it+1,ib+1,isb+1);
-   hist_partonflav_AK4_1[it][ib][isb] = new TH1D(name,title,22,-0.01,21.99);
-   hist_partonflav_AK4_1[it][ib][isb]->Sumw2();
-   
-   sprintf(name,"TopJet_Pt_toptag%i_btag%i_subbtag%i_lowbpt",it,ib,isb);
-   sprintf(title,"TopJet P_{T} Top WP %i B WP %i SubB WP %i",it+1,ib+1,isb+1);
-   hist_topjetpt_sel_1[it][ib][isb] = new TH1D(name,title,noptbins,ptbins);
-   hist_topjetpt_sel_1[it][ib][isb]->Sumw2();
-    
-   sprintf(name,"TopJet_SDMass_toptag%i_btag%i_subbtag%i_lowbpt",it,ib,isb);
-   sprintf(title,"TopJet Soft drop mass Top WP %i B WP %i SubB WP %i",it+1,ib+1,isb+1);
-   hist_topjetsdmass_sel_1[it][ib][isb] = new TH1D(name,title,nsdmassbins,sdmassbins);
-   hist_topjetsdmass_sel_1[it][ib][isb]->Sumw2();
-   
-   sprintf(name,"TopJet_DeepTagTvsQCD_toptag%i_btag%i_subbtag%i_lowbpt",it,ib,isb);
-   sprintf(title,"TopJet DeepTagTvsQCD Top WP %i B WP %i SubB WP %i",it+1,ib+1,isb+1);
-   hist_topjetdeeptopscore_sel_1[it][ib][isb] = new TH1D(name,title,100,-0.0001,0.9999);
-   hist_topjetdeeptopscore_sel_1[it][ib][isb]->Sumw2();
-   
-   sprintf(name,"TopJet_MD_DeepTagTvsQCD_toptag%i_btag%i_subbtag%i_lowbpt",it,ib,isb);
-   sprintf(title,"TopJet Mass-Decorrelated DeepTagTvsQCD Top WP %i B WP %i SubB WP %i",it+1,ib+1,isb+1);
-   hist_topjetdeepmdtopscore_sel_1[it][ib][isb] = new TH1D(name,title,100,-0.0001,0.9999);
-   hist_topjetdeepmdtopscore_sel_1[it][ib][isb]->Sumw2();
-   
-   sprintf(name,"TopJet_SubjetBTag_toptag%i_btag%i_subbtag%i_lowbpt",it,ib,isb);
-   sprintf(title,"TopJet SubJet CSVv2 Score Top WP %i B WP %i SubB WP %i",it+1,ib+1,isb+1);
-   hist_topjetsbtag_sel_1[it][ib][isb] = new TH1D(name,title,20,0,1.0);
-   hist_topjetsbtag_sel_1[it][ib][isb]->Sumw2();
-   
-   sprintf(name,"TopJet_SubjetBTag_DeepCSV_toptag%i_btag%i_subbtag%i_lowbpt",it,ib,isb);
-   sprintf(title,"TopJet SubJet DeepCSV Score Top WP %i B WP %i SubB WP %i",it+1,ib+1,isb+1);
-   hist_topjetsdeepCSV_sel_1[it][ib][isb] = new TH1D(name,title,20,0,1.0);
-   hist_topjetsdeepCSV_sel_1[it][ib][isb]->Sumw2();
-   
-   sprintf(name,"TopJet_Tau32_toptag%i_btag%i_subbtag%i_lowbpt",it,ib,isb);
-   sprintf(title,"TopJet #tau_{32} Top WP %i B WP %i SubB WP %i",it+1,ib+1,isb+1);
-   hist_topjettau32_sel_1[it][ib][isb] = new TH1D(name,title,50,0,1.0);
-   hist_topjettau32_sel_1[it][ib][isb]->Sumw2();
-   
-   sprintf(name,"BJet_Pt_toptag%i_btag%i_subbtag%i_lowbpt",it,ib,isb);
-   sprintf(title,"BJet P_{T} Top WP %i B WP %i SubB WP %i",it+1,ib+1,isb+1);
-   hist_bjetpt_sel_1[it][ib][isb] = new TH1D(name,title,noptbins,ptbins);
-   hist_bjetpt_sel_1[it][ib][isb]->Sumw2();
-    
-   sprintf(name,"BJet_Mass_toptag%i_btag%i_subbtag%i_lowbpt",it,ib,isb);
-   sprintf(title,"BJet Mass Top WP %i B WP %i SubB WP %i",it+1,ib+1,isb+1);
-   hist_bjetmass_sel_1[it][ib][isb] = new TH1D(name,title,nsdmassbins,sdmassbins);
-   hist_bjetmass_sel_1[it][ib][isb]->Sumw2();
-   
-   sprintf(name,"BJet_BTag_toptag%i_btag%i_subbtag%i_lowbpt",it,ib,isb);
-   sprintf(title,"BJet CSVv2 Score Top WP %i B WP %i SubB WP %i",it+1,ib+1,isb+1);
-   hist_bjetbtag_sel_1[it][ib][isb] = new TH1D(name,title,20,0,1.0);
-   hist_bjetbtag_sel_1[it][ib][isb]->Sumw2();
-   
-   sprintf(name,"BJet_MatchAK8_TopTagScore_toptag%i_btag%i_subbtag%i_lowbpt",it,ib,isb);
-   sprintf(title,"Top-tag Score of AK8 jet corresponding to Top WP %i B WP %i SubB WP %i",it+1,ib+1,isb+1);
-   hist_bjetmatch_AK8Topscore_sel_1[it][ib][isb] = new TH1D(name,title,100,0,1.0);
-   hist_bjetmatch_AK8Topscore_sel_1[it][ib][isb]->Sumw2();
-   
-   sprintf(name,"BJet_MatchAK8_WTagScore_toptag%i_btag%i_subbtag%i_lowbpt",it,ib,isb);
-   sprintf(title,"W-tag Score of AK8 jet corresponding to Top WP %i B WP %i SubB WP %i",it+1,ib+1,isb+1);
-   hist_bjetmatch_AK8Wscore_sel_1[it][ib][isb] = new TH1D(name,title,100,0,1.0);
-   hist_bjetmatch_AK8Wscore_sel_1[it][ib][isb]->Sumw2();
-   
-   // Low b pt end 
-   
-   // no b mass cut //
-   
-   sprintf(name,"tb_Mass_toptag%i_btag%i_subbtag%i_nobmasscut",it,ib,isb);
-   sprintf(title,"Mass of tb Pair | Top WP %i B WP %i SubB WP %i",it+1,ib+1,isb+1);
-   hist_tbmass_2[it][ib][isb] = new TH1D(name,title,nvwpmbin,wpmbins);
-   hist_tbmass_2[it][ib][isb]->Sumw2();
-   
-   sprintf(name,"tb_Pt_toptag%i_btag%i_subbtag%i_nobmasscut",it,ib,isb);
-   sprintf(title,"Pt of tb Pair | Top WP %i B WP %i SubB WP %i",it+1,ib+1,isb+1);
-   hist_tbpt_2[it][ib][isb] = new TH1D(name,title,noptbins,ptbins);
-   hist_tbpt_2[it][ib][isb]->Sumw2();
-   
-   sprintf(name,"tb_y_toptag%i_btag%i_subbtag%i_nobmasscut",it,ib,isb);
-   sprintf(title,"Rapidity of tb Pair | Top WP %i B WP %i SubB WP %i",it+1,ib+1,isb+1);
-   hist_tbrap_2[it][ib][isb] = new TH1D(name,title,50,-5.,5.);
-   hist_tbrap_2[it][ib][isb]->Sumw2();
-   
-   sprintf(name,"tb_z_toptag%i_btag%i_subbtag%i_nobmasscut",it,ib,isb);
-   sprintf(title,"Min(p_{T}^{t},p_{T}^{b}) / (p_{T}^{t}+p_{T}^{b})  | Top WP %i B WP %i SubB WP %i",it+1,ib+1,isb+1); 
-   hist_tbpt_frac_2[it][ib][isb] = new TH1D(name,title,50,0,0.5);
-   hist_tbpt_frac_2[it][ib][isb]->Sumw2();
-   
-   sprintf(name,"tb_deltheta_toptag%i_btag%i_subbtag%i_nobmasscut",it,ib,isb);
-   sprintf(title,"cos(#Delta#theta^{tb}) | Top WP %i B WP %i SubB WP %i (p_{T}^{b}<40 GeV)",it+1,ib+1,isb+1);
-   hist_tbtheta_diff_2[it][ib][isb] = new TH1D(name,title,50,-1.,+1.);
-   hist_tbtheta_diff_2[it][ib][isb]->Sumw2();
-   
-   sprintf(name,"tb_delphi_toptag%i_btag%i_subbtag%i_nobmasscut",it,ib,isb);
-   sprintf(title,"#Delta#phi^{tb} | Top WP %i B WP %i SubB WP %i",it+1,ib+1,isb+1);
-   hist_tbphi_diff_2[it][ib][isb] = new TH1D(name,title,150,-M_PI,M_PI);
-   hist_tbphi_diff_2[it][ib][isb]->Sumw2();
-   
-   sprintf(name,"BCandidate_Jet_Parton_Flavour_toptag%i_btag%i_subbtag%i_nobmasscut",it,ib,isb);
-   sprintf(title,"BCandidate Jet Parton Flavour | Top WP %i B WP %i SubB WP %i",it+1,ib+1,isb+1);
-   hist_partonflav_AK4_2[it][ib][isb] = new TH1D(name,title,22,-0.01,21.99);
-   hist_partonflav_AK4_2[it][ib][isb]->Sumw2();
-   
-   sprintf(name,"TopJet_Pt_toptag%i_btag%i_subbtag%i_nobmasscut",it,ib,isb);
-   sprintf(title,"TopJet P_{T} Top WP %i B WP %i SubB WP %i",it+1,ib+1,isb+1);
-   hist_topjetpt_sel_2[it][ib][isb] = new TH1D(name,title,noptbins,ptbins);
-   hist_topjetpt_sel_2[it][ib][isb]->Sumw2();
-    
-   sprintf(name,"TopJet_SDMass_toptag%i_btag%i_subbtag%i_nobmasscut",it,ib,isb);
-   sprintf(title,"TopJet Soft drop mass Top WP %i B WP %i SubB WP %i",it+1,ib+1,isb+1);
-   hist_topjetsdmass_sel_2[it][ib][isb] = new TH1D(name,title,nsdmassbins,sdmassbins);
-   hist_topjetsdmass_sel_2[it][ib][isb]->Sumw2();
-   
-   sprintf(name,"TopJet_DeepTagTvsQCD_toptag%i_btag%i_subbtag%i_nobmasscut",it,ib,isb);
-   sprintf(title,"TopJet DeepTagTvsQCD Top WP %i B WP %i SubB WP %i",it+1,ib+1,isb+1);
-   hist_topjetdeeptopscore_sel_2[it][ib][isb] = new TH1D(name,title,100,-0.0001,0.9999);
-   hist_topjetdeeptopscore_sel_2[it][ib][isb]->Sumw2();
-   
-   sprintf(name,"TopJet_MD_DeepTagTvsQCD_toptag%i_btag%i_subbtag%i_nobmasscut",it,ib,isb);
-   sprintf(title,"TopJet Mass-Decorrelated DeepTagTvsQCD Top WP %i B WP %i SubB WP %i",it+1,ib+1,isb+1);
-   hist_topjetdeepmdtopscore_sel_2[it][ib][isb] = new TH1D(name,title,100,-0.0001,0.9999);
-   hist_topjetdeepmdtopscore_sel_2[it][ib][isb]->Sumw2();
-   
-   sprintf(name,"TopJet_SubjetBTag_toptag%i_btag%i_subbtag%i_nobmasscut",it,ib,isb);
-   sprintf(title,"TopJet SubJet CSVv2 Score Top WP %i B WP %i SubB WP %i",it+1,ib+1,isb+1);
-   hist_topjetsbtag_sel_2[it][ib][isb] = new TH1D(name,title,20,0,1.0);
-   hist_topjetsbtag_sel_2[it][ib][isb]->Sumw2();
-   
-   sprintf(name,"TopJet_SubjetBTag_DeepCSV_toptag%i_btag%i_subbtag%i_nobmasscut",it,ib,isb);
-   sprintf(title,"TopJet SubJet DeepCSV Score Top WP %i B WP %i SubB WP %i",it+1,ib+1,isb+1);
-   hist_topjetsdeepCSV_sel_2[it][ib][isb] = new TH1D(name,title,20,0,1.0);
-   hist_topjetsdeepCSV_sel_2[it][ib][isb]->Sumw2();
-   
-   sprintf(name,"TopJet_Tau32_toptag%i_btag%i_subbtag%i_nobmasscut",it,ib,isb);
-   sprintf(title,"TopJet #tau_{32} Top WP %i B WP %i SubB WP %i",it+1,ib+1,isb+1);
-   hist_topjettau32_sel_2[it][ib][isb] = new TH1D(name,title,50,0,1.0);
-   hist_topjettau32_sel_2[it][ib][isb]->Sumw2();
-   
-   sprintf(name,"BJet_Pt_toptag%i_btag%i_subbtag%i_nobmasscut",it,ib,isb);
-   sprintf(title,"BJet P_{T} Top WP %i B WP %i SubB WP %i",it+1,ib+1,isb+1);
-   hist_bjetpt_sel_2[it][ib][isb] = new TH1D(name,title,noptbins,ptbins);
-   hist_bjetpt_sel_2[it][ib][isb]->Sumw2();
-    
-   sprintf(name,"BJet_Mass_toptag%i_btag%i_subbtag%i_nobmasscut",it,ib,isb);
-   sprintf(title,"BJet Mass Top WP %i B WP %i SubB WP %i",it+1,ib+1,isb+1);
-   hist_bjetmass_sel_2[it][ib][isb] = new TH1D(name,title,nsdmassbins,sdmassbins);
-   hist_bjetmass_sel_2[it][ib][isb]->Sumw2();
-   
-   sprintf(name,"BJet_BTag_toptag%i_btag%i_subbtag%i_nobmasscut",it,ib,isb);
-   sprintf(title,"BJet CSVv2 Score Top WP %i B WP %i SubB WP %i",it+1,ib+1,isb+1);
-   hist_bjetbtag_sel_2[it][ib][isb] = new TH1D(name,title,20,0,1.0);
-   hist_bjetbtag_sel_2[it][ib][isb]->Sumw2();
-   
-   sprintf(name,"BJet_MatchAK8_TopTagScore_toptag%i_btag%i_subbtag%i_nobmasscut",it,ib,isb);
-   sprintf(title,"Top-tag Score of AK8 jet corresponding to Top WP %i B WP %i SubB WP %i",it+1,ib+1,isb+1);
-   hist_bjetmatch_AK8Topscore_sel_2[it][ib][isb] = new TH1D(name,title,100,0,1.0);
-   hist_bjetmatch_AK8Topscore_sel_2[it][ib][isb]->Sumw2();
-   
-   sprintf(name,"BJet_MatchAK8_WTagScore_toptag%i_btag%i_subbtag%i_nobmasscut",it,ib,isb);
-   sprintf(title,"W-tag Score of AK8 jet corresponding to Top WP %i B WP %i SubB WP %i",it+1,ib+1,isb+1);
-   hist_bjetmatch_AK8Wscore_sel_2[it][ib][isb] = new TH1D(name,title,100,0,1.0);
-   hist_bjetmatch_AK8Wscore_sel_2[it][ib][isb]->Sumw2();
-
-   
-   // no bmass cut end //
-  
-  // HT cut //
-   
-   sprintf(name,"tb_Mass_toptag%i_btag%i_subbtag%i_highht",it,ib,isb);
-   sprintf(title,"Mass of tb Pair | Top WP %i B WP %i SubB WP %i",it+1,ib+1,isb+1);
-   hist_tbmass_3[it][ib][isb] = new TH1D(name,title,nvwpmbin,wpmbins);
-   hist_tbmass_3[it][ib][isb]->Sumw2();
-   
-   sprintf(name,"tb_Pt_toptag%i_btag%i_subbtag%i_highht",it,ib,isb);
-   sprintf(title,"Pt of tb Pair | Top WP %i B WP %i SubB WP %i",it+1,ib+1,isb+1);
-   hist_tbpt_3[it][ib][isb] = new TH1D(name,title,noptbins,ptbins);
-   hist_tbpt_3[it][ib][isb]->Sumw2();
-   
-   sprintf(name,"tb_y_toptag%i_btag%i_subbtag%i_highht",it,ib,isb);
-   sprintf(title,"Rapidity of tb Pair | Top WP %i B WP %i SubB WP %i",it+1,ib+1,isb+1);
-   hist_tbrap_3[it][ib][isb] = new TH1D(name,title,50,-5.,5.);
-   hist_tbrap_3[it][ib][isb]->Sumw2();
-   
-   sprintf(name,"tb_z_toptag%i_btag%i_subbtag%i_highht",it,ib,isb);
-   sprintf(title,"Min(p_{T}^{t},p_{T}^{b}) / (p_{T}^{t}+p_{T}^{b})  | Top WP %i B WP %i SubB WP %i",it+1,ib+1,isb+1); 
-   hist_tbpt_frac_3[it][ib][isb] = new TH1D(name,title,50,0,0.5);
-   hist_tbpt_frac_3[it][ib][isb]->Sumw2();
-   
-   sprintf(name,"tb_deltheta_toptag%i_btag%i_subbtag%i_highht",it,ib,isb);
-   sprintf(title,"cos(#Delta#theta^{tb}) | Top WP %i B WP %i SubB WP %i",it+1,ib+1,isb+1);
-   hist_tbtheta_diff_3[it][ib][isb] = new TH1D(name,title,50,-1.,+1.);
-   hist_tbtheta_diff_3[it][ib][isb]->Sumw2();
-   
-   sprintf(name,"tb_delphi_toptag%i_btag%i_subbtag%i_highht",it,ib,isb);
-   sprintf(title,"#Delta#phi^{tb} | Top WP %i B WP %i SubB WP %i",it+1,ib+1,isb+1);
-   hist_tbphi_diff_3[it][ib][isb] = new TH1D(name,title,150,-M_PI,M_PI);
-   hist_tbphi_diff_3[it][ib][isb]->Sumw2();
-   
-   sprintf(name,"BCandidate_Jet_Parton_Flavour_toptag%i_btag%i_subbtag%i_highht",it,ib,isb);
-   sprintf(title,"BCandidate Jet Parton Flavour | Top WP %i B WP %i SubB WP %i",it+1,ib+1,isb+1);
-   hist_partonflav_AK4_3[it][ib][isb] = new TH1D(name,title,22,-0.01,21.99);
-   hist_partonflav_AK4_3[it][ib][isb]->Sumw2();
-   
-   sprintf(name,"TopJet_Pt_toptag%i_btag%i_subbtag%i_highht",it,ib,isb);
-   sprintf(title,"TopJet P_{T} Top WP %i B WP %i SubB WP %i",it+1,ib+1,isb+1);
-   hist_topjetpt_sel_3[it][ib][isb] = new TH1D(name,title,noptbins,ptbins);
-   hist_topjetpt_sel_3[it][ib][isb]->Sumw2();
-    
-   sprintf(name,"TopJet_SDMass_toptag%i_btag%i_subbtag%i_highht",it,ib,isb);
-   sprintf(title,"TopJet Soft drop mass Top WP %i B WP %i SubB WP %i",it+1,ib+1,isb+1);
-   hist_topjetsdmass_sel_3[it][ib][isb] = new TH1D(name,title,nsdmassbins,sdmassbins);
-   hist_topjetsdmass_sel_3[it][ib][isb]->Sumw2();
-   
-   sprintf(name,"TopJet_DeepTagTvsQCD_toptag%i_btag%i_subbtag%i_highht",it,ib,isb);
-   sprintf(title,"TopJet DeepTagTvsQCD Top WP %i B WP %i SubB WP %i",it+1,ib+1,isb+1);
-   hist_topjetdeeptopscore_sel_3[it][ib][isb] = new TH1D(name,title,100,-0.0001,0.9999);
-   hist_topjetdeeptopscore_sel_3[it][ib][isb]->Sumw2();
-   
-   sprintf(name,"TopJet_MD_DeepTagTvsQCD_toptag%i_btag%i_subbtag%i_highht",it,ib,isb);
-   sprintf(title,"TopJet Mass-Decorrelated DeepTagTvsQCD Top WP %i B WP %i SubB WP %i",it+1,ib+1,isb+1);
-   hist_topjetdeepmdtopscore_sel_3[it][ib][isb] = new TH1D(name,title,100,-0.0001,0.9999);
-   hist_topjetdeepmdtopscore_sel_3[it][ib][isb]->Sumw2();
-   
-   sprintf(name,"TopJet_SubjetBTag_toptag%i_btag%i_subbtag%i_highht",it,ib,isb);
-   sprintf(title,"TopJet SubJet CSVv2 Score Top WP %i B WP %i SubB WP %i",it+1,ib+1,isb+1);
-   hist_topjetsbtag_sel_3[it][ib][isb] = new TH1D(name,title,20,0,1.0);
-   hist_topjetsbtag_sel_3[it][ib][isb]->Sumw2();
-   
-   sprintf(name,"TopJet_SubjetBTag_DeepCSV_toptag%i_btag%i_subbtag%i_highht",it,ib,isb);
-   sprintf(title,"TopJet SubJet DeepCSV Score Top WP %i B WP %i SubB WP %i",it+1,ib+1,isb+1);
-   hist_topjetsdeepCSV_sel_3[it][ib][isb] = new TH1D(name,title,20,0,1.0);
-   hist_topjetsdeepCSV_sel_3[it][ib][isb]->Sumw2();
-   
-   sprintf(name,"TopJet_Tau32_toptag%i_btag%i_subbtag%i_highht",it,ib,isb);
-   sprintf(title,"TopJet #tau_{32} Top WP %i B WP %i SubB WP %i",it+1,ib+1,isb+1);
-   hist_topjettau32_sel_3[it][ib][isb] = new TH1D(name,title,50,0,1.0);
-   hist_topjettau32_sel_3[it][ib][isb]->Sumw2();
-   
-   sprintf(name,"BJet_Pt_toptag%i_btag%i_subbtag%i_highht",it,ib,isb);
-   sprintf(title,"BJet P_{T} Top WP %i B WP %i SubB WP %i",it+1,ib+1,isb+1);
-   hist_bjetpt_sel_3[it][ib][isb] = new TH1D(name,title,noptbins,ptbins);
-   hist_bjetpt_sel_3[it][ib][isb]->Sumw2();
-    
-   sprintf(name,"BJet_Mass_toptag%i_btag%i_subbtag%i_highht",it,ib,isb);
-   sprintf(title,"BJet Mass Top WP %i B WP %i SubB WP %i",it+1,ib+1,isb+1);
-   hist_bjetmass_sel_3[it][ib][isb] = new TH1D(name,title,nsdmassbins,sdmassbins);
-   hist_bjetmass_sel_3[it][ib][isb]->Sumw2();
-   
-   sprintf(name,"BJet_BTag_toptag%i_btag%i_subbtag%i_highht",it,ib,isb);
-   sprintf(title,"BJet CSVv2 Score Top WP %i B WP %i SubB WP %i",it+1,ib+1,isb+1);
-   hist_bjetbtag_sel_3[it][ib][isb] = new TH1D(name,title,20,0,1.0);
-   hist_bjetbtag_sel_3[it][ib][isb]->Sumw2();
-   
-   sprintf(name,"BJet_MatchAK8_TopTagScore_toptag%i_btag%i_subbtag%i_highht",it,ib,isb);
-   sprintf(title,"Top-tag Score of AK8 jet corresponding to Top WP %i B WP %i SubB WP %i",it+1,ib+1,isb+1);
-   hist_bjetmatch_AK8Topscore_sel_3[it][ib][isb] = new TH1D(name,title,100,0,1.0);
-   hist_bjetmatch_AK8Topscore_sel_3[it][ib][isb]->Sumw2();
-
-   sprintf(name,"BJet_MatchAK8_WTagScore_toptag%i_btag%i_subbtag%i_highht",it,ib,isb);
-   sprintf(title,"W-tag Score of AK8 jet corresponding to Top WP %i B WP %i SubB WP %i",it+1,ib+1,isb+1);
-   hist_bjetmatch_AK8Wscore_sel_3[it][ib][isb] = new TH1D(name,title,100,0,1.0);
-   hist_bjetmatch_AK8Wscore_sel_3[it][ib][isb]->Sumw2();
-   
-   sprintf(name,"Event_HT_DeepAK8MD_toptag%i_btag%i_subbtag%i_tau32_highht",it,ib,isb);
-   sprintf(title,"H_{T} | Top WP %i B WP %i SubB WP %i",it+1,ib+1,isb+1);
-   hist_ht_tau32_3[it][ib][isb] = new TH1D(name,title,nvwpmbin,wpmbins);
-   hist_ht_tau32_3[it][ib][isb]->Sumw2();
-   
-   
-   // HT cut end 
-   
    sprintf(name,"TopJet_SDMass_Tau32_tbMass_toptag%i_btag%i_subbtag%i",it,ib,isb);
    sprintf(title,"TopJet Soft drop mass #tau{32} tb Inv Mass Top WP %i B WP %i SubB WP %i",it+1,ib+1,isb+1);
    hist_3D_topjetsdmass_topjettau32_tbmass[it][ib][isb] = new TH3D(name,title,nomassbins,mass_low,mass_high,50,0,1.0,nwpmbin,nwpmlow,nwpmhigh);
@@ -2327,10 +2102,20 @@ for(int it=0; it<ntoptag_DAK8; it++){
    hist_tbmass_md_DeepAK8[it][ib][isb] = new TH1D(name,title,nvwpmbin,wpmbins);
    hist_tbmass_md_DeepAK8[it][ib][isb]->Sumw2();
    
+   sprintf(name,"tb_Mass_DeepAK8MD_toptag%i_btag%i_subbtag%i_option2",it,ib,isb);
+   sprintf(title,"Mass of tb Pair | Top WP %i B WP %i SubB WP %i (optional p/f ratio)",it+1,ib+1,isb+1);
+   hist_tbmass_md_DeepAK8_2[it][ib][isb] = new TH1D(name,title,nvwpmbin,wpmbins);
+   hist_tbmass_md_DeepAK8_2[it][ib][isb]->Sumw2();
+   
    sprintf(name,"tb_Mass_DeepAK8MD_toptag%i_btag%i_subbtag%i_passing_dy_cut",it,ib,isb);
    sprintf(title,"Mass of tb Pair | Top WP %i B WP %i SubB WP %i (#Delta y <1.8)",it+1,ib+1,isb+1);
    hist_tbmass_md_DeepAK8_dY[it][ib][isb] = new TH1D(name,title,nvwpmbin,wpmbins);
    hist_tbmass_md_DeepAK8_dY[it][ib][isb]->Sumw2();
+   
+   sprintf(name,"tb_Mass_DeepAK8MD_toptag%i_btag%i_subbtag%i_trigwgt",it,ib,isb);
+   sprintf(title,"Mass of tb Pair | Top WP %i B WP %i SubB WP %i (trigger weight)",it+1,ib+1,isb+1);
+   hist_tbmass_md_DeepAK8_trigwt[it][ib][isb] = new TH1D(name,title,nvwpmbin,wpmbins);
+   hist_tbmass_md_DeepAK8_trigwt[it][ib][isb]->Sumw2();
    
    sprintf(name,"tb_Mass_DeepAK8MD_toptag%i_btag%i_subbtag%i_pf_up",it,ib,isb);
    sprintf(title,"Mass of tb Pair | Top WP %i B WP %i SubB WP %i (p/f up)",it+1,ib+1,isb+1);
@@ -2341,6 +2126,16 @@ for(int it=0; it<ntoptag_DAK8; it++){
    sprintf(title,"Mass of tb Pair | Top WP %i B WP %i SubB WP %i (p/f down)",it+1,ib+1,isb+1);
    hist_tbmass_md_DeepAK8_pfdn[it][ib][isb] = new TH1D(name,title,nvwpmbin,wpmbins);
    hist_tbmass_md_DeepAK8_pfdn[it][ib][isb]->Sumw2();
+   
+   sprintf(name,"tb_Mass_DeepAK8MD_toptag%i_btag%i_subbtag%i_pf2_up",it,ib,isb);
+   sprintf(title,"Mass of tb Pair | Top WP %i B WP %i SubB WP %i (p/f up : option 2)",it+1,ib+1,isb+1);
+   hist_tbmass_md_DeepAK8_pfup_2[it][ib][isb] = new TH1D(name,title,nvwpmbin,wpmbins);
+   hist_tbmass_md_DeepAK8_pfup_2[it][ib][isb]->Sumw2();
+   
+   sprintf(name,"tb_Mass_DeepAK8MD_toptag%i_btag%i_subbtag%i_pf2_dn",it,ib,isb);
+   sprintf(title,"Mass of tb Pair | Top WP %i B WP %i SubB WP %i (p/f down : option 2)",it+1,ib+1,isb+1);
+   hist_tbmass_md_DeepAK8_pfdn_2[it][ib][isb] = new TH1D(name,title,nvwpmbin,wpmbins);
+   hist_tbmass_md_DeepAK8_pfdn_2[it][ib][isb]->Sumw2();
    
    sprintf(name,"tb_Mass_DeepAK8MD_toptag%i_btag%i_subbtag%i_mdAK8_up",it,ib,isb);
    sprintf(title,"Mass of tb Pair | Top WP %i B WP %i SubB WP %i (DeepAK8 SF up)",it+1,ib+1,isb+1);
@@ -2372,6 +2167,24 @@ for(int it=0; it<ntoptag_DAK8; it++){
    hist_tbmass_md_DeepAK8_prefiredn[it][ib][isb] = new TH1D(name,title,nvwpmbin,wpmbins);
    hist_tbmass_md_DeepAK8_prefiredn[it][ib][isb]->Sumw2();
    
+   sprintf(name,"tb_Mass_DeepAK8MD_toptag%i_btag%i_subbtag%i_fine",it,ib,isb);
+   hist_tbmass_md_DeepAK8_fine[it][ib][isb] = new TH1D(name,title,100,1000,5000);
+   hist_tbmass_md_DeepAK8_fine[it][ib][isb]->Sumw2();
+   
+   sprintf(name,"tb_Mass_DeepAK8MD_toptag%i_btag%i_subbtag%i_fine_puup",it,ib,isb);
+   hist_tbmass_md_DeepAK8_fine_puup[it][ib][isb] = new TH1D(name,title,100,1000,5000);
+   hist_tbmass_md_DeepAK8_fine_puup[it][ib][isb]->Sumw2();
+   
+   sprintf(name,"tb_Mass_DeepAK8MD_toptag%i_btag%i_subbtag%i_fine_pudn",it,ib,isb);
+   hist_tbmass_md_DeepAK8_fine_pudn[it][ib][isb] = new TH1D(name,title,100,1000,5000);
+   hist_tbmass_md_DeepAK8_fine_pudn[it][ib][isb]->Sumw2();
+   
+   sprintf(name,"TwoD_tb_Mass_npv_DeepAK8MD_toptag%i_btag%i_subbtag%i_fine",it,ib,isb);
+   sprintf(title,"2D correlation of M_{tb} vs n_{PU}");
+   h2d_mtb_npu[it][ib][isb] = new TH2D(name,name,100,1000,5000,100,0,100);
+   h2d_mtb_npu[it][ib][isb]->Sumw2();
+   
+   
    if(FakeAnalysis){
    
    sprintf(name,"tb_Mass_DeepAK8MD_toptag%i_btag%i_subbtag%i_bmsdcor_up",it,ib,isb);
@@ -2384,12 +2197,42 @@ for(int it=0; it<ntoptag_DAK8; it++){
    hist_tbmass_md_DeepAK8_bcordn[it][ib][isb] = new TH1D(name,title,nvwpmbin,wpmbins);
    hist_tbmass_md_DeepAK8_bcordn[it][ib][isb]->Sumw2();
    
+   sprintf(name,"tb_Mass_DeepAK8MD_toptag%i_btag%i_subbtag%i_bmsdcor_up2",it,ib,isb);
+   sprintf(title,"Mass of tb Pair | Top WP %i B WP %i SubB WP %i (b m_{sd} correction up)",it+1,ib+1,isb+1);
+   hist_tbmass_md_DeepAK8_bcorup_2[it][ib][isb] = new TH1D(name,title,nvwpmbin,wpmbins);
+   hist_tbmass_md_DeepAK8_bcorup_2[it][ib][isb]->Sumw2();
+   
+   sprintf(name,"tb_Mass_DeepAK8MD_toptag%i_btag%i_subbtag%i_bmsdcor_dn2",it,ib,isb);
+   sprintf(title,"Mass of tb Pair | Top WP %i B WP %i SubB WP %i (b m_{sd} correction down)",it+1,ib+1,isb+1);
+   hist_tbmass_md_DeepAK8_bcordn_2[it][ib][isb] = new TH1D(name,title,nvwpmbin,wpmbins);
+   hist_tbmass_md_DeepAK8_bcordn_2[it][ib][isb]->Sumw2();
+   
    }
    
    sprintf(name,"tb_Mass_DeepAK8MD_toptag%i_btag%i_subbtag%i_noptw",it,ib,isb);
    sprintf(title,"Mass of tb Pair | Top WP %i B WP %i SubB WP %i (w/o top p_{T} weight)",it+1,ib+1,isb+1);
    hist_tbmass_md_DeepAK8_noptw[it][ib][isb] = new TH1D(name,title,nvwpmbin,wpmbins);
    hist_tbmass_md_DeepAK8_noptw[it][ib][isb]->Sumw2();
+   
+   sprintf(name,"tb_Mass_DeepAK8MD_toptag%i_btag%i_subbtag%i_alphaup",it,ib,isb);
+   sprintf(title,"Mass of tb Pair | Top WP %i B WP %i SubB WP %i",it+1,ib+1,isb+1);
+   hist_tbmass_md_DeepAK8_alphaup[it][ib][isb] = new TH1D(name,title,nvwpmbin,wpmbins);
+   hist_tbmass_md_DeepAK8_alphaup[it][ib][isb]->Sumw2();
+   
+   sprintf(name,"tb_Mass_DeepAK8MD_toptag%i_btag%i_subbtag%i_alphadn",it,ib,isb);
+   sprintf(title,"Mass of tb Pair | Top WP %i B WP %i SubB WP %i",it+1,ib+1,isb+1);
+   hist_tbmass_md_DeepAK8_alphadn[it][ib][isb] = new TH1D(name,title,nvwpmbin,wpmbins);
+   hist_tbmass_md_DeepAK8_alphadn[it][ib][isb]->Sumw2();
+   
+   sprintf(name,"tb_Mass_DeepAK8MD_toptag%i_btag%i_subbtag%i_betaup",it,ib,isb);
+   sprintf(title,"Mass of tb Pair | Top WP %i B WP %i SubB WP %i",it+1,ib+1,isb+1);
+   hist_tbmass_md_DeepAK8_betaup[it][ib][isb] = new TH1D(name,title,nvwpmbin,wpmbins);
+   hist_tbmass_md_DeepAK8_betaup[it][ib][isb]->Sumw2();
+   
+   sprintf(name,"tb_Mass_DeepAK8MD_toptag%i_btag%i_subbtag%i_betadn",it,ib,isb);
+   sprintf(title,"Mass of tb Pair | Top WP %i B WP %i SubB WP %i",it+1,ib+1,isb+1);
+   hist_tbmass_md_DeepAK8_betadn[it][ib][isb] = new TH1D(name,title,nvwpmbin,wpmbins);
+   hist_tbmass_md_DeepAK8_betadn[it][ib][isb]->Sumw2();
    
    for(int ipt=0; ipt<ntopptbins; ipt++){
 	sprintf(name,"tb_Mass_DeepAK8MD_toptag%i_btag%i_subbtag%i_Topptbin%i",it,ib,isb,ipt);
@@ -2476,6 +2319,16 @@ for(int it=0; it<ntoptag_DAK8; it++){
 	   sprintf(title,"Mass of tb Pair | Top WP %i B WP %i SubB WP %i JES %i (Down)",it+1,ib+1,isb+1,ijes+1);
 	   hist_tbmass_md_DeepAK8_JES_dn[it][ib][isb][ijes] = new TH1D(name,title,nvwpmbin,wpmbins);
 	   hist_tbmass_md_DeepAK8_JES_dn[it][ib][isb][ijes]->Sumw2();	  
+	   
+	   sprintf(name,"tb_Mass_DeepAK8MD_toptag%i_btag%i_subbtag%i_JES%i_up2",it,ib,isb,ijes+1);
+	   sprintf(title,"Mass of tb Pair | Top WP %i B WP %i SubB WP %i JES %i (Up)",it+1,ib+1,isb+1,ijes+1);
+	   hist_tbmass_md_DeepAK8_JES_up_2[it][ib][isb][ijes] = new TH1D(name,title,nvwpmbin,wpmbins);
+	   hist_tbmass_md_DeepAK8_JES_up_2[it][ib][isb][ijes]->Sumw2();
+	  
+	   sprintf(name,"tb_Mass_DeepAK8MD_toptag%i_btag%i_subbtag%i_JES%i_dn2",it,ib,isb,ijes+1);
+	   sprintf(title,"Mass of tb Pair | Top WP %i B WP %i SubB WP %i JES %i (Down)",it+1,ib+1,isb+1,ijes+1);
+	   hist_tbmass_md_DeepAK8_JES_dn_2[it][ib][isb][ijes] = new TH1D(name,title,nvwpmbin,wpmbins);
+	   hist_tbmass_md_DeepAK8_JES_dn_2[it][ib][isb][ijes]->Sumw2();	  
 	}
    
    sprintf(name,"tb_Pt_DeepAK8MD_toptag%i_btag%i_subbtag%i",it,ib,isb);
@@ -2658,6 +2511,16 @@ for(int it=0; it<ntoptag_DAK8; it++){
 	sprintf(title,"BJet P_{T} Top WP %i B WP %i SubB WP %i Eta %i",it+1,ib+1,isb+1,ieta+1);
 	hist_bjetpt_sel_md_DeepAK8_beta[it][ib][isb][ieta] = new TH1D(name,title,noptbins,ptbins);
 	hist_bjetpt_sel_md_DeepAK8_beta[it][ib][isb][ieta]->Sumw2();
+    
+    sprintf(name,"tb_Mass_DeepAK8MD_toptag%i_btag%i_subbtag%i_Eta%i_1",it,ib,isb,ieta+1);
+    sprintf(title,"Mass of tb Pair | Top WP %i B WP %i SubB WP %i",it+1,ib+1,isb+1);
+    hist_tbmass_md_DeepAK8_eta1[it][ib][isb][ieta] = new TH1D(name,title,nvwpmbin,wpmbins);
+    hist_tbmass_md_DeepAK8_eta1[it][ib][isb][ieta]->Sumw2();
+    
+    sprintf(name,"tb_Mass_DeepAK8MD_toptag%i_btag%i_subbtag%i_Eta%i_2",it,ib,isb,ieta+1);
+    sprintf(title,"Mass of tb Pair | Top WP %i B WP %i SubB WP %i",it+1,ib+1,isb+1);
+    hist_tbmass_md_DeepAK8_eta2[it][ib][isb][ieta] = new TH1D(name,title,nvwpmbin,wpmbins);
+    hist_tbmass_md_DeepAK8_eta2[it][ib][isb][ieta]->Sumw2();
     
 	}
     
@@ -3296,6 +3159,236 @@ for(int ieta=0; ieta<netabins; ieta++){
 rvar.ResizeTo(1,5);//new TMatrixD(1,5);
 cvar.ResizeTo(5,1) ;//new TMatrixD(5,1);
 
+err2.ResizeTo(3,1);
+err_pol2.ResizeTo(1,1);
+for(int ieta=0; ieta<netabins; ieta++){
+	cov_bpfrat_pol2[ieta].ResizeTo(3,3);
+	cov_bpfrat_val_pol2[ieta].ResizeTo(3,3);
+}
+rvar2.ResizeTo(1,3);//new TMatrixD(1,5);
+cvar2.ResizeTo(3,1) ;//new TMatrixD(5,1);
+
+// value assignement //
+
+#ifdef Anal_2016
+   
+   btagvalue = 0.8484; //0.9535; //tight 0.8484; // medium //csvv2 
+   btagvalue_deepCSV = 0.6321; //0.8953  ;//tight  0.6321; //medium // deepcsv 
+//   btagvalue_deepFlavB = 0.45; //0.7221; // 0.3093;  // medium	//deepflav
+   #ifdef B_Tight
+   btagvalue_deepFlavB = 0.70221;
+   #else
+   btagvalue_deepFlavB = 0.45;
+   #endif
+   
+   deepak8_cut = 0.929;    // 2016 0.5% mistag rate
+   deepak8_cut_md = 0.632; // 2016 0.5% mistag rate
+   
+   for(int ipt=0; ipt<noAK8ptbins; ipt++){
+		DeepAK8_SF[ipt] = DeepAK8_SF_16[ipt];
+		DeepAK8_MD_SF[ipt] = DeepAK8_MD_SF_16[ipt];
+		DeepAK8_MD_SF_up[ipt] = DeepAK8_MD_SF_16_up[ipt];
+		DeepAK8_MD_SF_dn[ipt] = DeepAK8_MD_SF_16_dn[ipt];
+	}
+	
+  for(int ij=0; ij<2; ij++){
+	 
+	 #ifdef B_Tight 
+	  for(int imsd=0; imsd<nsdmassbins; imsd++){
+		cor_b_sdmass_mc[ij][imsd] = cor_b_tight_sdmass_mc_16[ij][imsd];
+		cor_b_sdmass_data[ij][imsd] = cor_b_tight_sdmass_data_16[ij][imsd];
+		}
+	 #else 
+	 for(int imsd=0; imsd<nsdmassbins; imsd++){
+		cor_b_sdmass_mc[ij][imsd] = cor_b_sdmass_mc_16[ij][imsd];
+		cor_b_sdmass_data[ij][imsd] = cor_b_sdmass_data_16[ij][imsd];
+		}
+	 #endif	
+	 }	
+
+  for(int ieta=0; ieta<netabins; ieta++){
+	  
+	 for(int ivar=0; ivar<5; ivar++){
+		for(int jvar=0; jvar<5; jvar++){
+			
+			COV_sig_data[ieta][ivar][jvar] = COV_sig_data_16[ieta][ivar][jvar] ;
+			COV_sig_mc[ieta][ivar][jvar] = COV_sig_mc_16[ieta][ivar][jvar] ;
+			COV_val_data[ieta][ivar][jvar] = COV_val_data_16[ieta][ivar][jvar] ;
+			COV_val_mc[ieta][ivar][jvar] = COV_val_mc_16[ieta][ivar][jvar] ;
+			
+			}
+		}
+		
+	 for(int ivar=0; ivar<3; ivar++){
+		for(int jvar=0; jvar<3; jvar++){	
+		
+			#ifdef B_Tight
+			
+			COV_sig_data_pol2[ieta][ivar][jvar] = COV_sig_data_pol2_16_btight[ieta][ivar][jvar] ;
+			COV_sig_mc_pol2[ieta][ivar][jvar] = COV_sig_mc_pol2_16_btight[ieta][ivar][jvar] ;
+			COV_val_data_pol2[ieta][ivar][jvar] = COV_val_data_pol2_16_btight[ieta][ivar][jvar] ;
+			COV_val_mc_pol2[ieta][ivar][jvar] = COV_val_mc_pol2_16_btight[ieta][ivar][jvar] ;
+			
+			#else
+			
+			COV_sig_data_pol2[ieta][ivar][jvar] = COV_sig_data_pol2_16[ieta][ivar][jvar] ;
+			COV_sig_mc_pol2[ieta][ivar][jvar] = COV_sig_mc_pol2_16[ieta][ivar][jvar] ;
+			COV_val_data_pol2[ieta][ivar][jvar] = COV_val_data_pol2_16[ieta][ivar][jvar] ;
+			COV_val_mc_pol2[ieta][ivar][jvar] = COV_val_mc_pol2_16[ieta][ivar][jvar] ;
+			
+			#endif
+			
+			}
+		}	
+		
+	 }
+   
+   for(int imsd=0; imsd<ntopsdmassbins; imsd++){
+		for(int ht=0; ht<nohtbins; ht++){
+			if(isQCD){
+				trig_weight_factors[imsd][ht] = trig_weight_factors_2016_QCD[imsd][ht];
+			}
+			if(isTTBar){
+				trig_weight_factors[imsd][ht] = trig_weight_factors_2016_TT[imsd][ht];
+			}
+			if(isST){
+				trig_weight_factors[imsd][ht] = trig_weight_factors_2016_ST[imsd][ht];
+			}
+		}
+	}
+	 
+#endif
+	
+#ifdef Anal_2017
+   
+   btagvalue = 0.8838;//0.9693;//tight 0.8838; //csvv2 medium
+   btagvalue_deepCSV =  0.4941;//0.65;//myvalue 0.8001;// tight 0.4941; // deepcsv medium
+   btagvalue_deepFlavB = 0.6; //0.6; // my final value //0.3033; //0.55;// my value 0.7489; // tight 0.3033; //deepflav medium
+   
+   deepak8_cut = 0.884;    // 2017 0.5% mistag rate
+   deepak8_cut_md = 0.554; // 2017 0.5% mistag rate
+   
+   for(int ipt=0; ipt<noAK8ptbins; ipt++){
+		DeepAK8_SF[ipt] = DeepAK8_SF_17[ipt];
+		DeepAK8_MD_SF[ipt] = DeepAK8_MD_SF_17[ipt];
+		DeepAK8_MD_SF_up[ipt] = DeepAK8_MD_SF_17_up[ipt];
+		DeepAK8_MD_SF_dn[ipt] = DeepAK8_MD_SF_17_dn[ipt];
+	}
+	
+   for(int ij=0; ij<2; ij++){
+	 for(int imsd=0; imsd<nsdmassbins; imsd++){
+		cor_b_sdmass_mc[ij][imsd] = cor_b_sdmass_mc_17[ij][imsd];
+		cor_b_sdmass_data[ij][imsd] = cor_b_sdmass_data_17[ij][imsd];
+		}
+	 }		
+   
+   for(int ieta=0; ieta<netabins; ieta++){
+	   
+	 for(int ivar=0; ivar<5; ivar++){
+		for(int jvar=0; jvar<5; jvar++){
+			
+			COV_sig_data[ieta][ivar][jvar] = COV_sig_data_17[ieta][ivar][jvar] ;
+			COV_sig_mc[ieta][ivar][jvar] = COV_sig_mc_17[ieta][ivar][jvar] ;
+			COV_val_data[ieta][ivar][jvar] = COV_val_data_17[ieta][ivar][jvar] ;
+			COV_val_mc[ieta][ivar][jvar] = COV_val_mc_17[ieta][ivar][jvar] ;
+			
+			}
+		}
+		
+	 for(int ivar=0; ivar<3; ivar++){
+		for(int jvar=0; jvar<3; jvar++){	
+		
+			COV_sig_data_pol2[ieta][ivar][jvar] = COV_sig_data_pol2_17[ieta][ivar][jvar] ;
+			COV_sig_mc_pol2[ieta][ivar][jvar] = COV_sig_mc_pol2_17[ieta][ivar][jvar] ;
+			COV_val_data_pol2[ieta][ivar][jvar] = COV_val_data_pol2_17[ieta][ivar][jvar] ;
+			COV_val_mc_pol2[ieta][ivar][jvar] = COV_val_mc_pol2_17[ieta][ivar][jvar] ;
+			
+			}
+		}
+			
+	 }
+   
+    for(int imsd=0; imsd<ntopsdmassbins; imsd++){
+		for(int ht=0; ht<nohtbins; ht++){
+			if(isQCD){
+				trig_weight_factors[imsd][ht] = trig_weight_factors_2017_QCD[imsd][ht];
+			}
+			if(isTTBar){
+				trig_weight_factors[imsd][ht] = trig_weight_factors_2017_TT[imsd][ht];
+			}
+			if(isST){
+				trig_weight_factors[imsd][ht] = trig_weight_factors_2017_ST[imsd][ht];
+			}
+		}
+	}
+   
+   	
+#endif
+
+#ifdef Anal_2018
+   btagvalue = 0.8838; 
+   btagvalue_deepCSV = 0.4184; //0.7527  ;//tight  0.4184; //medium // deepcsv 
+   btagvalue_deepFlavB = 0.6;  //0.7264; ;//tight   0.2770;  // medium	//deepflav
+   
+   deepak8_cut = 0.922;      // 2018 0.5% mistag rate
+   deepak8_cut_md = 0.685;   // 2018 0.5% mistag rate
+   
+   for(int ipt=0; ipt<noAK8ptbins; ipt++){
+		DeepAK8_SF[ipt] = DeepAK8_SF_18[ipt];
+		DeepAK8_MD_SF[ipt] = DeepAK8_MD_SF_18[ipt];
+		DeepAK8_MD_SF_up[ipt] = DeepAK8_MD_SF_18_up[ipt];
+		DeepAK8_MD_SF_dn[ipt] = DeepAK8_MD_SF_18_dn[ipt];
+	}
+   
+   for(int ij=0; ij<2; ij++){
+	 for(int imsd=0; imsd<nsdmassbins; imsd++){
+		cor_b_sdmass_mc[ij][imsd] = cor_b_sdmass_mc_18[ij][imsd];
+		cor_b_sdmass_data[ij][imsd] = cor_b_sdmass_data_18[ij][imsd];
+		}
+	 }	 
+   
+   for(int ieta=0; ieta<netabins; ieta++){
+	   
+	 for(int ivar=0; ivar<5; ivar++){
+		for(int jvar=0; jvar<5; jvar++){
+			
+			COV_sig_data[ieta][ivar][jvar] = COV_sig_data_18[ieta][ivar][jvar] ;
+			COV_sig_mc[ieta][ivar][jvar] = COV_sig_mc_18[ieta][ivar][jvar] ;
+			COV_val_data[ieta][ivar][jvar] = COV_val_data_18[ieta][ivar][jvar] ;
+			COV_val_mc[ieta][ivar][jvar] = COV_val_mc_18[ieta][ivar][jvar] ;
+			
+			}
+		}
+		
+	for(int ivar=0; ivar<3; ivar++){
+		for(int jvar=0; jvar<3; jvar++){	
+		
+			COV_sig_data_pol2[ieta][ivar][jvar] = COV_sig_data_pol2_18[ieta][ivar][jvar] ;
+			COV_sig_mc_pol2[ieta][ivar][jvar] = COV_sig_mc_pol2_18[ieta][ivar][jvar] ;
+			COV_val_data_pol2[ieta][ivar][jvar] = COV_val_data_pol2_18[ieta][ivar][jvar] ;
+			COV_val_mc_pol2[ieta][ivar][jvar] = COV_val_mc_pol2_18[ieta][ivar][jvar] ;
+			
+			}
+		}
+		
+	 }
+   
+   for(int imsd=0; imsd<ntopsdmassbins; imsd++){
+		for(int ht=0; ht<nohtbins; ht++){
+			if(isQCD){
+				trig_weight_factors[imsd][ht] = trig_weight_factors_2018_QCD[imsd][ht];
+			}
+			if(isTT){
+				trig_weight_factors[imsd][ht] = trig_weight_factors_2018_TT[imsd][ht];
+			}
+			if(isST){
+				trig_weight_factors[imsd][ht] = trig_weight_factors_2018_ST[imsd][ht];
+			}
+		}
+	}
+   
+#endif
+
 
 if(!isMC || (isMC && (isTTBar || isST))){
 
@@ -3305,36 +3398,61 @@ bpfrat->SetParameters(-1.85166e+01,-4.56084e-01,5.20671e+01,4.91319e-01);
 #ifdef Anal_2017
 
 for(int ieta=0; ieta<netabins; ieta++){
-	sprintf(name,"BTagger_PFRate_SR_Eta%i",ieta+1);
-	if(ieta==2){
-		bpfrat_beta[ieta]= new TF1(name,Pol0,500,2000,1);
-	}
-	else{
-		bpfrat_beta[ieta]= new TF1(name,BiFun,500,3000,5);
-		}
-		
-	if(ieta==0) { bpfrat_beta[ieta]->SetParameters(9.19642e+02,4.30497e-02,2.21115e-06,9.94336e-08,-2.80334e-08); }
-	if(ieta==1) { bpfrat_beta[ieta]->SetParameters(9.19936e+02,3.57853e-02,4.15636e-06,7.47582e-08,-3.15999e-08); }
-	if(ieta==2) { bpfrat_beta[ieta]->SetParameter(0,2.82991e-02); }
 	
+	sprintf(name,"BTagger_PFRate_SR_Eta%i",ieta+1);
+	bpfrat_beta[ieta]= new TF1(name,BiFun,1000,5000,5);
+  	
+  	if(ieta==0) { bpfrat_beta[ieta]->SetParameters(2.32358e+03,4.16906e-02,-5.86470e-06,4.04857e-09,-2.52014e-09); }
+	if(ieta==1) { bpfrat_beta[ieta]->SetParameters(2.33773e+03,3.47750e-02,-3.01114e-06,4.48931e-09,6.58976e-10); }
+	if(ieta==2) { bpfrat_beta[ieta]->SetParameters(2.40356e+03,2.69763e-02,-4.83897e-06,-2.48385e-09,2.76093e-09); }
+
 	for(int ipar=0; ipar<5; ipar++){
 		sprintf(name,"dFun_%i_Eta%i",ipar,ieta+1);
-		if(ipar==0){fun_bdF[ipar][ieta]= new TF1(name,bdF0,500,3000,5);}
-		if(ipar==1){fun_bdF[ipar][ieta]= new TF1(name,bdF1,500,3000,5);}
-		if(ipar==2){fun_bdF[ipar][ieta]= new TF1(name,bdF2,500,3000,5);}
-		if(ipar==3){fun_bdF[ipar][ieta]= new TF1(name,bdF3,500,3000,5);}
-		if(ipar==4){fun_bdF[ipar][ieta]= new TF1(name,bdF4,500,3000,5);}
-	}
-	for(int ipar=0; ipar<5; ipar++){
-		if(ieta==0){ fun_bdF[ipar][ieta]->SetParameters(9.19642e+02,4.30497e-02,2.21115e-06,9.94336e-08,-2.80334e-08); }
-		if(ieta==1){ fun_bdF[ipar][ieta]->SetParameters(9.19936e+02,3.57853e-02,4.15636e-06,7.47582e-08,-3.15999e-08); }
-		if(ieta==2){ fun_bdF[ipar][ieta]->SetParameter(0,2.82991e-02); }
+		if(ipar==0){fun_bdF[ipar][ieta]= new TF1(name,bdF0,1000,5000,5);}
+		if(ipar==1){fun_bdF[ipar][ieta]= new TF1(name,bdF1,1000,5000,5);}
+		if(ipar==2){fun_bdF[ipar][ieta]= new TF1(name,bdF2,1000,5000,5);}
+		if(ipar==3){fun_bdF[ipar][ieta]= new TF1(name,bdF3,1000,5000,5);}
+		if(ipar==4){fun_bdF[ipar][ieta]= new TF1(name,bdF4,1000,5000,5);}
 	}
 	
+	for(int ipar=0; ipar<5; ipar++){
+	
+		if(ieta==0){ fun_bdF[ipar][ieta]->SetParameters(2.32358e+03,4.16906e-02,-5.86470e-06,4.04857e-09,-2.52014e-09); }
+		if(ieta==1){ fun_bdF[ipar][ieta]->SetParameters(2.33773e+03,3.47750e-02,-3.01114e-06,4.48931e-09,6.58976e-10); }
+		if(ieta==2){ fun_bdF[ipar][ieta]->SetParameters(2.40356e+03,2.69763e-02,-4.83897e-06,-2.48385e-09,2.76093e-09); }
+	}
 	
 	for(int ipar=0; ipar<5; ipar++){
 		for(int jpar=0; jpar<5; jpar++){
 			cov_bpfrat_beta[ieta](ipar,jpar) = COV_sig_data[ieta][ipar][jpar];
+		}
+	}
+	
+	sprintf(name,"BTagger_PFRate_Pol2_SR_Eta%i",ieta+1);
+	bpfrat_pol2[ieta]= new TF1(name,Pol2,1000,5000,3);
+	
+	if(ieta==0) { bpfrat_pol2[ieta]->SetParameters(6.74291e-02,-1.30191e-05,7.34549e-10); }
+	if(ieta==1) { bpfrat_pol2[ieta]->SetParameters(5.93216e-02,-1.58721e-05,2.27318e-09); }
+	if(ieta==2) { bpfrat_pol2[ieta]->SetParameters(3.56435e-02,-5.45445e-06,7.73411e-10); }
+  	
+	
+	for(int ipar=0; ipar<3; ipar++){
+		sprintf(name,"dFun_pol2_%i_Eta%i",ipar,ieta+1);
+		if(ipar==0){fun_bdF_pol2[ipar][ieta]= new TF1(name,bdF0_pol2,1000,5000,3);}
+		if(ipar==1){fun_bdF_pol2[ipar][ieta]= new TF1(name,bdF1_pol2,1000,5000,3);}
+		if(ipar==2){fun_bdF_pol2[ipar][ieta]= new TF1(name,bdF2_pol2,1000,5000,3);}
+	}
+	
+	for(int ipar=0; ipar<3; ipar++){
+	
+		if(ieta==0){ fun_bdF_pol2[ipar][ieta]->SetParameters(6.74291e-02,-1.30191e-05,7.34549e-10); }
+		if(ieta==1){ fun_bdF_pol2[ipar][ieta]->SetParameters(5.93216e-02,-1.58721e-05,2.27318e-09); }
+		if(ieta==2){ fun_bdF_pol2[ipar][ieta]->SetParameters(3.56435e-02,-5.45445e-06,7.73411e-10); }
+	}
+	
+	for(int ipar=0; ipar<3; ipar++){
+		for(int jpar=0; jpar<3; jpar++){
+			cov_bpfrat_pol2[ieta](ipar,jpar) = COV_sig_data_pol2[ieta][ipar][jpar];
 		}
 	}
    
@@ -3344,29 +3462,61 @@ bpfrat_val = new TF1("BTagger_PFRate_VR",MikkoFunc1,500,2000,4);
 bpfrat_val->SetParameters(-6.12117e+00,-4.51636e-01,1.71053e+01,2.05272e-01);
 
 for(int ieta=0; ieta<netabins; ieta++){
+	
 	sprintf(name,"BTagger_PFRate_VR_Eta%i",ieta+1);
-	bpfrat_val_beta[ieta]= new TF1(name,BiFun,500,3000,5);
-	if(ieta==0) { bpfrat_val_beta[ieta]->SetParameters(9.21574e+02,1.59883e-02,1.27991e-05,3.64022e-08,-1.70595e-08); }
-	if(ieta==1) { bpfrat_val_beta[ieta]->SetParameters(9.23578e+02,1.61573e-02,1.96964e-05,4.31348e-08,-3.15592e-08); }
-	if(ieta==2) { bpfrat_val_beta[ieta]->SetParameters(9.27653e+02,1.92117e-02,2.44121e-05,3.00314e-08,-4.29574e-08); }
+	bpfrat_val_beta[ieta]= new TF1(name,BiFun,1000,5000,5);
+	
+	if(ieta==0) { bpfrat_val_beta[ieta]->SetParameters(2.37490e+03,1.64886e-02,2.05504e-06,1.00313e-09,-2.40608e-09); }
+	if(ieta==1) { bpfrat_val_beta[ieta]->SetParameters(1.60759e+03,1.45295e-02,7.95157e-07,-3.10981e-10,-7.35494e-11); }
+	if(ieta==2) { bpfrat_val_beta[ieta]->SetParameters(1.75466e+03,1.48627e-02,1.55269e-06,3.36807e-09,-4.34977e-10); }
 	
 	for(int ipar=0; ipar<5; ipar++){
 		sprintf(name,"dFun_%i_Eta%i",ipar,ieta+1);
-		if(ipar==0){fun_val_bdF[ipar][ieta]= new TF1(name,bdF0,500,3000,5);}
-		if(ipar==1){fun_val_bdF[ipar][ieta]= new TF1(name,bdF1,500,3000,5);}
-		if(ipar==2){fun_val_bdF[ipar][ieta]= new TF1(name,bdF2,500,3000,5);}
-		if(ipar==3){fun_val_bdF[ipar][ieta]= new TF1(name,bdF3,500,3000,5);}
-		if(ipar==4){fun_val_bdF[ipar][ieta]= new TF1(name,bdF4,500,3000,5);}
+		if(ipar==0){fun_val_bdF[ipar][ieta]= new TF1(name,bdF0,1000,5000,5);}
+		if(ipar==1){fun_val_bdF[ipar][ieta]= new TF1(name,bdF1,1000,5000,5);}
+		if(ipar==2){fun_val_bdF[ipar][ieta]= new TF1(name,bdF2,1000,5000,5);}
+		if(ipar==3){fun_val_bdF[ipar][ieta]= new TF1(name,bdF3,1000,5000,5);}
+		if(ipar==4){fun_val_bdF[ipar][ieta]= new TF1(name,bdF4,1000,5000,5);}
 	}
+	
 	for(int ipar=0; ipar<5; ipar++){
-		if(ieta==0){ fun_val_bdF[ipar][ieta]->SetParameters(9.21574e+02,1.59883e-02,1.27991e-05,3.64022e-08,-1.70595e-08); }
-		if(ieta==1){ fun_val_bdF[ipar][ieta]->SetParameters(9.23578e+02,1.61573e-02,1.96964e-05,4.31348e-08,-3.15592e-08); }
-		if(ieta==2){ fun_val_bdF[ipar][ieta]->SetParameters(9.27653e+02,1.92117e-02,2.44121e-05,3.00314e-08,-4.29574e-08); }
+		
+		if(ieta==0){ fun_val_bdF[ipar][ieta]->SetParameters(2.37490e+03,1.64886e-02,2.05504e-06,1.00313e-09,-2.40608e-09); }
+		if(ieta==1){ fun_val_bdF[ipar][ieta]->SetParameters(1.60759e+03,1.45295e-02,7.95157e-07,-3.10981e-10,-7.35494e-11); }
+		if(ieta==2){ fun_val_bdF[ipar][ieta]->SetParameters(1.75466e+03,1.48627e-02,1.55269e-06,3.36807e-09,-4.34977e-10); }
 	}
 	
 	for(int ipar=0; ipar<5; ipar++){
 		for(int jpar=0; jpar<5; jpar++){
 			cov_bpfrat_val_beta[ieta](ipar,jpar) = COV_val_data[ieta][ipar][jpar];
+		}
+	}
+	
+	sprintf(name,"BTagger_PFRate_Pol2_VR_Eta%i",ieta+1);
+	bpfrat_val_pol2[ieta]= new TF1(name,Pol2,1000,5000,3);
+	
+	if(ieta==0) { bpfrat_val_pol2[ieta]->SetParameters(1.37009e-02,1.76742e-06,-3.39836e-10); }
+	if(ieta==1) { bpfrat_val_pol2[ieta]->SetParameters(1.29249e-02,1.14622e-06,-9.56192e-11); }
+	if(ieta==2) { bpfrat_val_pol2[ieta]->SetParameters(1.35903e-02,1.00618e-06,-8.49165e-11); }
+  	
+	
+	for(int ipar=0; ipar<3; ipar++){
+		sprintf(name,"dFun_val_pol2_%i_Eta%i",ipar,ieta+1);
+		if(ipar==0){fun_val_bdF_pol2[ipar][ieta]= new TF1(name,bdF0_pol2,1000,5000,3);}
+		if(ipar==1){fun_val_bdF_pol2[ipar][ieta]= new TF1(name,bdF1_pol2,1000,5000,3);}
+		if(ipar==2){fun_val_bdF_pol2[ipar][ieta]= new TF1(name,bdF2_pol2,1000,5000,3);}
+	}
+	
+	for(int ipar=0; ipar<3; ipar++){
+	
+		if(ieta==0){ fun_val_bdF_pol2[ipar][ieta]->SetParameters(1.37009e-02,1.76742e-06,-3.39836e-10); }
+		if(ieta==1){ fun_val_bdF_pol2[ipar][ieta]->SetParameters(1.29249e-02,1.14622e-06,-9.56192e-11); }
+		if(ieta==2){ fun_val_bdF_pol2[ipar][ieta]->SetParameters(1.35903e-02,1.00618e-06,-8.49165e-11); }
+	}
+	
+	for(int ipar=0; ipar<3; ipar++){
+		for(int jpar=0; jpar<3; jpar++){
+			cov_bpfrat_val_pol2[ieta](ipar,jpar) = COV_val_data_pol2[ieta][ipar][jpar];
 		}
 	}
 	
@@ -3377,30 +3527,26 @@ for(int ieta=0; ieta<netabins; ieta++){
 #ifdef Anal_2018
 
 for(int ieta=0; ieta<netabins; ieta++){
+	
 	sprintf(name,"BTagger_PFRate_SR_Eta%i",ieta+1);
-	if(ieta==2){
-		bpfrat_beta[ieta]= new TF1(name,Pol0,500,2000,1);
-	}
-	else{
-		bpfrat_beta[ieta]= new TF1(name,BiFun,500,3000,5);
-		}
+	bpfrat_beta[ieta]= new TF1(name,BiFun,1000,5000,5);
 		
-	if(ieta==0) { bpfrat_beta[ieta]->SetParameters(9.18023e+02,4.00929e-02,-2.25060e-05,5.23070e-08,5.74881e-09); }
-	if(ieta==1) { bpfrat_beta[ieta]->SetParameters(9.18810e+02,3.26960e-02,-6.10167e-06,8.89880e-08,-8.49323e-09); }
-	if(ieta==2) { bpfrat_beta[ieta]->SetParameter(0,2.84248e-02); }
+	if(ieta==0) { bpfrat_beta[ieta]->SetParameters(2.29350e+03,3.86563e-02,-1.07188e-05,3.15084e-09,2.21607e-09); }
+	if(ieta==1) { bpfrat_beta[ieta]->SetParameters(2.33510e+03,3.35633e-02,-2.33749e-06,7.60051e-09,5.62973e-11); }
+	if(ieta==2) { bpfrat_beta[ieta]->SetParameters(2.40811e+03,2.63507e-02,-4.45930e-06,-3.34820e-10,2.91961e-09); }
 	
 	for(int ipar=0; ipar<5; ipar++){
 		sprintf(name,"dFun_%i_Eta%i",ipar,ieta+1);
-		if(ipar==0){fun_bdF[ipar][ieta]= new TF1(name,bdF0,500,3000,5);}
-		if(ipar==1){fun_bdF[ipar][ieta]= new TF1(name,bdF1,500,3000,5);}
-		if(ipar==2){fun_bdF[ipar][ieta]= new TF1(name,bdF2,500,3000,5);}
-		if(ipar==3){fun_bdF[ipar][ieta]= new TF1(name,bdF3,500,3000,5);}
-		if(ipar==4){fun_bdF[ipar][ieta]= new TF1(name,bdF4,500,3000,5);}
+		if(ipar==0){fun_bdF[ipar][ieta]= new TF1(name,bdF0,1000,5000,5);}
+		if(ipar==1){fun_bdF[ipar][ieta]= new TF1(name,bdF1,1000,5000,5);}
+		if(ipar==2){fun_bdF[ipar][ieta]= new TF1(name,bdF2,1000,5000,5);}
+		if(ipar==3){fun_bdF[ipar][ieta]= new TF1(name,bdF3,1000,5000,5);}
+		if(ipar==4){fun_bdF[ipar][ieta]= new TF1(name,bdF4,1000,5000,5);}
 	}
 	for(int ipar=0; ipar<5; ipar++){
-		if(ieta==0){ fun_bdF[ipar][ieta]->SetParameters(9.18023e+02,4.00929e-02,-2.25060e-05,5.23070e-08,5.74881e-09); }
-		if(ieta==1){ fun_bdF[ipar][ieta]->SetParameters(9.18810e+02,3.26960e-02,-6.10167e-06,8.89880e-08,-8.49323e-09); }
-		if(ieta==2){ fun_bdF[ipar][ieta]->SetParameter(0,2.84248e-02); }
+		if(ieta==0){ fun_bdF[ipar][ieta]->SetParameters(2.29350e+03,3.86563e-02,-1.07188e-05,3.15084e-09,2.21607e-09); }
+		if(ieta==1){ fun_bdF[ipar][ieta]->SetParameters(2.33510e+03,3.35633e-02,-2.33749e-06,7.60051e-09,5.62973e-11); }
+		if(ieta==2){ fun_bdF[ipar][ieta]->SetParameters(2.40811e+03,2.63507e-02,-4.45930e-06,-3.34820e-10,2.91961e-09); }
 	}
 	
 	
@@ -3410,6 +3556,36 @@ for(int ieta=0; ieta<netabins; ieta++){
 		}
 	}
    
+   	
+	sprintf(name,"BTagger_PFRate_Pol2_SR_Eta%i",ieta+1);
+	bpfrat_pol2[ieta]= new TF1(name,Pol2,1000,5000,3);
+	
+	if(ieta==0) { bpfrat_pol2[ieta]->SetParameters(7.84117e-02,-2.35057e-05,2.67991e-09); }
+	if(ieta==1) { bpfrat_pol2[ieta]->SetParameters(6.61623e-02,-2.14266e-05,3.16112e-09); }
+	if(ieta==2) { bpfrat_pol2[ieta]->SetParameters(4.24171e-02,-1.08117e-05,1.71723e-09); }
+  	
+	
+	for(int ipar=0; ipar<3; ipar++){
+		sprintf(name,"dFun_pol2_%i_Eta%i",ipar,ieta+1);
+		if(ipar==0){fun_bdF_pol2[ipar][ieta]= new TF1(name,bdF0_pol2,1000,5000,3);}
+		if(ipar==1){fun_bdF_pol2[ipar][ieta]= new TF1(name,bdF1_pol2,1000,5000,3);}
+		if(ipar==2){fun_bdF_pol2[ipar][ieta]= new TF1(name,bdF2_pol2,1000,5000,3);}
+	}
+	
+	for(int ipar=0; ipar<3; ipar++){
+	
+		if(ieta==0){ fun_bdF_pol2[ipar][ieta]->SetParameters(7.84117e-02,-2.35057e-05,2.67991e-09); }
+		if(ieta==1){ fun_bdF_pol2[ipar][ieta]->SetParameters(6.61623e-02,-2.14266e-05,3.16112e-09); }
+		if(ieta==2){ fun_bdF_pol2[ipar][ieta]->SetParameters(4.24171e-02,-1.08117e-05,1.71723e-09); }
+	}
+	
+	for(int ipar=0; ipar<3; ipar++){
+		for(int jpar=0; jpar<3; jpar++){
+			cov_bpfrat_pol2[ieta](ipar,jpar) = COV_sig_data_pol2[ieta][ipar][jpar];
+		}
+	}
+ 
+   
 }
 
 bpfrat_val = new TF1("BTagger_PFRate_VR",MikkoFunc1,500,2000,4);
@@ -3418,22 +3594,22 @@ bpfrat_val->SetParameters(-6.12117e+00,-4.51636e-01,1.71053e+01,2.05272e-01);
 for(int ieta=0; ieta<netabins; ieta++){
 	sprintf(name,"BTagger_PFRate_VR_Eta%i",ieta+1);
 	bpfrat_val_beta[ieta]= new TF1(name,BiFun,500,2000,5);
-	if(ieta==0) { bpfrat_val_beta[ieta]->SetParameters(9.21838e+02,1.49672e-02,1.16194e-05,4.13458e-08,-1.51338e-08); }
-	if(ieta==1) { bpfrat_val_beta[ieta]->SetParameters(9.23153e+02,1.52827e-02,1.60653e-05,3.17830e-08,-2.22326e-08); }
-	if(ieta==2) { bpfrat_val_beta[ieta]->SetParameters(9.28351e+02,1.76019e-02,2.04060e-05,2.31925e-08,-4.59519e-08); }
+	if(ieta==0) { bpfrat_val_beta[ieta]->SetParameters(2.37771e+03,1.57059e-02,1.52264e-06,8.91914e-10,-2.00822e-09); }
+	if(ieta==1) { bpfrat_val_beta[ieta]->SetParameters(1.60470e+03,1.38313e-02,1.54416e-07,-2.40379e-09,5.25140e-11); }
+	if(ieta==2) { bpfrat_val_beta[ieta]->SetParameters(1.88921e+03,1.41138e-02,6.94243e-07,-8.17460e-10,-2.58415e-11); }
 	
 	for(int ipar=0; ipar<5; ipar++){
 		sprintf(name,"dFun_%i_Eta%i",ipar,ieta+1);
-		if(ipar==0){fun_val_bdF[ipar][ieta]= new TF1(name,bdF0,500,3000,5);}
-		if(ipar==1){fun_val_bdF[ipar][ieta]= new TF1(name,bdF1,500,3000,5);}
-		if(ipar==2){fun_val_bdF[ipar][ieta]= new TF1(name,bdF2,500,3000,5);}
-		if(ipar==3){fun_val_bdF[ipar][ieta]= new TF1(name,bdF3,500,3000,5);}
-		if(ipar==4){fun_val_bdF[ipar][ieta]= new TF1(name,bdF4,500,3000,5);}
+		if(ipar==0){fun_val_bdF[ipar][ieta]= new TF1(name,bdF0,1000,5000,5);}
+		if(ipar==1){fun_val_bdF[ipar][ieta]= new TF1(name,bdF1,1000,5000,5);}
+		if(ipar==2){fun_val_bdF[ipar][ieta]= new TF1(name,bdF2,1000,5000,5);}
+		if(ipar==3){fun_val_bdF[ipar][ieta]= new TF1(name,bdF3,1000,5000,5);}
+		if(ipar==4){fun_val_bdF[ipar][ieta]= new TF1(name,bdF4,1000,5000,5);}
 	}
 	for(int ipar=0; ipar<5; ipar++){
-		if(ieta==0){ fun_val_bdF[ipar][ieta]->SetParameters(9.21838e+02,1.49672e-02,1.16194e-05,4.13458e-08,-1.51338e-08); }
-		if(ieta==1){ fun_val_bdF[ipar][ieta]->SetParameters(9.23153e+02,1.52827e-02,1.60653e-05,3.17830e-08,-2.22326e-08); }
-		if(ieta==2){ fun_val_bdF[ipar][ieta]->SetParameters(9.28351e+02,1.76019e-02,2.04060e-05,2.31925e-08,-4.59519e-08); }
+		if(ieta==0){ fun_val_bdF[ipar][ieta]->SetParameters(2.37771e+03,1.57059e-02,1.52264e-06,8.91914e-10,-2.00822e-09); }
+		if(ieta==1){ fun_val_bdF[ipar][ieta]->SetParameters(1.60470e+03,1.38313e-02,1.54416e-07,-2.40379e-09,5.25140e-11); }
+		if(ieta==2){ fun_val_bdF[ipar][ieta]->SetParameters(1.88921e+03,1.41138e-02,6.94243e-07,-8.17460e-10,-2.58415e-11); }
 	}
 	
 	for(int ipar=0; ipar<5; ipar++){
@@ -3441,7 +3617,35 @@ for(int ieta=0; ieta<netabins; ieta++){
 			cov_bpfrat_val_beta[ieta](ipar,jpar) = COV_val_data[ieta][ipar][jpar];
 		}
 	}
+   
+	sprintf(name,"BTagger_PFRate_Pol2_VR_Eta%i",ieta+1);
+	bpfrat_val_pol2[ieta]= new TF1(name,Pol2,1000,5000,3);
 	
+	if(ieta==0) { bpfrat_val_pol2[ieta]->SetParameters(1.40055e-02,1.18775e-06,-2.74695e-10); }
+	if(ieta==1) { bpfrat_val_pol2[ieta]->SetParameters(1.23360e-02,1.14762e-06,-1.71305e-10); }
+	if(ieta==2) { bpfrat_val_pol2[ieta]->SetParameters(1.17753e-02,1.47266e-06,-1.39420e-10); }
+  	
+	
+	for(int ipar=0; ipar<3; ipar++){
+		sprintf(name,"dFun_val_pol2_%i_Eta%i",ipar,ieta+1);
+		if(ipar==0){fun_val_bdF_pol2[ipar][ieta]= new TF1(name,bdF0_pol2,1000,5000,3);}
+		if(ipar==1){fun_val_bdF_pol2[ipar][ieta]= new TF1(name,bdF1_pol2,1000,5000,3);}
+		if(ipar==2){fun_val_bdF_pol2[ipar][ieta]= new TF1(name,bdF2_pol2,1000,5000,3);}
+	}
+	
+	for(int ipar=0; ipar<3; ipar++){
+	
+		if(ieta==0){ fun_val_bdF_pol2[ipar][ieta]->SetParameters(1.40055e-02,1.18775e-06,-2.74695e-10); }
+		if(ieta==1){ fun_val_bdF_pol2[ipar][ieta]->SetParameters(1.23360e-02,1.14762e-06,-1.71305e-10); }
+		if(ieta==2){ fun_val_bdF_pol2[ipar][ieta]->SetParameters(1.17753e-02,1.47266e-06,-1.39420e-10); }
+	}
+	
+	for(int ipar=0; ipar<3; ipar++){
+		for(int jpar=0; jpar<3; jpar++){
+			cov_bpfrat_val_pol2[ieta](ipar,jpar) = COV_val_data_pol2[ieta][ipar][jpar];
+		}
+	}
+   
 }
 
 #endif
@@ -3453,24 +3657,53 @@ bpfrat->SetParameters(-1.85166e+01,-4.56084e-01,5.20671e+01,4.91319e-01);
 
 for(int ieta=0; ieta<netabins; ieta++){
 	sprintf(name,"BTagger_PFRate_SR_Eta%i",ieta+1);
-	bpfrat_beta[ieta]= new TF1(name,BiFun,500,3000,5);	
-		
-	if(ieta==0) { bpfrat_beta[ieta]->SetParameters(9.19721e+02,1.15659e-01,1.26063e-04,1.05958e-07,-1.12334e-07); }
-	if(ieta==1) { bpfrat_beta[ieta]->SetParameters(9.20718e+02,1.41018e-01,1.53105e-04,6.22570e-08,-2.20901e-07); }
-	if(ieta==2) { bpfrat_beta[ieta]->SetParameters(9.25898e+02,1.60750e-01,1.98040e-04,-4.49154e-08,-4.89607e-07); }
+	bpfrat_beta[ieta]= new TF1(name,BiFun,1000,5000,5);	
+	
+	#ifdef B_Tight
+	
+	if(ieta==0) { bpfrat_beta[ieta]->SetParameters(2.29122e+03,4.77575e-02,-7.77317e-06,-6.32208e-09,-6.82567e-12); }
+	if(ieta==1) { bpfrat_beta[ieta]->SetParameters(2.32450e+03,5.43731e-02,-2.00072e-06,-4.40247e-09,2.30975e-11); }
+	if(ieta==2) { bpfrat_beta[ieta]->SetParameters(1.68235e+03,4.08733e-02,-1.36196e-06,-5.02670e-09,-5.07570e-10); }
+	
+	#else
+	/*
+	if(ieta==0) { bpfrat_beta[ieta]->SetParameters(1.51559e+03,9.42536e-02,2.13754e-05,-8.46763e-10,9.40950e-10); }
+	if(ieta==1) { bpfrat_beta[ieta]->SetParameters(1.63928e+03,1.11094e-01,3.27249e-05,-6.38342e-10,-8.62401e-09); }
+	if(ieta==2) { bpfrat_beta[ieta]->SetParameters(1.92606e+03,1.13426e-01,6.25910e-06,-3.19538e-08,-3.90406e-09); }
+	*/
+	if(ieta==0) { bpfrat_beta[ieta]->SetParameters(1.62883e+03,9.64815e-02,2.42160e-05,8.71399e-09,-1.46361e-09); }
+	if(ieta==1) { bpfrat_beta[ieta]->SetParameters(1.75281e+03,1.14714e-01,2.97073e-05,-7.18638e-09,-7.69304e-09); }
+	if(ieta==2) { bpfrat_beta[ieta]->SetParameters(1.88203e+03,1.13035e-01,5.61238e-06,-3.84968e-08,-3.41842e-09); }
+	
+	#endif
 	
 	for(int ipar=0; ipar<5; ipar++){
 		sprintf(name,"dFun_%i_Eta%i",ipar,ieta+1);
-		if(ipar==0){fun_bdF[ipar][ieta]= new TF1(name,bdF0,500,3000,5);}
-		if(ipar==1){fun_bdF[ipar][ieta]= new TF1(name,bdF1,500,3000,5);}
-		if(ipar==2){fun_bdF[ipar][ieta]= new TF1(name,bdF2,500,3000,5);}
-		if(ipar==3){fun_bdF[ipar][ieta]= new TF1(name,bdF3,500,3000,5);}
-		if(ipar==4){fun_bdF[ipar][ieta]= new TF1(name,bdF4,500,3000,5);}
+		if(ipar==0){fun_bdF[ipar][ieta]= new TF1(name,bdF0,1000,5000,5);}
+		if(ipar==1){fun_bdF[ipar][ieta]= new TF1(name,bdF1,1000,5000,5);}
+		if(ipar==2){fun_bdF[ipar][ieta]= new TF1(name,bdF2,1000,5000,5);}
+		if(ipar==3){fun_bdF[ipar][ieta]= new TF1(name,bdF3,1000,5000,5);}
+		if(ipar==4){fun_bdF[ipar][ieta]= new TF1(name,bdF4,1000,5000,5);}
 	}
 	for(int ipar=0; ipar<5; ipar++){
-		if(ieta==0){ fun_bdF[ipar][ieta]->SetParameters(9.19721e+02,1.15659e-01,1.26063e-04,1.05958e-07,-1.12334e-07); }
-		if(ieta==1){ fun_bdF[ipar][ieta]->SetParameters(9.20718e+02,1.41018e-01,1.53105e-04,6.22570e-08,-2.20901e-07); }
-		if(ieta==2){ fun_bdF[ipar][ieta]->SetParameters(9.25898e+02,1.60750e-01,1.98040e-04,-4.49154e-08,-4.89607e-07); }
+		
+		#ifdef B_Tight
+		
+		if(ieta==0){ fun_bdF[ipar][ieta]->SetParameters(2.29122e+03,4.77575e-02,-7.77317e-06,-6.32208e-09,-6.82567e-12); }
+		if(ieta==1){ fun_bdF[ipar][ieta]->SetParameters(2.32450e+03,5.43731e-02,-2.00072e-06,-4.40247e-09,2.30975e-11); }
+		if(ieta==2){ fun_bdF[ipar][ieta]->SetParameters(1.68235e+03,4.08733e-02,-1.36196e-06,-5.02670e-09,-5.07570e-10); }
+		
+		#else
+		/*
+		if(ieta==0){ fun_bdF[ipar][ieta]->SetParameters(1.51559e+03,9.42536e-02,2.13754e-05,-8.46763e-10,9.40950e-10); }
+		if(ieta==1){ fun_bdF[ipar][ieta]->SetParameters(1.63928e+03,1.11094e-01,3.27249e-05,-6.38342e-10,-8.62401e-09); }
+		if(ieta==2){ fun_bdF[ipar][ieta]->SetParameters(1.92606e+03,1.13426e-01,6.25910e-06,-3.19538e-08,-3.90406e-09); }
+		*/
+		if(ieta==0) { fun_bdF[ipar][ieta]->SetParameters(1.62883e+03,9.64815e-02,2.42160e-05,8.71399e-09,-1.46361e-09); }
+		if(ieta==1) { fun_bdF[ipar][ieta]->SetParameters(1.75281e+03,1.14714e-01,2.97073e-05,-7.18638e-09,-7.69304e-09); }
+		if(ieta==2) { fun_bdF[ipar][ieta]->SetParameters(1.88203e+03,1.13035e-01,5.61238e-06,-3.84968e-08,-3.41842e-09); }
+		
+		#endif
 	}
 	
 	
@@ -3480,6 +3713,57 @@ for(int ieta=0; ieta<netabins; ieta++){
 		}
 	}
    
+   	
+	sprintf(name,"BTagger_PFRate_Pol2_SR_Eta%i",ieta+1);
+	bpfrat_pol2[ieta]= new TF1(name,Pol2,1000,5000,3);
+	
+  	#ifdef B_Tight
+	if(ieta==0) { bpfrat_pol2[ieta]->SetParameters(4.13346e-02,1.04929e-05,-3.26939e-09); }
+	if(ieta==1) { bpfrat_pol2[ieta]->SetParameters(4.27580e-02,9.60189e-06,-1.94551e-09); }
+	if(ieta==2) { bpfrat_pol2[ieta]->SetParameters(4.03561e-02,1.31197e-06,-6.63512e-10); }
+	#else
+	/*
+	if(ieta==0) { bpfrat_pol2[ieta]->SetParameters(6.33366e-02,1.91396e-05,8.10967e-10); }
+	if(ieta==1) { bpfrat_pol2[ieta]->SetParameters(3.86670e-02,5.74462e-05,-7.96772e-09); }
+	if(ieta==2) { bpfrat_pol2[ieta]->SetParameters(5.23110e-02,4.58462e-05,-7.88366e-09); }
+	*/
+	if(ieta==0) { bpfrat_pol2[ieta]->SetParameters(6.02485e-02,2.26926e-05,-1.57336e-10); }
+	if(ieta==1) { bpfrat_pol2[ieta]->SetParameters(3.94634e-02,5.63117e-05,-7.62595e-09); }
+	if(ieta==2) { bpfrat_pol2[ieta]->SetParameters(5.33156e-02,4.48943e-05,-7.71915e-09); }
+	#endif
+	
+	for(int ipar=0; ipar<3; ipar++){
+		sprintf(name,"dFun_pol2_%i_Eta%i",ipar,ieta+1);
+		if(ipar==0){fun_bdF_pol2[ipar][ieta]= new TF1(name,bdF0_pol2,1000,5000,3);}
+		if(ipar==1){fun_bdF_pol2[ipar][ieta]= new TF1(name,bdF1_pol2,1000,5000,3);}
+		if(ipar==2){fun_bdF_pol2[ipar][ieta]= new TF1(name,bdF2_pol2,1000,5000,3);}
+	}
+	
+	for(int ipar=0; ipar<3; ipar++){
+		
+		#ifdef B_Tight
+		if(ieta==0){ fun_bdF_pol2[ipar][ieta]->SetParameters(4.13346e-02,1.04929e-05,-3.26939e-09); }
+		if(ieta==1){ fun_bdF_pol2[ipar][ieta]->SetParameters(4.27580e-02,9.60189e-06,-1.94551e-09); }
+		if(ieta==2){ fun_bdF_pol2[ipar][ieta]->SetParameters(4.03561e-02,1.31197e-06,-6.63512e-10); }
+		#else
+		/*
+		if(ieta==0){ fun_bdF_pol2[ipar][ieta]->SetParameters(6.33366e-02,1.91396e-05,8.10967e-10); }
+		if(ieta==1){ fun_bdF_pol2[ipar][ieta]->SetParameters(3.86670e-02,5.74462e-05,-7.96772e-09); }
+		if(ieta==2){ fun_bdF_pol2[ipar][ieta]->SetParameters(5.23110e-02,4.58462e-05,-7.88366e-09); }
+		*/
+		if(ieta==0){ fun_bdF_pol2[ipar][ieta]->SetParameters(6.02485e-02,2.26926e-05,-1.57336e-10); }
+		if(ieta==1){ fun_bdF_pol2[ipar][ieta]->SetParameters(3.94634e-02,5.63117e-05,-7.62595e-09); }
+		if(ieta==2){ fun_bdF_pol2[ipar][ieta]->SetParameters(5.33156e-02,4.48943e-05,-7.71915e-09); }
+		#endif
+		
+	}
+	
+	for(int ipar=0; ipar<3; ipar++){
+		for(int jpar=0; jpar<3; jpar++){
+			cov_bpfrat_pol2[ieta](ipar,jpar) = COV_sig_data_pol2[ieta][ipar][jpar];
+		}
+	}
+ 
 }
 
 bpfrat_val = new TF1("BTagger_PFRate_VR",MikkoFunc1,500,2000,4);
@@ -3488,22 +3772,52 @@ bpfrat_val->SetParameters(-6.12117e+00,-4.51636e-01,1.71053e+01,2.05272e-01);
 for(int ieta=0; ieta<netabins; ieta++){
 	sprintf(name,"BTagger_PFRate_VR_Eta%i",ieta+1);
 	bpfrat_val_beta[ieta]= new TF1(name,BiFun,500,2000,5);
-	if(ieta==0) { bpfrat_val_beta[ieta]->SetParameters(9.24176e+02,5.30402e-02,1.02285e-04,1.00550e-07,-7.87886e-08); }
-	if(ieta==1) { bpfrat_val_beta[ieta]->SetParameters(9.24633e+02,8.56270e-02,1.55196e-04,7.39034e-08,-1.40448e-07); }
-	if(ieta==2) { bpfrat_val_beta[ieta]->SetParameters(9.29343e+02,1.16080e-01,1.99550e-04,7.32957e-08,-1.87475e-07); }
+	
+	#ifdef B_Tight
+	
+	if(ieta==0) { bpfrat_val_beta[ieta]->SetParameters(2.38813e+03,2.00962e-02,4.44519e-06,1.57842e-10,-4.67227e-09); }
+	if(ieta==1) { bpfrat_val_beta[ieta]->SetParameters(1.60168e+03,2.24037e-02,5.85461e-06,-9.20290e-09,-3.51063e-10); }
+	if(ieta==2) { bpfrat_val_beta[ieta]->SetParameters(1.65633e+03,2.31584e-02,1.42368e-06,-8.58618e-09,-5.77951e-10); }
+	
+	#else
+	/*
+	if(ieta==0) { bpfrat_val_beta[ieta]->SetParameters(1.46952e+03,3.40098e-02,1.89387e-05,2.13629e-08,1.52039e-09); }
+	if(ieta==1) { bpfrat_val_beta[ieta]->SetParameters(1.56631e+03,5.18521e-02,2.29592e-05,-1.47997e-08,4.33517e-11); }
+	if(ieta==2) { bpfrat_val_beta[ieta]->SetParameters(1.74334e+03,6.85619e-02,7.39425e-06,-2.81162e-08,-9.57036e-10); }
+	*/
+	if(ieta==0) { bpfrat_val_beta[ieta]->SetParameters(1.38373e+03,3.25541e-02,1.85890e-05,3.45274e-08,1.50838e-09); }
+	if(ieta==1) { bpfrat_val_beta[ieta]->SetParameters(1.48609e+03,4.99726e-02,2.31002e-05,-2.68049e-08,1.71155e-10); }
+	if(ieta==2) { bpfrat_val_beta[ieta]->SetParameters(1.63503e+03,6.72515e-02,8.78198e-06,-3.98430e-08,-1.37735e-09); }
+	
+	#endif
 	
 	for(int ipar=0; ipar<5; ipar++){
 		sprintf(name,"dFun_%i_Eta%i",ipar,ieta+1);
-		if(ipar==0){fun_val_bdF[ipar][ieta]= new TF1(name,bdF0,500,3000,5);}
-		if(ipar==1){fun_val_bdF[ipar][ieta]= new TF1(name,bdF1,500,3000,5);}
-		if(ipar==2){fun_val_bdF[ipar][ieta]= new TF1(name,bdF2,500,3000,5);}
-		if(ipar==3){fun_val_bdF[ipar][ieta]= new TF1(name,bdF3,500,3000,5);}
-		if(ipar==4){fun_val_bdF[ipar][ieta]= new TF1(name,bdF4,500,3000,5);}
+		if(ipar==0){fun_val_bdF[ipar][ieta]= new TF1(name,bdF0,1000,5000,5);}
+		if(ipar==1){fun_val_bdF[ipar][ieta]= new TF1(name,bdF1,1000,5000,5);}
+		if(ipar==2){fun_val_bdF[ipar][ieta]= new TF1(name,bdF2,1000,5000,5);}
+		if(ipar==3){fun_val_bdF[ipar][ieta]= new TF1(name,bdF3,1000,5000,5);}
+		if(ipar==4){fun_val_bdF[ipar][ieta]= new TF1(name,bdF4,1000,5000,5);}
 	}
 	for(int ipar=0; ipar<5; ipar++){
-		if(ieta==0){ fun_val_bdF[ipar][ieta]->SetParameters(9.24176e+02,5.30402e-02,1.02285e-04,1.00550e-07,-7.87886e-08); }
-		if(ieta==1){ fun_val_bdF[ipar][ieta]->SetParameters(9.24633e+02,8.56270e-02,1.55196e-04,7.39034e-08,-1.40448e-07); }
-		if(ieta==2){ fun_val_bdF[ipar][ieta]->SetParameters(9.29343e+02,1.16080e-01,1.99550e-04,7.32957e-08,-1.87475e-07); }
+		
+		#ifdef B_Tight
+		
+		if(ieta==0){ fun_val_bdF[ipar][ieta]->SetParameters(2.38813e+03,2.00962e-02,4.44519e-06,1.57842e-10,-4.67227e-09); }
+		if(ieta==1){ fun_val_bdF[ipar][ieta]->SetParameters(1.60168e+03,2.24037e-02,5.85461e-06,-9.20290e-09,-3.51063e-10); }
+		if(ieta==2){ fun_val_bdF[ipar][ieta]->SetParameters(1.65633e+03,2.31584e-02,1.42368e-06,-8.58618e-09,-5.77951e-10); }
+		
+		#else
+		/*
+		if(ieta==0){ fun_val_bdF[ipar][ieta]->SetParameters(1.46952e+03,3.40098e-02,1.89387e-05,2.13629e-08,1.52039e-09); }
+		if(ieta==1){ fun_val_bdF[ipar][ieta]->SetParameters(1.56631e+03,5.18521e-02,2.29592e-05,-1.47997e-08,4.33517e-11); }
+		if(ieta==2){ fun_val_bdF[ipar][ieta]->SetParameters(1.74334e+03,6.85619e-02,7.39425e-06,-2.81162e-08,-9.57036e-10); }
+		*/
+		if(ieta==0){ fun_val_bdF[ipar][ieta]->SetParameters(1.38373e+03,3.25541e-02,1.85890e-05,3.45274e-08,1.50838e-09); }
+		if(ieta==1){ fun_val_bdF[ipar][ieta]->SetParameters(1.48609e+03,4.99726e-02,2.31002e-05,-2.68049e-08,1.71155e-10); }
+		if(ieta==2){ fun_val_bdF[ipar][ieta]->SetParameters(1.63503e+03,6.72515e-02,8.78198e-06,-3.98430e-08,-1.37735e-09); }
+		
+		#endif
 	}
 	
 	for(int ipar=0; ipar<5; ipar++){
@@ -3512,6 +3826,57 @@ for(int ieta=0; ieta<netabins; ieta++){
 		}
 	}
 	
+	
+	sprintf(name,"BTagger_PFRate_Pol2_VR_Eta%i",ieta+1);
+	bpfrat_val_pol2[ieta]= new TF1(name,Pol2,1000,5000,3);
+	
+  	#ifdef B_Tight
+  	if(ieta==0) { bpfrat_val_pol2[ieta]->SetParameters(4.98020e-03,1.03754e-05,-1.82367e-09); }
+	if(ieta==1) { bpfrat_val_pol2[ieta]->SetParameters(6.55454e-03,1.18117e-05,-1.31684e-09); }
+	if(ieta==2) { bpfrat_val_pol2[ieta]->SetParameters(1.55511e-02,6.07535e-06,-1.04245e-09); }
+	#else
+	/*
+	if(ieta==0) { bpfrat_val_pol2[ieta]->SetParameters(1.75482e-02,6.64651e-06,3.28207e-09); }
+	if(ieta==1) { bpfrat_val_pol2[ieta]->SetParameters(7.58131e-03,3.03083e-05,-1.49105e-09); }
+	if(ieta==2) { bpfrat_val_pol2[ieta]->SetParameters(3.25262e-02,2.58994e-05,-3.54484e-09); }
+	*/
+	if(ieta==0) { bpfrat_val_pol2[ieta]->SetParameters(1.61478e-02,8.10430e-06,2.94908e-09); }
+	if(ieta==1) { bpfrat_val_pol2[ieta]->SetParameters(6.66628e-03,3.10612e-05,-1.59688e-09); }
+	if(ieta==2) { bpfrat_val_pol2[ieta]->SetParameters(3.18996e-02,2.64498e-05,-3.65144e-09); }
+	#endif
+	
+	for(int ipar=0; ipar<3; ipar++){
+		sprintf(name,"dFun_val_pol2_%i_Eta%i",ipar,ieta+1);
+		if(ipar==0){fun_val_bdF_pol2[ipar][ieta]= new TF1(name,bdF0_pol2,1000,5000,3);}
+		if(ipar==1){fun_val_bdF_pol2[ipar][ieta]= new TF1(name,bdF1_pol2,1000,5000,3);}
+		if(ipar==2){fun_val_bdF_pol2[ipar][ieta]= new TF1(name,bdF2_pol2,1000,5000,3);}
+	}
+	
+	#ifdef B_Tight
+	for(int ipar=0; ipar<3; ipar++){
+		if(ieta==0){ fun_val_bdF_pol2[ipar][ieta]->SetParameters(4.98020e-03,1.03754e-05,-1.82367e-09); }
+		if(ieta==1){ fun_val_bdF_pol2[ipar][ieta]->SetParameters(6.55454e-03,1.18117e-05,-1.31684e-09); }
+		if(ieta==2){ fun_val_bdF_pol2[ipar][ieta]->SetParameters(1.55511e-02,6.07535e-06,-1.04245e-09); }
+	}
+	#else
+	for(int ipar=0; ipar<3; ipar++){
+		/*
+		if(ieta==0){ fun_val_bdF_pol2[ipar][ieta]->SetParameters(1.75482e-02,6.64651e-06,3.28207e-09); }
+		if(ieta==1){ fun_val_bdF_pol2[ipar][ieta]->SetParameters(7.58131e-03,3.03083e-05,-1.49105e-09); }
+		if(ieta==2){ fun_val_bdF_pol2[ipar][ieta]->SetParameters(3.25262e-02,2.58994e-05,-3.54484e-09); }
+		*/
+		if(ieta==0){ fun_val_bdF_pol2[ipar][ieta]->SetParameters(1.61478e-02,8.10430e-06,2.94908e-09); }
+		if(ieta==1){ fun_val_bdF_pol2[ipar][ieta]->SetParameters(6.66628e-03,3.10612e-05,-1.59688e-09); }
+		if(ieta==2){ fun_val_bdF_pol2[ipar][ieta]->SetParameters(3.18996e-02,2.64498e-05,-3.65144e-09); } 
+	}
+	#endif
+	
+	for(int ipar=0; ipar<3; ipar++){
+		for(int jpar=0; jpar<3; jpar++){
+			cov_bpfrat_val_pol2[ieta](ipar,jpar) = COV_val_data_pol2[ieta][ipar][jpar];
+		}
+	}
+   
 }
 
 #endif
@@ -3543,37 +3908,61 @@ bpfrat->SetParameters(-1.13445e+00,-5.30009e-01,9.42228e-01,6.32387e-02);
 #ifdef Anal_2017
 
 for(int ieta=0; ieta<netabins; ieta++){
+	
 	sprintf(name,"BTagger_PFRate_SR_Eta%i",ieta+1);
-	if(ieta==2){
-		bpfrat_beta[ieta]= new TF1(name,Pol0,500,2000,1);
-	}
-	else{
-		bpfrat_beta[ieta]= new TF1(name,BiFun,500,3000,5);
-		}
-	if(ieta==0) { bpfrat_beta[ieta]->SetParameters(9.21635e+02,3.26171e-02,-1.69936e-05,1.45564e-08,6.17401e-10); }
-	if(ieta==1) { bpfrat_beta[ieta]->SetParameters(1.36644e+03,2.30698e-02,-6.68588e-06,1.11514e-08,-1.05550e-08); }
-	if(ieta==2) { bpfrat_beta[ieta]->SetParameter(0,2.59751e-02); }
+	bpfrat_beta[ieta]= new TF1(name,BiFun,1000,5000,5);
+	
+	if(ieta==0) { bpfrat_beta[ieta]->SetParameters(2.38815e+03,3.08787e-02,-7.72864e-06,1.67637e-09,4.59941e-10); }
+	if(ieta==1) { bpfrat_beta[ieta]->SetParameters(2.47737e+03,2.53782e-02,-1.92963e-06,6.31278e-09,-4.67200e-10); }
+	if(ieta==2) { bpfrat_beta[ieta]->SetParameters(2.52001e+03,2.31693e-02,-1.71081e-06,2.55212e-09,-1.86928e-10); }
 	
 	for(int ipar=0; ipar<5; ipar++){
 		sprintf(name,"dFun_%i_Eta%i",ipar,ieta+1);
-		if(ipar==0){fun_bdF[ipar][ieta]= new TF1(name,bdF0,500,3000,5);}
-		if(ipar==1){fun_bdF[ipar][ieta]= new TF1(name,bdF1,500,3000,5);}
-		if(ipar==2){fun_bdF[ipar][ieta]= new TF1(name,bdF2,500,3000,5);}
-		if(ipar==3){fun_bdF[ipar][ieta]= new TF1(name,bdF3,500,3000,5);}
-		if(ipar==4){fun_bdF[ipar][ieta]= new TF1(name,bdF4,500,3000,5);}
-	}
-	for(int ipar=0; ipar<5; ipar++){
-		if(ieta==0){ fun_bdF[ipar][ieta]->SetParameters(9.21635e+02,3.26171e-02,-1.69936e-05,1.45564e-08,6.17401e-10); }
-		if(ieta==1){ fun_bdF[ipar][ieta]->SetParameters(1.36644e+03,2.30698e-02,-6.68588e-06,1.11514e-08,-1.05550e-08); }
-		if(ieta==2){ fun_bdF[ipar][ieta]->SetParameter(0,2.59751e-02); }
+		if(ipar==0){fun_bdF[ipar][ieta]= new TF1(name,bdF0,1000,5000,5);}
+		if(ipar==1){fun_bdF[ipar][ieta]= new TF1(name,bdF1,1000,5000,5);}
+		if(ipar==2){fun_bdF[ipar][ieta]= new TF1(name,bdF2,1000,5000,5);}
+		if(ipar==3){fun_bdF[ipar][ieta]= new TF1(name,bdF3,1000,5000,5);}
+		if(ipar==4){fun_bdF[ipar][ieta]= new TF1(name,bdF4,1000,5000,5);}
 	}
 	
+	for(int ipar=0; ipar<5; ipar++){
+		if(ieta==0){ fun_bdF[ipar][ieta]->SetParameters(2.38815e+03,3.08787e-02,-7.72864e-06,1.67637e-09,4.59941e-10); }
+		if(ieta==1){ fun_bdF[ipar][ieta]->SetParameters(2.47737e+03,2.53782e-02,-1.92963e-06,6.31278e-09,-4.67200e-10); }
+		if(ieta==2){ fun_bdF[ipar][ieta]->SetParameters(2.52001e+03,2.31693e-02,-1.71081e-06,2.55212e-09,-1.86928e-10); } 
+	}
 	for(int ipar=0; ipar<5; ipar++){
 		for(int jpar=0; jpar<5; jpar++){
 			cov_bpfrat_beta[ieta](ipar,jpar) = COV_sig_mc[ieta][ipar][jpar];
 		}
 	}
 	
+		
+	sprintf(name,"BTagger_PFRate_Pol2_SR_Eta%i",ieta+1);
+	bpfrat_pol2[ieta]= new TF1(name,Pol2,1000,5000,3);
+	
+  	if(ieta==0) { bpfrat_pol2[ieta]->SetParameters(5.60160e-02,-1.26041e-05,8.77695e-10); }
+	if(ieta==1) { bpfrat_pol2[ieta]->SetParameters(5.34254e-02,-1.65591e-05,2.10147e-09); }
+	if(ieta==2) { bpfrat_pol2[ieta]->SetParameters(3.70577e-02,-7.59598e-06,8.27945e-10); }
+	
+	for(int ipar=0; ipar<3; ipar++){
+		sprintf(name,"dFun_pol2_%i_Eta%i",ipar,ieta+1);
+		if(ipar==0){fun_bdF_pol2[ipar][ieta]= new TF1(name,bdF0_pol2,1000,5000,3);}
+		if(ipar==1){fun_bdF_pol2[ipar][ieta]= new TF1(name,bdF1_pol2,1000,5000,3);}
+		if(ipar==2){fun_bdF_pol2[ipar][ieta]= new TF1(name,bdF2_pol2,1000,5000,3);}
+	}
+	
+	for(int ipar=0; ipar<3; ipar++){
+		if(ieta==0){ fun_bdF_pol2[ipar][ieta]->SetParameters(5.60160e-02,-1.26041e-05,8.77695e-10); }
+		if(ieta==1){ fun_bdF_pol2[ipar][ieta]->SetParameters(5.34254e-02,-1.65591e-05,2.10147e-09); }
+		if(ieta==2){ fun_bdF_pol2[ipar][ieta]->SetParameters(3.70577e-02,-7.59598e-06,8.27945e-10); }
+	}
+	
+	for(int ipar=0; ipar<3; ipar++){
+		for(int jpar=0; jpar<3; jpar++){
+			cov_bpfrat_pol2[ieta](ipar,jpar) = COV_sig_mc_pol2[ieta][ipar][jpar];
+		}
+	}
+ 
 }
 
 bpfrat_val = new TF1("BTagger_PFRate_VR",MikkoFunc1,400,2000,4);
@@ -3581,23 +3970,24 @@ bpfrat_val->SetParameters(1.25644e+01,-6.72034e-01,-1.34758e+01,1.22587e-02);
 
 for(int ieta=0; ieta<netabins; ieta++){
 	sprintf(name,"BTagger_PFRate_VR_Eta%i",ieta+1);
-	bpfrat_val_beta[ieta]= new TF1(name,BiFun,500,3000,5);
-	if(ieta==0) { bpfrat_val_beta[ieta]->SetParameters(9.18476e+02,1.12578e-02,7.20190e-06,2.24255e-08,-9.37130e-09); }
-	if(ieta==1) { bpfrat_val_beta[ieta]->SetParameters(9.14159e+02,1.21329e-02,1.08715e-05,2.25172e-08,-1.45333e-08); }
-	if(ieta==2) { bpfrat_val_beta[ieta]->SetParameters(9.11381e+02,1.59887e-02,1.24236e-05,2.32987e-09,-2.10085e-08); }
+	bpfrat_val_beta[ieta]= new TF1(name,BiFun,1000,5000,5);
+	
+	if(ieta==0) { bpfrat_val_beta[ieta]->SetParameters(1.83843e+03,1.12613e-02,1.90763e-06,1.65728e-09,-7.50511e-10); }
+	if(ieta==1) { bpfrat_val_beta[ieta]->SetParameters(1.82668e+03,1.11596e-02,1.50070e-07,-3.56212e-10,3.90915e-12); }
+	if(ieta==2) { bpfrat_val_beta[ieta]->SetParameters(2.41870e+03,1.32515e-02,-2.22957e-08,-3.12136e-10,2.74437e-10); }
 	
 	for(int ipar=0; ipar<5; ipar++){
 		sprintf(name,"dFun_%i_Eta%i",ipar,ieta+1);
-		if(ipar==0){fun_val_bdF[ipar][ieta]= new TF1(name,bdF0,500,3000,5);}
-		if(ipar==1){fun_val_bdF[ipar][ieta]= new TF1(name,bdF1,500,3000,5);}
-		if(ipar==2){fun_val_bdF[ipar][ieta]= new TF1(name,bdF2,500,3000,5);}
-		if(ipar==3){fun_val_bdF[ipar][ieta]= new TF1(name,bdF3,500,3000,5);}
-		if(ipar==4){fun_val_bdF[ipar][ieta]= new TF1(name,bdF4,500,3000,5);}
+		if(ipar==0){fun_val_bdF[ipar][ieta]= new TF1(name,bdF0,1000,5000,5);}
+		if(ipar==1){fun_val_bdF[ipar][ieta]= new TF1(name,bdF1,1000,5000,5);}
+		if(ipar==2){fun_val_bdF[ipar][ieta]= new TF1(name,bdF2,1000,5000,5);}
+		if(ipar==3){fun_val_bdF[ipar][ieta]= new TF1(name,bdF3,1000,5000,5);}
+		if(ipar==4){fun_val_bdF[ipar][ieta]= new TF1(name,bdF4,1000,5000,5);}
 	}
 	for(int ipar=0; ipar<5; ipar++){
-		if(ieta==0){ fun_val_bdF[ipar][ieta]->SetParameters(9.18476e+02,1.12578e-02,7.20190e-06,2.24255e-08,-9.37130e-09); }
-		if(ieta==1){ fun_val_bdF[ipar][ieta]->SetParameters(9.14159e+02,1.21329e-02,1.08715e-05,2.25172e-08,-1.45333e-08); }
-		if(ieta==2){ fun_val_bdF[ipar][ieta]->SetParameters(9.11381e+02,1.59887e-02,1.24236e-05,2.32987e-09,-2.10085e-08); }
+		if(ieta==0){ fun_val_bdF[ipar][ieta]->SetParameters(1.83843e+03,1.12613e-02,1.90763e-06,1.65728e-09,-7.50511e-10); }
+		if(ieta==1){ fun_val_bdF[ipar][ieta]->SetParameters(1.82668e+03,1.11596e-02,1.50070e-07,-3.56212e-10,3.90915e-12); }
+		if(ieta==2){ fun_val_bdF[ipar][ieta]->SetParameters(2.41870e+03,1.32515e-02,-2.22957e-08,-3.12136e-10,2.74437e-10); }
 	}
 	
 	
@@ -3607,6 +3997,33 @@ for(int ieta=0; ieta<netabins; ieta++){
 		}
 	}
 	
+	
+	sprintf(name,"BTagger_PFRate_Pol2_VR_Eta%i",ieta+1);
+	bpfrat_val_pol2[ieta]= new TF1(name,Pol2,1000,5000,3);
+	
+	if(ieta==0) { bpfrat_val_pol2[ieta]->SetParameters(8.05651e-03,2.49117e-06,-3.70402e-10); }
+	if(ieta==1) { bpfrat_val_pol2[ieta]->SetParameters(1.05382e-02,3.99037e-07,-3.94526e-11); }
+	if(ieta==2) { bpfrat_val_pol2[ieta]->SetParameters(1.27873e-02,5.06370e-08,5.78976e-11); }
+	
+	for(int ipar=0; ipar<3; ipar++){
+		sprintf(name,"dFun_val_pol2_%i_Eta%i",ipar,ieta+1);
+		if(ipar==0){fun_val_bdF_pol2[ipar][ieta]= new TF1(name,bdF0_pol2,1000,5000,3);}
+		if(ipar==1){fun_val_bdF_pol2[ipar][ieta]= new TF1(name,bdF1_pol2,1000,5000,3);}
+		if(ipar==2){fun_val_bdF_pol2[ipar][ieta]= new TF1(name,bdF2_pol2,1000,5000,3);}
+	}
+	
+	for(int ipar=0; ipar<3; ipar++){
+		if(ieta==0){ fun_val_bdF_pol2[ipar][ieta]->SetParameters(8.05651e-03,2.49117e-06,-3.70402e-10); }
+		if(ieta==1){ fun_val_bdF_pol2[ipar][ieta]->SetParameters(1.05382e-02,3.99037e-07,-3.94526e-11); }
+		if(ieta==2){ fun_val_bdF_pol2[ipar][ieta]->SetParameters(1.27873e-02,5.06370e-08,5.78976e-11); }
+	}
+	
+	for(int ipar=0; ipar<3; ipar++){
+		for(int jpar=0; jpar<3; jpar++){
+			cov_bpfrat_val_pol2[ieta](ipar,jpar) = COV_val_mc_pol2[ieta][ipar][jpar];
+		}
+	}
+   
 }
 
 #endif
@@ -3615,29 +4032,26 @@ for(int ieta=0; ieta<netabins; ieta++){
 #ifdef Anal_2018
 
 for(int ieta=0; ieta<netabins; ieta++){
+	
 	sprintf(name,"BTagger_PFRate_SR_Eta%i",ieta+1);
-	if(ieta==2){
-		bpfrat_beta[ieta]= new TF1(name,Pol0,500,2000,1);
-	}
-	else{
-		bpfrat_beta[ieta]= new TF1(name,BiFun,500,3000,5);
-		}
-	if(ieta==0) { bpfrat_beta[ieta]->SetParameters(9.34617e+02,3.24790e-02,-1.84100e-05,5.31797e-08,7.02828e-10); }
-	if(ieta==1) { bpfrat_beta[ieta]->SetParameters(9.27387e+02,2.82340e-02,-1.07568e-05,3.27753e-08,-9.72433e-09); }
-	if(ieta==2) { bpfrat_beta[ieta]->SetParameter(0,2.48953e-02); }
+	bpfrat_beta[ieta]= new TF1(name,BiFun,1000,5000,5);
+	
+	if(ieta==0) { bpfrat_beta[ieta]->SetParameters(2.38631e+03,3.01222e-02,-3.00223e-06,1.07079e-08,-2.09702e-09); }
+	if(ieta==1) { bpfrat_beta[ieta]->SetParameters(2.45145e+03,2.74238e-02,-4.85018e-06,2.17370e-09,1.03522e-09); }
+	if(ieta==2) { bpfrat_beta[ieta]->SetParameters(2.40609e+03,2.33899e-02,-8.84349e-06,-5.24304e-09,3.83809e-09); }
 	
 	for(int ipar=0; ipar<5; ipar++){
 		sprintf(name,"dFun_%i_Eta%i",ipar,ieta+1);
-		if(ipar==0){fun_bdF[ipar][ieta]= new TF1(name,bdF0,500,3000,5);}
-		if(ipar==1){fun_bdF[ipar][ieta]= new TF1(name,bdF1,500,3000,5);}
-		if(ipar==2){fun_bdF[ipar][ieta]= new TF1(name,bdF2,500,3000,5);}
-		if(ipar==3){fun_bdF[ipar][ieta]= new TF1(name,bdF3,500,3000,5);}
-		if(ipar==4){fun_bdF[ipar][ieta]= new TF1(name,bdF4,500,3000,5);}
+		if(ipar==0){fun_bdF[ipar][ieta]= new TF1(name,bdF0,1000,5000,5);}
+		if(ipar==1){fun_bdF[ipar][ieta]= new TF1(name,bdF1,1000,5000,5);}
+		if(ipar==2){fun_bdF[ipar][ieta]= new TF1(name,bdF2,1000,5000,5);}
+		if(ipar==3){fun_bdF[ipar][ieta]= new TF1(name,bdF3,1000,5000,5);}
+		if(ipar==4){fun_bdF[ipar][ieta]= new TF1(name,bdF4,1000,5000,5);}
 	}
 	for(int ipar=0; ipar<5; ipar++){
-		if(ieta==0){ fun_bdF[ipar][ieta]->SetParameters(9.34617e+02,3.24790e-02,-1.84100e-05,5.31797e-08,7.02828e-10); }
-		if(ieta==1){ fun_bdF[ipar][ieta]->SetParameters(9.27387e+02,2.82340e-02,-1.07568e-05,3.27753e-08,-9.72433e-09); }
-		if(ieta==2){ fun_bdF[ipar][ieta]->SetParameter(0,2.48953e-02); }
+		if(ieta==0){ fun_bdF[ipar][ieta]->SetParameters(2.38631e+03,3.01222e-02,-3.00223e-06,1.07079e-08,-2.09702e-09); }
+		if(ieta==1){ fun_bdF[ipar][ieta]->SetParameters(2.45145e+03,2.74238e-02,-4.85018e-06,2.17370e-09,1.03522e-09); }
+		if(ieta==2){ fun_bdF[ipar][ieta]->SetParameters(2.40609e+03,2.33899e-02,-8.84349e-06,-5.24304e-09,3.83809e-09); }
 	}
 	
 	for(int ipar=0; ipar<5; ipar++){
@@ -3646,30 +4060,60 @@ for(int ieta=0; ieta<netabins; ieta++){
 		}
 	}
 	
+		
+	sprintf(name,"BTagger_PFRate_Pol2_SR_Eta%i",ieta+1);
+	bpfrat_pol2[ieta]= new TF1(name,Pol2,1000,5000,3);
+	
+	if(ieta==0) { bpfrat_pol2[ieta]->SetParameters(6.73496e-02,-2.09486e-05,2.29190e-09); }
+	if(ieta==1) { bpfrat_pol2[ieta]->SetParameters(4.97077e-02,-1.26293e-05,1.44608e-09); }
+	if(ieta==2) { bpfrat_pol2[ieta]->SetParameters(3.86554e-02,-9.17069e-06,1.05423e-09); }
+  	
+	
+	for(int ipar=0; ipar<3; ipar++){
+		sprintf(name,"dFun_pol2_%i_Eta%i",ipar,ieta+1);
+		if(ipar==0){fun_bdF_pol2[ipar][ieta]= new TF1(name,bdF0_pol2,1000,5000,3);}
+		if(ipar==1){fun_bdF_pol2[ipar][ieta]= new TF1(name,bdF1_pol2,1000,5000,3);}
+		if(ipar==2){fun_bdF_pol2[ipar][ieta]= new TF1(name,bdF2_pol2,1000,5000,3);}
+	}
+	
+	for(int ipar=0; ipar<3; ipar++){
+	
+		if(ieta==0){ fun_bdF_pol2[ipar][ieta]->SetParameters(6.73496e-02,-2.09486e-05,2.29190e-09); }
+		if(ieta==1){ fun_bdF_pol2[ipar][ieta]->SetParameters(4.97077e-02,-1.26293e-05,1.44608e-09); }
+		if(ieta==2){ fun_bdF_pol2[ipar][ieta]->SetParameters(3.86554e-02,-9.17069e-06,1.05423e-09); }
+	}
+	
+	for(int ipar=0; ipar<3; ipar++){
+		for(int jpar=0; jpar<3; jpar++){
+			cov_bpfrat_pol2[ieta](ipar,jpar) = COV_sig_mc_pol2[ieta][ipar][jpar];
+		}
+	}
+ 
 }
 
 bpfrat_val = new TF1("BTagger_PFRate_VR",MikkoFunc1,400,2000,4);
 bpfrat_val->SetParameters(1.25644e+01,-6.72034e-01,-1.34758e+01,1.22587e-02);
 
 for(int ieta=0; ieta<netabins; ieta++){
+	
 	sprintf(name,"BTagger_PFRate_VR_Eta%i",ieta+1);
 	bpfrat_val_beta[ieta]= new TF1(name,BiFun,500,2000,5);
-	if(ieta==0) { bpfrat_val_beta[ieta]->SetParameters(9.16715e+02,1.29546e-02,5.01515e-06,1.15744e-08,-8.46381e-09); }
-	if(ieta==1) { bpfrat_val_beta[ieta]->SetParameters(9.15184e+02,1.38870e-02,1.01874e-05,7.75091e-09,-1.64004e-08); }
-	if(ieta==2) { bpfrat_val_beta[ieta]->SetParameters(9.14160e+02,1.65783e-02,1.89154e-05,2.87829e-08,-2.26370e-08); }
+	if(ieta==0) { bpfrat_val_beta[ieta]->SetParameters(2.34737e+03,1.27890e-02,8.02288e-07,5.02738e-10,-1.18313e-09); }
+	if(ieta==1) { bpfrat_val_beta[ieta]->SetParameters(1.81111e+03,1.20177e-02,9.54510e-07,6.15626e-10,1.53146e-10); }
+	if(ieta==2) { bpfrat_val_beta[ieta]->SetParameters(1.79748e+03,1.39612e-02,-5.32411e-07,-2.99721e-09,4.19168e-10); }
 	
 	for(int ipar=0; ipar<5; ipar++){
 		sprintf(name,"dFun_%i_Eta%i",ipar,ieta+1);
-		if(ipar==0){fun_val_bdF[ipar][ieta]= new TF1(name,bdF0,500,3000,5);}
-		if(ipar==1){fun_val_bdF[ipar][ieta]= new TF1(name,bdF1,500,3000,5);}
-		if(ipar==2){fun_val_bdF[ipar][ieta]= new TF1(name,bdF2,500,3000,5);}
-		if(ipar==3){fun_val_bdF[ipar][ieta]= new TF1(name,bdF3,500,3000,5);}
-		if(ipar==4){fun_val_bdF[ipar][ieta]= new TF1(name,bdF4,500,3000,5);}
+		if(ipar==0){fun_val_bdF[ipar][ieta]= new TF1(name,bdF0,1000,5000,5);}
+		if(ipar==1){fun_val_bdF[ipar][ieta]= new TF1(name,bdF1,1000,5000,5);}
+		if(ipar==2){fun_val_bdF[ipar][ieta]= new TF1(name,bdF2,1000,5000,5);}
+		if(ipar==3){fun_val_bdF[ipar][ieta]= new TF1(name,bdF3,1000,5000,5);}
+		if(ipar==4){fun_val_bdF[ipar][ieta]= new TF1(name,bdF4,1000,5000,5);}
 	}
 	for(int ipar=0; ipar<5; ipar++){
-		if(ieta==0){ fun_val_bdF[ipar][ieta]->SetParameters(9.16715e+02,1.29546e-02,5.01515e-06,1.15744e-08,-8.46381e-09); }
-		if(ieta==1){ fun_val_bdF[ipar][ieta]->SetParameters(9.15184e+02,1.38870e-02,1.01874e-05,7.75091e-09,-1.64004e-08); }
-		if(ieta==2){ fun_val_bdF[ipar][ieta]->SetParameters(9.14160e+02,1.65783e-02,1.89154e-05,2.87829e-08,-2.26370e-08); }
+		if(ieta==0){ fun_val_bdF[ipar][ieta]->SetParameters(2.34737e+03,1.27890e-02,8.02288e-07,5.02738e-10,-1.18313e-09); }
+		if(ieta==1){ fun_val_bdF[ipar][ieta]->SetParameters(1.81111e+03,1.20177e-02,9.54510e-07,6.15626e-10,1.53146e-10); }
+		if(ieta==2){ fun_val_bdF[ipar][ieta]->SetParameters(1.79748e+03,1.39612e-02,-5.32411e-07,-2.99721e-09,4.19168e-10); }
 	}
 	
 	
@@ -3679,6 +4123,35 @@ for(int ieta=0; ieta<netabins; ieta++){
 		}
 	}
 	
+	
+	sprintf(name,"BTagger_PFRate_Pol2_VR_Eta%i",ieta+1);
+	bpfrat_val_pol2[ieta]= new TF1(name,Pol2,1000,5000,3);
+	
+	if(ieta==0) { bpfrat_val_pol2[ieta]->SetParameters(1.03646e-02,2.23546e-06,-5.14962e-10); }
+	if(ieta==1) { bpfrat_val_pol2[ieta]->SetParameters(1.12766e-02,2.76393e-08,2.18502e-10); }
+	if(ieta==2) { bpfrat_val_pol2[ieta]->SetParameters(1.37085e-02,-2.10553e-07,1.20776e-10); }
+  	
+	
+	for(int ipar=0; ipar<3; ipar++){
+		sprintf(name,"dFun_val_pol2_%i_Eta%i",ipar,ieta+1);
+		if(ipar==0){fun_val_bdF_pol2[ipar][ieta]= new TF1(name,bdF0_pol2,1000,5000,3);}
+		if(ipar==1){fun_val_bdF_pol2[ipar][ieta]= new TF1(name,bdF1_pol2,1000,5000,3);}
+		if(ipar==2){fun_val_bdF_pol2[ipar][ieta]= new TF1(name,bdF2_pol2,1000,5000,3);}
+	}
+	
+	for(int ipar=0; ipar<3; ipar++){
+	
+		if(ieta==0){ fun_val_bdF_pol2[ipar][ieta]->SetParameters(1.03646e-02,2.23546e-06,-5.14962e-10); }
+		if(ieta==1){ fun_val_bdF_pol2[ipar][ieta]->SetParameters(1.12766e-02,2.76393e-08,2.18502e-10); }
+		if(ieta==2){ fun_val_bdF_pol2[ipar][ieta]->SetParameters(1.37085e-02,-2.10553e-07,1.20776e-10); }
+	}
+	
+	for(int ipar=0; ipar<3; ipar++){
+		for(int jpar=0; jpar<3; jpar++){
+			cov_bpfrat_val_pol2[ieta](ipar,jpar) = COV_val_mc_pol2[ieta][ipar][jpar];
+		}
+	}
+   
 }
 
 #endif
@@ -3688,24 +4161,45 @@ for(int ieta=0; ieta<netabins; ieta++){
 
 for(int ieta=0; ieta<netabins; ieta++){
 	sprintf(name,"BTagger_PFRate_SR_Eta%i",ieta+1);
-	bpfrat_beta[ieta]= new TF1(name,BiFun,500,3000,5);
+	bpfrat_beta[ieta]= new TF1(name,BiFun,1000,5000,5);
+	
+	#ifdef B_Tight
+	
+	if(ieta==0) { bpfrat_beta[ieta]->SetParameters(2.38773e+03,3.26989e-02,-2.98803e-06,4.69225e-09,-2.05419e-09); }
+	if(ieta==1) { bpfrat_beta[ieta]->SetParameters(2.52028e+03,3.27123e-02,-6.72983e-07,3.46661e-09,-1.35889e-09); }
+	if(ieta==2) { bpfrat_beta[ieta]->SetParameters(2.52488e+03,2.75470e-02,-5.06421e-06,-2.47926e-09,9.59098e-10); }
+	
+	#else
 		
-	if(ieta==0) { bpfrat_beta[ieta]->SetParameters(9.24636e+02,7.51672e-02,5.07008e-05,8.72022e-08,-5.56651e-08); }
-	if(ieta==1) { bpfrat_beta[ieta]->SetParameters(9.19503e+02,8.47453e-02,6.04311e-05,5.27157e-09,-6.04043e-08); }
-	if(ieta==2) { bpfrat_beta[ieta]->SetParameters(9.12603e+02,9.82523e-02,1.08519e-04,3.69877e-08,-1.45109e-07); }
+	if(ieta==0) { bpfrat_beta[ieta]->SetParameters(1.95962e+03,6.98537e-02,1.18804e-05,2.03276e-08,-4.51380e-09); }
+	if(ieta==1) { bpfrat_beta[ieta]->SetParameters(1.69468e+03,7.28344e-02,1.89960e-06,-1.07402e-08,2.61903e-09); }
+	if(ieta==2) { bpfrat_beta[ieta]->SetParameters(2.29001e+03,7.84576e-02,6.11443e-06,1.81058e-09,-4.64201e-09); }
+	
+	#endif
 	
 	for(int ipar=0; ipar<5; ipar++){
 		sprintf(name,"dFun_%i_Eta%i",ipar,ieta+1);
-		if(ipar==0){fun_bdF[ipar][ieta]= new TF1(name,bdF0,500,3000,5);}
-		if(ipar==1){fun_bdF[ipar][ieta]= new TF1(name,bdF1,500,3000,5);}
-		if(ipar==2){fun_bdF[ipar][ieta]= new TF1(name,bdF2,500,3000,5);}
-		if(ipar==3){fun_bdF[ipar][ieta]= new TF1(name,bdF3,500,3000,5);}
-		if(ipar==4){fun_bdF[ipar][ieta]= new TF1(name,bdF4,500,3000,5);}
+		if(ipar==0){fun_bdF[ipar][ieta]= new TF1(name,bdF0,1000,5000,5);}
+		if(ipar==1){fun_bdF[ipar][ieta]= new TF1(name,bdF1,1000,5000,5);}
+		if(ipar==2){fun_bdF[ipar][ieta]= new TF1(name,bdF2,1000,5000,5);}
+		if(ipar==3){fun_bdF[ipar][ieta]= new TF1(name,bdF3,1000,5000,5);}
+		if(ipar==4){fun_bdF[ipar][ieta]= new TF1(name,bdF4,1000,5000,5);}
 	}
 	for(int ipar=0; ipar<5; ipar++){
-		if(ieta==0){ fun_bdF[ipar][ieta]->SetParameters(9.24636e+02,7.51672e-02,5.07008e-05,8.72022e-08,-5.56651e-08); }
-		if(ieta==1){ fun_bdF[ipar][ieta]->SetParameters(9.19503e+02,8.47453e-02,6.04311e-05,5.27157e-09,-6.04043e-08); }
-		if(ieta==2){ fun_bdF[ipar][ieta]->SetParameters(9.12603e+02,9.82523e-02,1.08519e-04,3.69877e-08,-1.45109e-07); }
+		
+		#ifdef B_Tight
+		
+		if(ieta==0){ fun_bdF[ipar][ieta]->SetParameters(2.38773e+03,3.26989e-02,-2.98803e-06,4.69225e-09,-2.05419e-09); }
+		if(ieta==1){ fun_bdF[ipar][ieta]->SetParameters(2.52028e+03,3.27123e-02,-6.72983e-07,3.46661e-09,-1.35889e-09); }
+		if(ieta==2){ fun_bdF[ipar][ieta]->SetParameters(2.52488e+03,2.75470e-02,-5.06421e-06,-2.47926e-09,9.59098e-10); }
+	
+		#else
+		
+		if(ieta==0){ fun_bdF[ipar][ieta]->SetParameters(1.95962e+03,6.98537e-02,1.18804e-05,2.03276e-08,-4.51380e-09); }
+		if(ieta==1){ fun_bdF[ipar][ieta]->SetParameters(1.69468e+03,7.28344e-02,1.89960e-06,-1.07402e-08,2.61903e-09); }
+		if(ieta==2){ fun_bdF[ipar][ieta]->SetParameters(2.29001e+03,7.84576e-02,6.11443e-06,1.81058e-09,-4.64201e-09); }
+	
+		#endif
 	}
 	
 	for(int ipar=0; ipar<5; ipar++){
@@ -3714,6 +4208,59 @@ for(int ieta=0; ieta<netabins; ieta++){
 		}
 	}
 	
+		
+	sprintf(name,"BTagger_PFRate_Pol2_SR_Eta%i",ieta+1);
+	bpfrat_pol2[ieta]= new TF1(name,Pol2,1000,5000,3);
+	
+  	
+  	#ifdef B_Tight
+  	
+  	if(ieta==0) { bpfrat_pol2[ieta]->SetParameters(5.03656e-02,-7.99279e-06,2.79968e-10); }
+	if(ieta==1) { bpfrat_pol2[ieta]->SetParameters(4.54351e-02,-6.33923e-06,4.95724e-10); }
+	if(ieta==2) { bpfrat_pol2[ieta]->SetParameters(3.32082e-02,-1.65095e-06,-2.52107e-10); }
+	
+	#else
+	
+	if(ieta==0) { bpfrat_pol2[ieta]->SetParameters(5.97915e-02,7.62850e-06,-8.32615e-10); }
+	if(ieta==1) { bpfrat_pol2[ieta]->SetParameters(7.10220e-02,-2.45082e-06,1.84770e-09); }
+	if(ieta==2) { bpfrat_pol2[ieta]->SetParameters(5.65278e-02,1.67292e-05,-3.03467e-09); }
+	
+	#endif
+	
+	for(int ipar=0; ipar<3; ipar++){
+		sprintf(name,"dFun_pol2_%i_Eta%i",ipar,ieta+1);
+		if(ipar==0){fun_bdF_pol2[ipar][ieta]= new TF1(name,bdF0_pol2,1000,5000,3);}
+		if(ipar==1){fun_bdF_pol2[ipar][ieta]= new TF1(name,bdF1_pol2,1000,5000,3);}
+		if(ipar==2){fun_bdF_pol2[ipar][ieta]= new TF1(name,bdF2_pol2,1000,5000,3);}
+	}
+	
+	
+	#ifdef B_Tight
+	
+	for(int ipar=0; ipar<3; ipar++){
+		if(ieta==0){ fun_bdF_pol2[ipar][ieta]->SetParameters(5.03656e-02,-7.99279e-06,2.79968e-10); }
+		if(ieta==1){ fun_bdF_pol2[ipar][ieta]->SetParameters(4.54351e-02,-6.33923e-06,4.95724e-10); }
+		if(ieta==2){ fun_bdF_pol2[ipar][ieta]->SetParameters(3.32082e-02,-1.65095e-06,-2.52107e-10); }
+	}
+
+	#else
+	
+	for(int ipar=0; ipar<3; ipar++){
+		
+		if(ieta==0){ fun_bdF_pol2[ipar][ieta]->SetParameters(5.97915e-02,7.62850e-06,-8.32615e-10); }
+		if(ieta==1){ fun_bdF_pol2[ipar][ieta]->SetParameters(7.10220e-02,-2.45082e-06,1.84770e-09); }
+		if(ieta==2){ fun_bdF_pol2[ipar][ieta]->SetParameters(5.65278e-02,1.67292e-05,-3.03467e-09); }
+		
+	}
+	
+	#endif
+
+	for(int ipar=0; ipar<3; ipar++){
+		for(int jpar=0; jpar<3; jpar++){
+			cov_bpfrat_pol2[ieta](ipar,jpar) = COV_sig_mc_pol2[ieta][ipar][jpar];
+		}
+	}
+ 
 }
 
 bpfrat_val = new TF1("BTagger_PFRate_VR",MikkoFunc1,400,2000,4);
@@ -3722,22 +4269,44 @@ bpfrat_val->SetParameters(1.25644e+01,-6.72034e-01,-1.34758e+01,1.22587e-02);
 for(int ieta=0; ieta<netabins; ieta++){
 	sprintf(name,"BTagger_PFRate_VR_Eta%i",ieta+1);
 	bpfrat_val_beta[ieta]= new TF1(name,BiFun,500,2000,5);
-	if(ieta==0) { bpfrat_val_beta[ieta]->SetParameters(9.14452e+02,3.23713e-02,6.26563e-05,8.54225e-08,-4.07378e-08); }
-	if(ieta==1) { bpfrat_val_beta[ieta]->SetParameters(9.12924e+02,4.96057e-02,9.21091e-05,6.68105e-08,-7.31665e-08); }
-	if(ieta==2) { bpfrat_val_beta[ieta]->SetParameters(9.13928e+02,7.52902e-02,1.22513e-04,5.57476e-08,-1.01395e-07); }
+	
+	#ifdef B_Tight
+	
+	if(ieta==0) { bpfrat_val_beta[ieta]->SetParameters(2.34538e+03,1.30676e-02,3.29252e-06,1.27183e-09,-2.45126e-09); }
+	if(ieta==1) { bpfrat_val_beta[ieta]->SetParameters(1.66768e+03,1.40119e-02,2.76997e-06,-3.59449e-09,-3.71193e-10); }
+	if(ieta==2) { bpfrat_val_beta[ieta]->SetParameters(1.74832e+03,1.60425e-02,1.07590e-06,-6.46407e-09,-5.12396e-10); }
+	
+	#else
+
+	if(ieta==0) { bpfrat_val_beta[ieta]->SetParameters(1.61913e+03,2.34176e-02,1.49306e-05,2.48973e-08,-7.50976e-10); }
+	if(ieta==1) { bpfrat_val_beta[ieta]->SetParameters(1.70283e+03,3.40288e-02,1.12081e-05,-8.28958e-09,3.94102e-10); }
+	if(ieta==2) { bpfrat_val_beta[ieta]->SetParameters(1.80500e+03,4.91733e-02,6.78692e-06,-1.42749e-08,-1.16174e-09); }
+	
+	#endif
 	
 	for(int ipar=0; ipar<5; ipar++){
 		sprintf(name,"dFun_%i_Eta%i",ipar,ieta+1);
-		if(ipar==0){fun_val_bdF[ipar][ieta]= new TF1(name,bdF0,500,3000,5);}
-		if(ipar==1){fun_val_bdF[ipar][ieta]= new TF1(name,bdF1,500,3000,5);}
-		if(ipar==2){fun_val_bdF[ipar][ieta]= new TF1(name,bdF2,500,3000,5);}
-		if(ipar==3){fun_val_bdF[ipar][ieta]= new TF1(name,bdF3,500,3000,5);}
-		if(ipar==4){fun_val_bdF[ipar][ieta]= new TF1(name,bdF4,500,3000,5);}
+		if(ipar==0){fun_val_bdF[ipar][ieta]= new TF1(name,bdF0,1000,5000,5);}
+		if(ipar==1){fun_val_bdF[ipar][ieta]= new TF1(name,bdF1,1000,5000,5);}
+		if(ipar==2){fun_val_bdF[ipar][ieta]= new TF1(name,bdF2,1000,5000,5);}
+		if(ipar==3){fun_val_bdF[ipar][ieta]= new TF1(name,bdF3,1000,5000,5);}
+		if(ipar==4){fun_val_bdF[ipar][ieta]= new TF1(name,bdF4,1000,5000,5);}
 	}
 	for(int ipar=0; ipar<5; ipar++){
-		if(ieta==0){ fun_val_bdF[ipar][ieta]->SetParameters(9.14452e+02,3.23713e-02,6.26563e-05,8.54225e-08,-4.07378e-08); }
-		if(ieta==1){ fun_val_bdF[ipar][ieta]->SetParameters(9.12924e+02,4.96057e-02,9.21091e-05,6.68105e-08,-7.31665e-08); }
-		if(ieta==2){ fun_val_bdF[ipar][ieta]->SetParameters(9.13928e+02,7.52902e-02,1.22513e-04,5.57476e-08,-1.01395e-07); }
+		
+		#ifdef B_Tight
+		
+		if(ieta==0){ fun_val_bdF[ipar][ieta]->SetParameters(2.34538e+03,1.30676e-02,3.29252e-06,1.27183e-09,-2.45126e-09); }
+		if(ieta==1){ fun_val_bdF[ipar][ieta]->SetParameters(1.66768e+03,1.40119e-02,2.76997e-06,-3.59449e-09,-3.71193e-10); }
+		if(ieta==2){ fun_val_bdF[ipar][ieta]->SetParameters(1.74832e+03,1.60425e-02,1.07590e-06,-6.46407e-09,-5.12396e-10); }
+		
+		#else
+		
+		if(ieta==0){ fun_val_bdF[ipar][ieta]->SetParameters(1.61913e+03,2.34176e-02,1.49306e-05,2.48973e-08,-7.50976e-10); }
+		if(ieta==1){ fun_val_bdF[ipar][ieta]->SetParameters(1.70283e+03,3.40288e-02,1.12081e-05,-8.28958e-09,3.94102e-10); }
+		if(ieta==2){ fun_val_bdF[ipar][ieta]->SetParameters(1.80500e+03,4.91733e-02,6.78692e-06,-1.42749e-08,-1.16174e-09); }
+		
+		#endif
 	}
 	
 	
@@ -3747,6 +4316,56 @@ for(int ieta=0; ieta<netabins; ieta++){
 		}
 	}
 	
+	
+	sprintf(name,"BTagger_PFRate_Pol2_VR_Eta%i",ieta+1);
+	bpfrat_val_pol2[ieta]= new TF1(name,Pol2,1000,5000,3);
+
+  	#ifdef B_Tight
+  	
+  	if(ieta==0) { bpfrat_val_pol2[ieta]->SetParameters(5.28523e-03,5.42903e-06,-9.21253e-10); }
+	if(ieta==1) { bpfrat_val_pol2[ieta]->SetParameters(6.85565e-03,5.13629e-06,-5.62590e-10); }
+	if(ieta==2) { bpfrat_val_pol2[ieta]->SetParameters(9.22647e-03,5.23730e-06,-8.92990e-10); }
+	
+	#else
+	
+	if(ieta==0) { bpfrat_val_pol2[ieta]->SetParameters(1.00135e-02,7.02723e-06,1.17011e-09); }
+	if(ieta==1) { bpfrat_val_pol2[ieta]->SetParameters(1.02765e-02,1.43040e-05,-3.73468e-10); }
+	if(ieta==2) { bpfrat_val_pol2[ieta]->SetParameters(2.27449e-02,1.83936e-05,-2.37152e-09); }
+	
+	#endif
+	
+	for(int ipar=0; ipar<3; ipar++){
+		sprintf(name,"dFun_val_pol2_%i_Eta%i",ipar,ieta+1);
+		if(ipar==0){fun_val_bdF_pol2[ipar][ieta]= new TF1(name,bdF0_pol2,1000,5000,3);}
+		if(ipar==1){fun_val_bdF_pol2[ipar][ieta]= new TF1(name,bdF1_pol2,1000,5000,3);}
+		if(ipar==2){fun_val_bdF_pol2[ipar][ieta]= new TF1(name,bdF2_pol2,1000,5000,3);}
+	}
+	
+	
+	#ifdef B_Tight
+	
+	for(int ipar=0; ipar<3; ipar++){
+		if(ieta==0){ fun_val_bdF_pol2[ipar][ieta]->SetParameters(5.28523e-03,5.42903e-06,-9.21253e-10); }
+		if(ieta==1){ fun_val_bdF_pol2[ipar][ieta]->SetParameters(6.85565e-03,5.13629e-06,-5.62590e-10); }
+		if(ieta==2){ fun_val_bdF_pol2[ipar][ieta]->SetParameters(9.22647e-03,5.23730e-06,-8.92990e-10); }
+	}
+	
+	#else
+	
+	for(int ipar=0; ipar<3; ipar++){
+		if(ieta==0){ fun_val_bdF_pol2[ipar][ieta]->SetParameters(1.00135e-02,7.02723e-06,1.17011e-09); }
+		if(ieta==1){ fun_val_bdF_pol2[ipar][ieta]->SetParameters(1.02765e-02,1.43040e-05,-3.73468e-10); }
+		if(ieta==2){ fun_val_bdF_pol2[ipar][ieta]->SetParameters(2.27449e-02,1.83936e-05,-2.37152e-09); }
+	}
+	
+	#endif
+	
+	for(int ipar=0; ipar<3; ipar++){
+		for(int jpar=0; jpar<3; jpar++){
+			cov_bpfrat_val_pol2[ieta](ipar,jpar) = COV_val_mc_pol2[ieta][ipar][jpar];
+		}
+	}
+   
 }
 
 #endif
@@ -3770,124 +4389,12 @@ tagpfrat_MDAK8_val2->SetParameters(1.04260e-02,-1.07329e-04,3.99638e-07);
 
 }
 
-// value assignement //
-
-#ifdef Anal_2016
-   
-   btagvalue = 0.8484; //0.9535; //tight 0.8484; // medium //csvv2 
-   btagvalue_deepCSV = 0.6321; //0.8953  ;//tight  0.6321; //medium // deepcsv 
-   btagvalue_deepFlavB = 0.45; //0.7221; // 0.3093;  // medium	//deepflav
-   
-   deepak8_cut = 0.929;    // 2016 0.5% mistag rate
-   deepak8_cut_md = 0.632; // 2016 0.5% mistag rate
-   
-   for(int ipt=0; ipt<noAK8ptbins; ipt++){
-		DeepAK8_SF[ipt] = DeepAK8_SF_16[ipt];
-		DeepAK8_MD_SF[ipt] = DeepAK8_MD_SF_16[ipt];
-		DeepAK8_MD_SF_up[ipt] = DeepAK8_MD_SF_16_up[ipt];
-		DeepAK8_MD_SF_dn[ipt] = DeepAK8_MD_SF_16_dn[ipt];
-	}
-	
-  for(int ij=0; ij<2; ij++){
-	 for(int imsd=0; imsd<nsdmassbins; imsd++){
-		cor_b_sdmass_mc[ij][imsd] = cor_b_sdmass_mc_16[ij][imsd];
-		cor_b_sdmass_data[ij][imsd] = cor_b_sdmass_data_16[ij][imsd];
-		}
-	 }	
-
-  for(int ieta=0; ieta<netabins; ieta++){
-	 for(int ivar=0; ivar<5; ivar++){
-		for(int jvar=0; jvar<5; jvar++){
-			
-			COV_sig_data[ieta][ivar][jvar] = COV_sig_data_16[ieta][ivar][jvar] ;
-			COV_sig_mc[ieta][ivar][jvar] = COV_sig_mc_16[ieta][ivar][jvar] ;
-			COV_val_data[ieta][ivar][jvar] = COV_val_data_16[ieta][ivar][jvar] ;
-			COV_val_mc[ieta][ivar][jvar] = COV_val_mc_16[ieta][ivar][jvar] ;
-			
-			}
-		}
-	 }
-   
-	 
-#endif
-	
-#ifdef Anal_2017
-   
-   btagvalue = 0.8838;//0.9693;//tight 0.8838; //csvv2 medium
-   btagvalue_deepCSV =  0.4941;//0.65;//myvalue 0.8001;// tight 0.4941; // deepcsv medium
-   btagvalue_deepFlavB = 0.6; //0.6; // my final value //0.3033; //0.55;// my value 0.7489; // tight 0.3033; //deepflav medium
-   
-   deepak8_cut = 0.884;    // 2017 0.5% mistag rate
-   deepak8_cut_md = 0.554; // 2017 0.5% mistag rate
-   
-   for(int ipt=0; ipt<noAK8ptbins; ipt++){
-		DeepAK8_SF[ipt] = DeepAK8_SF_17[ipt];
-		DeepAK8_MD_SF[ipt] = DeepAK8_MD_SF_17[ipt];
-		DeepAK8_MD_SF_up[ipt] = DeepAK8_MD_SF_17_up[ipt];
-		DeepAK8_MD_SF_dn[ipt] = DeepAK8_MD_SF_17_dn[ipt];
-	}
-	
-   for(int ij=0; ij<2; ij++){
-	 for(int imsd=0; imsd<nsdmassbins; imsd++){
-		cor_b_sdmass_mc[ij][imsd] = cor_b_sdmass_mc_17[ij][imsd];
-		cor_b_sdmass_data[ij][imsd] = cor_b_sdmass_data_17[ij][imsd];
-		}
-	 }		
-   
-   for(int ieta=0; ieta<netabins; ieta++){
-	 for(int ivar=0; ivar<5; ivar++){
-		for(int jvar=0; jvar<5; jvar++){
-			
-			COV_sig_data[ieta][ivar][jvar] = COV_sig_data_17[ieta][ivar][jvar] ;
-			COV_sig_mc[ieta][ivar][jvar] = COV_sig_mc_17[ieta][ivar][jvar] ;
-			COV_val_data[ieta][ivar][jvar] = COV_val_data_17[ieta][ivar][jvar] ;
-			COV_val_mc[ieta][ivar][jvar] = COV_val_mc_17[ieta][ivar][jvar] ;
-			
-			}
-		}
-	 }
-   
-   	
-#endif
-
-#ifdef Anal_2018
-   btagvalue = 0.8838; 
-   btagvalue_deepCSV = 0.4184; //0.7527  ;//tight  0.4184; //medium // deepcsv 
-   btagvalue_deepFlavB = 0.6;  //0.7264; ;//tight   0.2770;  // medium	//deepflav
-   
-   deepak8_cut = 0.922;      // 2018 0.5% mistag rate
-   deepak8_cut_md = 0.685;   // 2018 0.5% mistag rate
-   
-   for(int ipt=0; ipt<noAK8ptbins; ipt++){
-		DeepAK8_SF[ipt] = DeepAK8_SF_18[ipt];
-		DeepAK8_MD_SF[ipt] = DeepAK8_MD_SF_18[ipt];
-		DeepAK8_MD_SF_up[ipt] = DeepAK8_MD_SF_18_up[ipt];
-		DeepAK8_MD_SF_dn[ipt] = DeepAK8_MD_SF_18_dn[ipt];
-	}
-   
-   for(int ij=0; ij<2; ij++){
-	 for(int imsd=0; imsd<nsdmassbins; imsd++){
-		cor_b_sdmass_mc[ij][imsd] = cor_b_sdmass_mc_18[ij][imsd];
-		cor_b_sdmass_data[ij][imsd] = cor_b_sdmass_data_18[ij][imsd];
-		}
-	 }	 
-   
-   for(int ieta=0; ieta<netabins; ieta++){
-	 for(int ivar=0; ivar<5; ivar++){
-		for(int jvar=0; jvar<5; jvar++){
-			
-			COV_sig_data[ieta][ivar][jvar] = COV_sig_data_18[ieta][ivar][jvar] ;
-			COV_sig_mc[ieta][ivar][jvar] = COV_sig_mc_18[ieta][ivar][jvar] ;
-			COV_val_data[ieta][ivar][jvar] = COV_val_data_18[ieta][ivar][jvar] ;
-			COV_val_mc[ieta][ivar][jvar] = COV_val_mc_18[ieta][ivar][jvar] ;
-			
-			}
-		}
-	 }
-   
-#endif
+sprintf(name,"$LHAPDF_DATA_PATH/cteq66");
+LHAPDF::initPDFSet(name, LHAPDF::LHGRID, 0);
+//LHAPDF::PDFSet set(name);
  
 }
+
 Bool_t Anal_Nano_PROOF::Process(Long64_t entry)
 {
    // The Process() function is called for each entry in the tree (or possibly
@@ -4041,11 +4548,12 @@ Bool_t Anal_Nano_PROOF::Process(Long64_t entry)
 	   FatJet_msoftdrop[fjet] = FatJet_msoftdrop[ijet];
 	   FatJet_pt[fjet] = FatJet_pt[ijet];
 	   #else
-	   FatJet_mass[fjet] = FatJet_mass_nom[ijet];
 	   if(isMC){
-	   FatJet_msoftdrop[fjet] = FatJet_msoftdrop_raw[ijet]*FatJet_corr_JER[ijet]*FatJet_msoftdrop_corr_JMS[ijet]*FatJet_msoftdrop_corr_JMR[ijet];
+	   FatJet_mass[fjet] = (FatJet_mass_raw[ijet]*FatJet_corr_JEC[ijet]*FatJet_corr_JER[ijet]);	   
+	   FatJet_msoftdrop[fjet] = FatJet_msoftdrop_raw[ijet]*FatJet_corr_JER[ijet];//*FatJet_msoftdrop_corr_JMS[ijet]*FatJet_msoftdrop_corr_JMR[ijet];
 	   }else{
-		   FatJet_msoftdrop[fjet] = FatJet_msoftdrop_raw[ijet]*FatJet_msoftdrop_corr_JMS[ijet];
+		   FatJet_mass[fjet] = (FatJet_mass_raw[ijet]*FatJet_corr_JEC[ijet]);		
+		   FatJet_msoftdrop[fjet] = FatJet_msoftdrop_raw[ijet];//*FatJet_msoftdrop_corr_JMS[ijet];
 		   }
 	   FatJet_pt[fjet] = FatJet_pt_nom[ijet];
 	   #endif
@@ -4728,7 +5236,7 @@ Bool_t Anal_Nano_PROOF::Process(Long64_t entry)
 //	   Jet_deepCSVbtagSF_shape[fjet] = Jet_deepCSVbtagSF_shape[ijet];
 //	   Jet_CSVbtagSF_shape[fjet] = Jet_CSVbtagSF_shape[ijet];
 
-		#ifdef Anal_2018
+	   #ifdef Anal_2018
 	   if(isMC){
 		   if(Jet_phi[fjet]>-1.57 && Jet_phi[fjet]<-0.87){
 			   if(Jet_eta[fjet]>-2.5 && Jet_eta[fjet]<-1.3) { 
@@ -4736,11 +5244,10 @@ Bool_t Anal_Nano_PROOF::Process(Long64_t entry)
 				   Jet_mass[fjet] = 0.8*Jet_mass[fjet];
 				   Jet_pt[fjet] = 0.8*Jet_pt[fjet];
 				   }
-			   if(FatJet_eta[fjet]>-3.0 && FatJet_eta[fjet]<-2.5) {
+			   if(Jet_eta[fjet]>-3.0 && Jet_eta[fjet]<-2.5) {
 		//	   	   scale down jES by 35 % for jets with -1.57 <phi< -0.87 and -3.0<eta<-2.5	   
-				   FatJet_mass[fjet] = 0.65*FatJet_mass[fjet];
-				   FatJet_msoftdrop[fjet] = 0.65*FatJet_msoftdrop[fjet];
-				   FatJet_pt[fjet] = 0.65*FatJet_pt[fjet];
+				   Jet_mass[fjet] = 0.65*Jet_mass[fjet];
+				   Jet_pt[fjet] = 0.65*Jet_pt[fjet];
 				   }	   
 			   }
 		   }
@@ -5245,11 +5752,11 @@ Bool_t Anal_Nano_PROOF::Process(Long64_t entry)
        weightev = 1;
 	   }  
    
-//   if(!isSignal){
+   if(isMC){
 	#if defined(Anal_2016) || defined(Anal_2017) 
 	weight *= PrefireWeight;
 	#endif
-//    }
+    }
     
     #ifdef Anal_2018
     
@@ -5258,8 +5765,83 @@ Bool_t Anal_Nano_PROOF::Process(Long64_t entry)
     PrefireWeight_Down = 1;
     
     #endif
+    
+    if(!isMC){
+		PrefireWeight = 1;
+		PrefireWeight_Up = 1;
+		PrefireWeight_Down = 1;	
+	}
    
    Tout->Fill();
+   
+   if(isMC){
+	   
+	   int igentop = -1;
+	   int igenb = -1;
+	   
+	   double maxgmass = -100;
+	   
+	   for(unsigned ijet=0; ijet<nGenJetAK8; ijet++){
+		
+			hist_pt_GEN_ak8->Fill(GenJetAK8_pt[ijet],Generator_weight);
+			hist_eta_GEN_ak8->Fill(GenJetAK8_eta[ijet],Generator_weight);
+			
+			if(ijet==0){
+				
+				hist_pt_GEN_ak8_lead->Fill(GenJetAK8_pt[ijet],Generator_weight);
+				hist_eta_GEN_ak8_lead->Fill(GenJetAK8_eta[ijet],Generator_weight);
+				
+				}
+				
+			if(GenJetAK8_mass[ijet] > maxgmass) { 	
+				igentop = ijet;
+				maxgmass = GenJetAK8_mass[ijet];
+			}
+			
+		}
+		
+		for(unsigned ijet=0; ijet<nGenJet; ijet++){
+		
+			hist_pt_GEN_ak4->Fill(GenJet_pt[ijet],Generator_weight);
+			hist_eta_GEN_ak4->Fill(GenJet_eta[ijet],Generator_weight);
+			
+			if(ijet==0){
+				
+				hist_pt_GEN_ak4_lead->Fill(GenJet_pt[ijet],Generator_weight);
+				hist_eta_GEN_ak4_lead->Fill(GenJet_eta[ijet],Generator_weight);
+				
+				}
+			
+		}
+		
+		if(igentop>=0){
+		
+		for(unsigned ijet=0; ijet<nGenJet; ijet++){
+			if(delta2R(GenJetAK8_eta[igentop],GenJetAK8_phi[igentop],GenJet_eta[ijet],GenJet_phi[ijet]) > 1.2){
+				if (fabs(PhiInRange(GenJetAK8_phi[igentop] - GenJet_phi[ijet])) > 0.5*M_PI){
+					igenb = ijet;
+					break;
+					}
+				}
+			}
+		
+		if(igenb>=0){
+			
+			TLorentzVector tak8_gen; 
+			tak8_gen.SetPtEtaPhiM(GenJetAK8_pt[igentop],GenJetAK8_eta[igentop],GenJetAK8_phi[igentop],GenJetAK8_mass[igentop]);
+			
+			TLorentzVector bak4_gen; 
+			bak4_gen.SetPtEtaPhiM(GenJet_pt[igenb],GenJet_eta[igenb],GenJet_phi[igenb],GenJet_mass[igenb]);
+			
+			if(tak8_gen.Pt()>500 && bak4_gen.Pt()>500){
+				hist_mtb_GEN->Fill((tak8_gen+bak4_gen).M(),Generator_weight);
+			}
+			
+		}
+		
+	  }
+		
+	}
    
    hist_npv->Fill(PV_npvsGood,weight);
    if(isMC && puWeight>1.e-9){
@@ -5610,6 +6192,10 @@ Bool_t Anal_Nano_PROOF::Process(Long64_t entry)
    hist_nmuons->Fill(nMuon,weight);
    hist_nelectrons->Fill(nElectron,weight);
    hist_nphotons->Fill(nPhoton,weight);
+   
+   if(had_trig){
+	   hist_nmuons_trig_pass->Fill(nMuon,weight);
+	   }
       
    if((nMuon  > 0) && (Muon_pt[0]>lepptcut))  return kFALSE;
    if((nElectron  > 0) && (Electron_pt[0]>lepptcut)) return kFALSE;
@@ -5806,7 +6392,7 @@ Bool_t Anal_Nano_PROOF::Process(Long64_t entry)
 
 // quarks from top //
 
-int top_d[6];
+int top_d[6]={-1,-1,-1,-1,-1,-1};
 int ist=0; int isqg = 0;
 int qp[4] = {-1,-1,-1,-1};
 int bp[2] = {-1,-1};
@@ -5853,18 +6439,22 @@ for(unsigned igen=0; igen<nGenPart; igen++){
 	
 	}
 
+}
+
+if(isMC && TopTagging){
+
 for(unsigned igen=0; igen<nGenPart; igen++){
 	if(GenPart_status[igen]==0) continue;
 			  
 		int isprompt = *(decToBinary(GenPart_statusFlags[igen])+0);//((decToBinary(GenPart_statusFlags[igen]))%10);
-		int fromhard = *(decToBinary(GenPart_statusFlags[igen])+8);//((decToBinary(GenPart_statusFlags[igen]))/100000000);
 		int ishard = *(decToBinary(GenPart_statusFlags[igen])+7);//((decToBinary(GenPart_statusFlags[igen]))/10000000)%10;
-		int isLastcopy = *(decToBinary(GenPart_statusFlags[igen])+13);
 		int isFirstcopy = *(decToBinary(GenPart_statusFlags[igen])+12);
+		int fromhard = *(decToBinary(GenPart_statusFlags[igen])+8);//((decToBinary(GenPart_statusFlags[igen]))/100000000);
+		int isLastcopy = *(decToBinary(GenPart_statusFlags[igen])+13);
 		int pid = abs(GenPart_pdgId[igen]);
 		
 		if(ngtop>0){  
-			if((isprompt==1) && (fromhard==1) && (abs(GenPart_status[igen])==23) && (GenPart_genPartIdxMother[igen] >= 0) && (abs(GenPart_pdgId[igen])<6)){
+			if((isprompt==1) && (fromhard==1) && (abs(GenPart_status[igen])==23) && (GenPart_genPartIdxMother[igen] >= 0) && (pid<6)){
 				if((abs(GenPart_pdgId[igen])==5 && abs(GenPart_pdgId[GenPart_genPartIdxMother[igen]])==6)||(abs(GenPart_pdgId[igen])<5 && abs(GenPart_pdgId[GenPart_genPartIdxMother[igen]])==24)){
 					top_d[ist] = igen;
 					ist++;
@@ -5899,12 +6489,12 @@ if(!isSignal && ngtop>0){
 		int iq = 0; int ib = 0;
 		  
 		for(int id=0; id<ist; id++){
-			if(abs(GenPart_pdgId[top_d[id]])<5)  { qp[iq] = top_d[id]; iq++; }
+			if(top_d[id]>=0 && abs(GenPart_pdgId[top_d[id]])<5)  { qp[iq] = top_d[id]; iq++; }
 			if(iq>=4) break;
 		}
 		
 		for(int id=0; id<ist; id++){
-			if(abs(GenPart_pdgId[top_d[id]])==5) { bp[ib] = top_d[id]; ib++; }
+			if(top_d[id]>=0 && abs(GenPart_pdgId[top_d[id]])==5) { bp[ib] = top_d[id]; ib++; }
 			if(ib>=2) break;
 		}
 		  
@@ -6067,9 +6657,9 @@ if(gnjetAK8_top>=0 && isMC && isSignal){
 SF_toppt =  1;
 
 if(ngtop==2 && isTTBar && isMC){
-//	SF_toppt =  sqrt(exp(0.0615-0.0005*GenPart_pt[igtop[0]]) * exp(0.0615-0.0005*GenPart_pt[igtop[1]]));
-//	weight_t *= SF_toppt;
-  SF_toppt =  sqrt(exp(0.0615-0.0005*TMath::Min(float(400.),GenPart_pt[igtop[0]])) * exp(0.0615-0.0005*TMath::Min(float(400.),GenPart_pt[igtop[1]])));
+	SF_toppt =  sqrt(exp(0.0615-0.0005*GenPart_pt[igtop[0]]) * exp(0.0615-0.0005*GenPart_pt[igtop[1]]));
+//	SF_toppt = SF_TOP(0.0615,0.0005,GenPart_pt[igtop[0]],GenPart_pt[igtop[1]]);
+//  SF_toppt =  sqrt(exp(0.0615-0.0005*TMath::Min(float(400.),GenPart_pt[igtop[0]])) * exp(0.0615-0.0005*TMath::Min(float(400.),GenPart_pt[igtop[1]])));
   //*sqrt(EW_toppt_cor(GenPart_pt[igtop[0]])*EW_toppt_cor(GenPart_pt[igtop[1]]));
   weight_t *= SF_toppt;
 }
@@ -6082,9 +6672,11 @@ if(ngtop==2 && isTTBar && isMC){
 
 sfwt_tau32 = 1;
 	  
-if((nghtop>0) && isMC && (nghtop>=0)){
+if((nghtop>0) && isMC && TopTagging){
 
 for(int ih=0; ih<nghtop; ih++){
+	 
+ if(ihtop[ih]<0) continue;		 
 	 
  for(unsigned ijet=0; ijet<nFatJet; ijet++){
 			
@@ -6156,7 +6748,7 @@ if(isMC){
 			if(isTTDiLep){
 				ttag_eff = 0.35; // tt hadronic 
 			}
-			if(isST){
+			if(isST||isSignal){
 				ttag_eff = 0.55; // tt hadronic 
 			}
 		 }
@@ -6722,14 +7314,14 @@ if(topjetAK8>=0){
 				 if(FatJet_deepTagMD_TvsQCD[topjetAK8] >= deepak8_cut_md) { mdtop_wp = 2; }
 				 if(FatJet_deepTagMD_TvsQCD[topjetAK8] < deepak8_cut_md) { mdtop_wp = 3; }
 			  
-				 if(tau32AK8 < tau32_cut && FatJet_msoftdrop[topjetAK8] >= 0 && FatJet_msoftdrop[topjetAK8] < topmasslow && FatJet_msoftdrop[topjetAK8] > minmasscut) { top_wp = 4; }
-				 if(tau32AK8 >= tau32_cut && FatJet_msoftdrop[topjetAK8] >= 0 && FatJet_msoftdrop[topjetAK8] < topmasslow && FatJet_msoftdrop[topjetAK8] > minmasscut) { top_wp = 5; }
+				 if(tau32AK8 < tau32_cut && FatJet_msoftdrop[topjetAK8] >= minmasscut && FatJet_msoftdrop[topjetAK8] < topmasslow) { top_wp = 4; }
+				 if(tau32AK8 >= tau32_cut && FatJet_msoftdrop[topjetAK8] >= minmasscut && FatJet_msoftdrop[topjetAK8] < topmasslow) { top_wp = 5; }
 				 
-				 if(FatJet_deepTag_TvsQCD[topjetAK8] >= deepak8_cut && FatJet_msoftdrop[topjetAK8] >= 0 && FatJet_msoftdrop[topjetAK8] < topmasslow && FatJet_msoftdrop[topjetAK8] > minmasscut) { dtop_wp = 4; }
-				 if(FatJet_deepTag_TvsQCD[topjetAK8] < deepak8_cut && FatJet_msoftdrop[topjetAK8] >= 0 && FatJet_msoftdrop[topjetAK8] < topmasslow && FatJet_msoftdrop[topjetAK8] > minmasscut) { dtop_wp = 5; }
+				 if(FatJet_deepTag_TvsQCD[topjetAK8] >= deepak8_cut && FatJet_msoftdrop[topjetAK8] >= minmasscut && FatJet_msoftdrop[topjetAK8] < topmasslow) { dtop_wp = 4; }
+				 if(FatJet_deepTag_TvsQCD[topjetAK8] < deepak8_cut && FatJet_msoftdrop[topjetAK8] >= minmasscut && FatJet_msoftdrop[topjetAK8] < topmasslow) { dtop_wp = 5; }
 				 
-				 if(FatJet_deepTagMD_TvsQCD[topjetAK8] >= deepak8_cut_md && FatJet_msoftdrop[topjetAK8] >= 0 && FatJet_msoftdrop[topjetAK8] < topmasslow && FatJet_msoftdrop[topjetAK8] > minmasscut) { mdtop_wp = 4; }
-				 if(FatJet_deepTagMD_TvsQCD[topjetAK8] < deepak8_cut_md && FatJet_msoftdrop[topjetAK8] >= 0 && FatJet_msoftdrop[topjetAK8] < topmasslow && FatJet_msoftdrop[topjetAK8] > minmasscut) { mdtop_wp = 5; }
+				 if(FatJet_deepTagMD_TvsQCD[topjetAK8] >= deepak8_cut_md && FatJet_msoftdrop[topjetAK8] >= minmasscut && FatJet_msoftdrop[topjetAK8] < topmasslow) { mdtop_wp = 4; }
+				 if(FatJet_deepTagMD_TvsQCD[topjetAK8] < deepak8_cut_md && FatJet_msoftdrop[topjetAK8] >= minmasscut && FatJet_msoftdrop[topjetAK8] < topmasslow) { mdtop_wp = 5; }
 			  
 				 if(tau32AK8 < tau32_cut && FatJet_msoftdrop[topjetAK8] >= topmasshigh) { top_wp = 6; }
 				 if(tau32AK8 >= tau32_cut && FatJet_msoftdrop[topjetAK8] >= topmasshigh) { top_wp = 7; }
@@ -6883,6 +7475,11 @@ if(topjetAK8>=0){
 					hist_biso_TopAK8score_MD_1->Fill(FatJet_deepTagMD_TvsQCD[AK8matchb],weight);
 					hist_biso_WAK8score_1->Fill(FatJet_deepTag_WvsQCD[AK8matchb],weight);
 					hist_biso_WAK8score_MD_1->Fill(FatJet_deepTagMD_WvsQCD[AK8matchb],weight);
+					
+					if(FatJet_msoftdrop[AK8matchb]>60){
+						hist_biso_TopAK8score_masscut_1->Fill(FatJet_deepTag_TvsQCD[AK8matchb],weight);
+						hist_biso_TopAK8score_MD_masscut_1->Fill(FatJet_deepTagMD_TvsQCD[AK8matchb],weight);
+					}
 					
 					if(bjet_wp>=0){
 						hist_biso_mass_btag_1[bjet_wp]->Fill(FatJet_msoftdrop[AK8matchb],weight);
@@ -7046,7 +7643,9 @@ if(topjetAK8>=0){
 	  if(topjetAK8>=0 && bjetAK4>=0){
 		  
 		  hist_npv_final->Fill(PV_npvsGood,weight);
+		  if(puWeight>1.e-9){
 		  hist_npv_final_nopuwt->Fill(PV_npvsGood,weight*1./puWeight);
+		  }
 		  
 		  TLorentzVector tjet; 
 		  tjet.SetPtEtaPhiM(FatJet_pt[topjetAK8],FatJet_eta[topjetAK8],FatJet_phi[topjetAK8],FatJet_mass[topjetAK8]);
@@ -7119,115 +7718,10 @@ if(topjetAK8>=0){
 		  
 		  }
 	  
-			weight1 = weight_t * sfwt_tau32 * exwt;
-			weight2 = weight_t * sfwt_tau32 * exwt2;
-		  
-		  
-		  hist_tbmass_1[ittag][ibtag][isubbtag]->Fill((tjet+bjet).M(),weight1);
-		  hist_tbpt_1[ittag][ibtag][isubbtag]->Fill((tjet+bjet).Pt(),weight1);
-		  hist_tbrap_1[ittag][ibtag][isubbtag]->Fill((tjet+bjet).Rapidity(),weight1);
-		  hist_tbpt_frac_1[ittag][ibtag][isubbtag]->Fill(TMath::Min(tjet.Pt(),bjet.Pt())/(tjet.Pt()+bjet.Pt()),weight1);
-		  hist_tbtheta_diff_1[ittag][ibtag][isubbtag]->Fill(tjet.Vect()*bjet.Vect()/(tjet.Vect().Mag() * bjet.Vect().Mag()),weight1);
-		  hist_tbphi_diff_1[ittag][ibtag][isubbtag]->Fill(PhiInRange(tjet.Phi()-bjet.Phi()),weight1);
-		  if(isMC){ 
-		  	hist_partonflav_AK4_1[ittag][ibtag][isubbtag]->Fill(Jet_partonFlavour[bjetAK4],weight1);
-		  }
-		  hist_2D_sdmass_tbmass_1[ibtag][tautag]->Fill(FatJet_msoftdrop[topjetAK8],(tjet+bjet).M(),weight1);
-		  hist_2D_DeepAK8_tbmass_1[ibtag]->Fill(FatJet_deepTag_TvsQCD[topjetAK8],(tjet+bjet).M(),weight1);
-		  hist_2D_MDDeepAK8_tbmass_1[ibtag]->Fill(FatJet_deepTagMD_TvsQCD[topjetAK8],(tjet+bjet).M(),weight1);
-		  
-		  hist_2D_sdmass_subbtag_CSVv2_AK8_1[ibtag][tautag]->Fill(FatJet_msoftdrop[topjetAK8],FatJet_subbtagCSVV2[topjetAK8],weight1);
-		  hist_2D_sdmass_subbtag_DeepCSV_AK8_1[ibtag][tautag]->Fill(FatJet_msoftdrop[topjetAK8],FatJet_subbtagDeepB[topjetAK8],weight1);
-		  hist_2D_sdmass_tau32_AK8_reg_1[ibtag][isubbtag]->Fill(FatJet_msoftdrop[topjetAK8],tau32,weight1);
-		  #ifdef Btagger_DeepJet
-			hist_2D_pt_btag_AK4_1[isubbtag][ittag]->Fill(Jet_pt[bjetAK4],Jet_btagDeepFlavB[bjetAK4],weight1);
-		  #endif
-		  #ifdef Btagger_DeepCSV
-			hist_2D_pt_btag_AK4_1[isubbtag][ittag]->Fill(Jet_pt[bjetAK4],Jet_btagDeepB[bjetAK4],weight1);
-		  #endif
-		  #ifdef Btagger_CSVv2
-			hist_2D_pt_btag_AK4_1[isubbtag][ittag]->Fill(Jet_pt[bjetAK4],Jet_btagCSVV2[bjetAK4],weight1);
-		  #endif
-		  hist_2D_sdmass_deeptopscore_AK8_1[ibtag][isubbtag]->Fill(FatJet_msoftdrop[topjetAK8],FatJet_deepTag_TvsQCD[topjetAK8],weight1);
-		  hist_2D_sdmass_deeptopscore_md_AK8_1[ibtag][isubbtag]->Fill(FatJet_msoftdrop[topjetAK8],FatJet_deepTagMD_TvsQCD[topjetAK8],weight1);
-		  
-		  hist_topjetpt_sel_1[ittag][ibtag][isubbtag]->Fill(FatJet_pt[topjetAK8],weight1);
-		  hist_topjetsdmass_sel_1[ittag][ibtag][isubbtag]->Fill(FatJet_msoftdrop[topjetAK8],weight1);
-		  hist_topjetdeeptopscore_sel_1[ittag][ibtag][isubbtag]->Fill(FatJet_deepTag_TvsQCD[topjetAK8],weight1);
-		  hist_topjetdeepmdtopscore_sel_1[ittag][ibtag][isubbtag]->Fill(FatJet_deepTagMD_TvsQCD[topjetAK8],weight1);
-		  hist_topjetsbtag_sel_1[ittag][ibtag][isubbtag]->Fill(FatJet_subbtagCSVV2[topjetAK8],weight1);
-		  hist_topjetsdeepCSV_sel_1[ittag][ibtag][isubbtag]->Fill(FatJet_subbtagDeepB[topjetAK8],weight1);
-		  hist_topjettau32_sel_1[ittag][ibtag][isubbtag]->Fill(tau32,weight1);
-		  
-		  hist_bjetpt_sel_1[ittag][ibtag][isubbtag]->Fill(Jet_pt[bjetAK4],weight1);
-		  hist_bjetmass_sel_1[ittag][ibtag][isubbtag]->Fill(bjet.M(),weight1);
-		  #ifdef Btagger_DeepJet
-			hist_bjetbtag_sel_1[ittag][ibtag][isubbtag]->Fill(Jet_btagDeepFlavB[bjetAK4],weight1);
-		  #endif
-		  #ifdef Btagger_DeepCSV
-		 	hist_bjetbtag_sel_1[ittag][ibtag][isubbtag]->Fill(Jet_btagDeepB[bjetAK4],weight1);
-	      #endif
-		  #ifdef Btagger_CSVv2
-			hist_bjetbtag_sel_1[ittag][ibtag][isubbtag]->Fill(Jet_btagCSVV2[bjetAK4],weight1);
-		  #endif
-			  
-		  if(Jet_MatchFatJet[bjetAK4] >= 0){
-		  hist_bjetmatch_AK8Topscore_sel_1[ittag][ibtag][isubbtag]->Fill(FatJet_deepTag_TvsQCD[Jet_MatchFatJet[bjetAK4]],weight1);
-		  hist_bjetmatch_AK8Wscore_sel_1[ittag][ibtag][isubbtag]->Fill(FatJet_deepTag_WvsQCD[Jet_MatchFatJet[bjetAK4]],weight1);
-		  }
+		  weight1 = weight_t * sfwt_tau32 * exwt;
+		  weight2 = weight_t * sfwt_tau32 * exwt2;
 		  
 		  if(Jet_pt[bjetAK4] > AK4ptcut_fi){
-			  
-			  hist_tbmass_2[ittag][ibtag][isubbtag]->Fill((tjet+bjet).M(),weight1);
-			  hist_tbpt_2[ittag][ibtag][isubbtag]->Fill((tjet+bjet).Pt(),weight1);
-		      hist_tbrap_2[ittag][ibtag][isubbtag]->Fill((tjet+bjet).Rapidity(),weight1);
-		      hist_tbpt_frac_2[ittag][ibtag][isubbtag]->Fill(TMath::Min(tjet.Pt(),bjet.Pt())/(tjet.Pt()+bjet.Pt()),weight1);
-		      if(isMC){ 
-		      	hist_partonflav_AK4_2[ittag][ibtag][isubbtag]->Fill(Jet_partonFlavour[bjetAK4],weight1);
-			  }
-			  hist_2D_sdmass_tbmass_2[ibtag][tautag]->Fill(FatJet_msoftdrop[topjetAK8],(tjet+bjet).M(),weight1);
-			  hist_2D_DeepAK8_tbmass_2[ibtag]->Fill(FatJet_deepTag_TvsQCD[topjetAK8],(tjet+bjet).M(),weight1);
-			  hist_2D_MDDeepAK8_tbmass_2[ibtag]->Fill(FatJet_deepTagMD_TvsQCD[topjetAK8],(tjet+bjet).M(),weight1);
-		  
-			  hist_2D_sdmass_subbtag_CSVv2_AK8_2[ibtag][tautag]->Fill(FatJet_msoftdrop[topjetAK8],FatJet_subbtagCSVV2[topjetAK8],weight1);
-			  hist_2D_sdmass_subbtag_DeepCSV_AK8_2[ibtag][tautag]->Fill(FatJet_msoftdrop[topjetAK8],FatJet_subbtagDeepB[topjetAK8],weight1);
-			  hist_2D_sdmass_tau32_AK8_reg_2[ibtag][isubbtag]->Fill(FatJet_msoftdrop[topjetAK8],tau32,weight1);
-		      #ifdef Btagger_DeepJet
-				hist_2D_pt_btag_AK4_2[isubbtag][ittag]->Fill(Jet_pt[bjetAK4],Jet_btagDeepFlavB[bjetAK4],weight1);
-			  #endif
-			  #ifdef Btagger_DeepCSV
-				hist_2D_pt_btag_AK4_2[isubbtag][ittag]->Fill(Jet_pt[bjetAK4],Jet_btagDeepB[bjetAK4],weight1);
-			  #endif
-			  #ifdef Btagger_CSVv2
-				hist_2D_pt_btag_AK4_2[isubbtag][ittag]->Fill(Jet_pt[bjetAK4],Jet_btagCSVV2[bjetAK4],weight1);
-			  #endif
-			  hist_2D_sdmass_deeptopscore_AK8_2[ibtag][isubbtag]->Fill(FatJet_msoftdrop[topjetAK8],FatJet_deepTag_TvsQCD[topjetAK8],weight1);
-			  hist_2D_sdmass_deeptopscore_md_AK8_2[ibtag][isubbtag]->Fill(FatJet_msoftdrop[topjetAK8],FatJet_deepTagMD_TvsQCD[topjetAK8],weight1);
-		  
-		      hist_topjetpt_sel_2[ittag][ibtag][isubbtag]->Fill(FatJet_pt[topjetAK8],weight1);
-		      hist_topjetsdmass_sel_2[ittag][ibtag][isubbtag]->Fill(FatJet_msoftdrop[topjetAK8],weight1);
-		      hist_topjetsbtag_sel_2[ittag][ibtag][isubbtag]->Fill(FatJet_subbtagCSVV2[topjetAK8],weight1);
-		      hist_topjetsdeepCSV_sel_2[ittag][ibtag][isubbtag]->Fill(FatJet_subbtagDeepB[topjetAK8],weight1);
-		      hist_topjettau32_sel_2[ittag][ibtag][isubbtag]->Fill(tau32,weight1);
-		      hist_topjetdeeptopscore_sel_2[ittag][ibtag][isubbtag]->Fill(FatJet_deepTag_TvsQCD[topjetAK8],weight1);
-		      hist_topjetdeepmdtopscore_sel_2[ittag][ibtag][isubbtag]->Fill(FatJet_deepTagMD_TvsQCD[topjetAK8],weight1);
-		  
-		      hist_bjetpt_sel_2[ittag][ibtag][isubbtag]->Fill(Jet_pt[bjetAK4],weight1);
-		      hist_bjetmass_sel_2[ittag][ibtag][isubbtag]->Fill(bjet.M(),weight1);
-			  #ifdef Btagger_DeepJet
-				hist_bjetbtag_sel_2[ittag][ibtag][isubbtag]->Fill(Jet_btagDeepFlavB[bjetAK4],weight1);
-			  #endif
-			  #ifdef Btagger_DeepCSV
-				hist_bjetbtag_sel_2[ittag][ibtag][isubbtag]->Fill(Jet_btagDeepB[bjetAK4],weight1);
-			  #endif
-			  #ifdef Btagger_CSVv2
-				hist_bjetbtag_sel_2[ittag][ibtag][isubbtag]->Fill(Jet_btagCSVV2[bjetAK4],weight1);
-			  #endif
-					
-			  if(Jet_MatchFatJet[bjetAK4] >= 0){
-			  hist_bjetmatch_AK8Topscore_sel_2[ittag][ibtag][isubbtag]->Fill(FatJet_deepTag_TvsQCD[Jet_MatchFatJet[bjetAK4]],weight1);
-			  hist_bjetmatch_AK8Wscore_sel_2[ittag][ibtag][isubbtag]->Fill(FatJet_deepTag_WvsQCD[Jet_MatchFatJet[bjetAK4]],weight1);
-			  }
 			  
 			  if((Jet_MatchFatJet[bjetAK4]>=0)&&(FatJet_msoftdrop[Jet_MatchFatJet[bjetAK4]] < bmasscut_fun(FatJet_pt[Jet_MatchFatJet[bjetAK4]]))){
 			 /*
@@ -7294,65 +7788,6 @@ if(topjetAK8>=0){
 					
 					hist_ht_tau32[imdttag][ibtag][isubbtag]->Fill(Event_Ht,weight1);
 					
-					if(1>0){
-						
-						hist_tbmass_3[ittag][ibtag][isubbtag]->Fill((tjet+bjet).M(),weight2);
-						hist_tbpt_3[ittag][ibtag][isubbtag]->Fill((tjet+bjet).Pt(),weight2);
-						hist_tbrap_3[ittag][ibtag][isubbtag]->Fill((tjet+bjet).Rapidity(),weight2);
-						hist_tbpt_frac_3[ittag][ibtag][isubbtag]->Fill(TMath::Min(tjet.Pt(),bjet.Pt())/(tjet.Pt()+bjet.Pt()),weight2);
-		    				if(isMC){ 
-							hist_partonflav_AK4_3[ittag][ibtag][isubbtag]->Fill(Jet_partonFlavour[bjetAK4],weight2);
-		  				}
-						hist_2D_sdmass_tbmass_3[ibtag][tautag]->Fill(FatJet_msoftdrop[topjetAK8],(tjet+bjet).M(),weight2);
-						hist_2D_DeepAK8_tbmass_3[ibtag]->Fill(FatJet_deepTag_TvsQCD[topjetAK8],(tjet+bjet).M(),weight2);
-						hist_2D_MDDeepAK8_tbmass_3[ibtag]->Fill(FatJet_deepTagMD_TvsQCD[topjetAK8],(tjet+bjet).M(),weight2);
-		  
-					    hist_2D_sdmass_subbtag_CSVv2_AK8_3[ibtag][tautag]->Fill(FatJet_msoftdrop[topjetAK8],FatJet_subbtagCSVV2[topjetAK8],weight2);
-						hist_2D_sdmass_subbtag_DeepCSV_AK8_3[ibtag][tautag]->Fill(FatJet_msoftdrop[topjetAK8],FatJet_subbtagDeepB[topjetAK8],weight2);
-						hist_2D_sdmass_tau32_AK8_reg_3[ibtag][isubbtag]->Fill(FatJet_msoftdrop[topjetAK8],tau32,weight2);
-						#ifdef Btagger_DeepJet
-							hist_2D_pt_btag_AK4_3[isubbtag][ittag]->Fill(Jet_pt[bjetAK4],Jet_btagDeepFlavB[bjetAK4],weight2);
-						#endif
-						#ifdef Btagger_DeepCSV
-							hist_2D_pt_btag_AK4_3[isubbtag][ittag]->Fill(Jet_pt[bjetAK4],Jet_btagDeepB[bjetAK4],weight2);
-						#endif
-						#ifdef Btagger_CSVv2
-							hist_2D_pt_btag_AK4_3[isubbtag][ittag]->Fill(Jet_pt[bjetAK4],Jet_btagCSVV2[bjetAK4],weight2);
-						#endif
-						hist_2D_sdmass_deeptopscore_AK8_3[ibtag][isubbtag]->Fill(FatJet_msoftdrop[topjetAK8],FatJet_deepTag_TvsQCD[topjetAK8],weight1);
-						hist_2D_sdmass_deeptopscore_md_AK8_3[ibtag][isubbtag]->Fill(FatJet_msoftdrop[topjetAK8],FatJet_deepTagMD_TvsQCD[topjetAK8],weight1);
-		  
-		  
-						hist_topjetpt_sel_3[ittag][ibtag][isubbtag]->Fill(FatJet_pt[topjetAK8],weight2);
-						hist_topjetsdmass_sel_3[ittag][ibtag][isubbtag]->Fill(FatJet_msoftdrop[topjetAK8],weight2);
-						hist_topjetdeeptopscore_sel_3[ittag][ibtag][isubbtag]->Fill(FatJet_deepTag_TvsQCD[topjetAK8],weight2);
-						hist_topjetdeepmdtopscore_sel_3[ittag][ibtag][isubbtag]->Fill(FatJet_deepTagMD_TvsQCD[topjetAK8],weight2);
-						hist_topjetsbtag_sel_3[ittag][ibtag][isubbtag]->Fill(FatJet_subbtagCSVV2[topjetAK8],weight2);
-						hist_topjetsdeepCSV_sel_3[ittag][ibtag][isubbtag]->Fill(FatJet_subbtagDeepB[topjetAK8],weight2);
-						hist_topjettau32_sel_3[ittag][ibtag][isubbtag]->Fill(tau32,weight2);
-		  
-						hist_bjetpt_sel_3[ittag][ibtag][isubbtag]->Fill(Jet_pt[bjetAK4],weight2);
-						hist_bjetmass_sel_3[ittag][ibtag][isubbtag]->Fill(bjet.M(),weight2);
-						
-						#ifdef Btagger_DeepJet
-							hist_bjetbtag_sel_3[ittag][ibtag][isubbtag]->Fill(Jet_btagDeepFlavB[bjetAK4],weight2);
-						#endif
-						#ifdef Btagger_DeepCSV
-							hist_bjetbtag_sel_3[ittag][ibtag][isubbtag]->Fill(Jet_btagDeepB[bjetAK4],weight2);
-						#endif
-						#ifdef Btagger_CSVv2
-							hist_bjetbtag_sel_3[ittag][ibtag][isubbtag]->Fill(Jet_btagCSVV2[bjetAK4],weight2);
-						#endif
-						
-						if(Jet_MatchFatJet[bjetAK4] >= 0){
-						hist_bjetmatch_AK8Topscore_sel_3[ittag][ibtag][isubbtag]->Fill(FatJet_deepTag_TvsQCD[Jet_MatchFatJet[bjetAK4]],weight2);
-						hist_bjetmatch_AK8Wscore_sel_3[ittag][ibtag][isubbtag]->Fill(FatJet_deepTag_WvsQCD[Jet_MatchFatJet[bjetAK4]],weight2);
-							}
-						
-						hist_ht_tau32_3[imdttag][ibtag][isubbtag]->Fill(Event_Ht,weight2);
-						
-						} // ht cut
-		  
 					} // cut on AK8 jet matched to b candidate (mass cut)
 			  
 			  } // b pt cut
@@ -7454,6 +7889,8 @@ if(topjetAK8>=0){
 
  if(imdttag>=0 && ibtag>=0 && isubbtag>=0){
 		  
+		  float m_tb = (tjet+bjet).M();
+		  
 		  float tau32 = FatJet_tau3[topjetAK8]*1./TMath::Max(float(1.e-6),FatJet_tau2[topjetAK8]);
 		  
 		  int deeptag = -1;
@@ -7463,14 +7900,15 @@ if(topjetAK8>=0){
 		  float exwt = 1.;
 		  float exwt2 = 1.;
 		  float exwt_sys = 0;
+		  float exwt_sys2 = 0;
 		  
 		  float cor_bsd = 1;
 		 
-		  float weight1, weight2;
+		  float weight1, weight2, weight3;
 		  
 		  int ieta = getbinid(fabs(Jet_eta[bjetAK4]),netabins,etabins);
 		  
-		  int imsdbin = getbinid(FatJet_msoftdrop[topjetAK8],ntopsdmassbins,topsdmassbins);
+//		  int imsdbin = getbinid(FatJet_msoftdrop[topjetAK8],ntopsdmassbins,topsdmassbins);
 
 		  if(FakeAnalysis){
 		  
@@ -7479,81 +7917,66 @@ if(topjetAK8>=0){
 
 		  if((imdttag==0||imdttag==4) && ibtag==0) {
 			   
-			  exwt = bpfrat_beta[ieta]->Eval(Jet_pt[bjetAK4]); 
+			  exwt = bpfrat_beta[ieta]->Eval(m_tb);   // taking pf ratio from mtb
 			  
-			  #if defined(Anal_2017) || defined(Anal_2018)
-			  
-			  if(ieta==2){
-				  if(isMC){
-					#ifdef Anal_2017
-					exwt_sys = 6.84223e-04; //2017
-					#endif 
-					#ifdef Anal_2018  
-					exwt_sys = 7.43203e-04; //2018
-					#endif 
-				 }else{
-					 #ifdef Anal_2017
-					exwt_sys = 5.30463e-04; //2017
-					#endif 
-					#ifdef Anal_2018  
-					exwt_sys = 4.79840e-04; //2018
-					#endif 
-					}
-			  }
-			  else{
-
 				for(int ivar=0; ivar<5; ivar++){
-					rvar[0][ivar] = fun_bdF[ivar][ieta]->Eval(bjet.Pt());
-					cvar[ivar][0] = fun_bdF[ivar][ieta]->Eval(bjet.Pt());
+					rvar[0][ivar] = fun_bdF[ivar][ieta]->Eval(m_tb);
+					cvar[ivar][0] = fun_bdF[ivar][ieta]->Eval(m_tb);
 				}
 
 				err1 = (cov_bpfrat_beta[ieta] * cvar);
 				err = (rvar * err1);
 			    exwt_sys = err(0,0);
 				exwt_sys = sqrt(exwt_sys);
-
-				}
 				
-			  #else
-			
-				for(int ivar=0; ivar<5; ivar++){
-					rvar[0][ivar] = fun_bdF[ivar][ieta]->Eval(bjet.Pt());
-					cvar[ivar][0] = fun_bdF[ivar][ieta]->Eval(bjet.Pt());
+				 exwt2 = bpfrat_pol2[ieta]->Eval(m_tb);   // taking pf ratio from mtb 
+				
+				for(int ivar=0; ivar<3; ivar++){
+					rvar2[0][ivar] = fun_bdF_pol2[ivar][ieta]->Eval(m_tb);
+					cvar2[ivar][0] = fun_bdF_pol2[ivar][ieta]->Eval(m_tb);
 				}
 
-				err1 = (cov_bpfrat_beta[ieta] * cvar);
-				err = (rvar * err1);
-			    exwt_sys = err(0,0);
-				exwt_sys = sqrt(exwt_sys);
-			
-			#endif	
+				err2 = (cov_bpfrat_pol2[ieta] * cvar2);
+				err_pol2 = (rvar2 * err2);
+			    exwt_sys2 = err_pol2(0,0);
+				exwt_sys2 = sqrt(exwt_sys2);
+			 
 			}
 			  
 		  if((imdttag==1||imdttag==5) && ibtag==0)  { 
-			  exwt = bpfrat_val_beta[ieta]->Eval(Jet_pt[bjetAK4]); 
+	 
+			  exwt = bpfrat_val_beta[ieta]->Eval(m_tb);                // taking pf ratio from mtb
 			  
 			  for(int ivar=0; ivar<5; ivar++){
-				  fun_val_bdF[ivar][ieta]->Eval(bjet.Pt());
-				  rvar[0][ivar] = fun_val_bdF[ivar][ieta]->Eval(bjet.Pt());
-				  cvar[ivar][0] = fun_val_bdF[ivar][ieta]->Eval(bjet.Pt());
+//				  fun_val_bdF[ivar][ieta]->Eval(bjet.Pt());
+				  rvar[0][ivar] = fun_val_bdF[ivar][ieta]->Eval(m_tb);
+				  cvar[ivar][0] = fun_val_bdF[ivar][ieta]->Eval(m_tb);
 			  }
 			  
 				err1 = (cov_bpfrat_val_beta[ieta] * cvar);
 				err =  (rvar * err1);
 				exwt_sys = err(0,0);
 				exwt_sys = sqrt(exwt_sys);
-
+	
+			  
+			  exwt2 = bpfrat_val_pol2[ieta]->Eval(m_tb);                // taking pf ratio from mtb
+			 
+			  for(int ivar=0; ivar<3; ivar++){
+				  rvar2[0][ivar] = fun_val_bdF_pol2[ivar][ieta]->Eval(m_tb);
+				  cvar2[ivar][0] = fun_val_bdF_pol2[ivar][ieta]->Eval(m_tb);
+			  }
+			  
+				err2 = (cov_bpfrat_val_pol2[ieta] * cvar2);
+				err_pol2 =  (rvar2 * err2);
+				exwt_sys2 = err_pol2(0,0);
+				exwt_sys2 = sqrt(exwt_sys2);
+			
 		  }
 		  
-		  if(exwt<0) { exwt = 0.001; }
+		  if(exwt<0) { exwt = 1.e-5; }//0.001; }
+		  if(exwt2<0) { exwt2 = 1.e-5; }//0.001; }
 		  
-/*		  
-		  if(imdttag==1 && ibtag==1) { exwt = tagpfrat_MDAK8->Eval(FatJet_msoftdrop[topjetAK8]); }
-		  if(imdttag==1 && ibtag==0) { 
-			  exwt = tagpfrat_MDAK8_val->Eval(FatJet_msoftdrop[topjetAK8]);
-//			  exwt2 = tagpfrat_MDAK8_val->Eval(FatJet_msoftdrop[topjetAK8]);
-			}
-*/		
+	
 			if(Jet_MatchFatJet[bjetAK4]>=0){
 			
 			int imsd_bin = getbinid(FatJet_msoftdrop[Jet_MatchFatJet[bjetAK4]],nsdmassbins,sdmassbins);
@@ -7570,9 +7993,15 @@ if(topjetAK8>=0){
 			}
 
 		}
-			
+		
 			weight1 = weight_t * sfwt_deepak8_md * cor_bsd * exwt ;
 			weight2 = weight_t * sfwt_deepak8_md * exwt ; // without b sd mass correction
+			
+			int iptsum = getbinid(tjet.Pt()+bjet.Pt(),nohtbins,htbins);
+			int imsdbin = getbinid(FatJet_msoftdrop[topjetAK8],ntopsdmassbins,topsdmassbins);
+			float trig_wt = 1;
+			if(iptsum>=0 && imsdbin>=0 && isMC){ trig_wt = trig_weight_factors[imsdbin][iptsum]; }
+			float weight_trig = weight1 * trig_wt;
 			
 			float weightup = weight_t * sfwt_deepak8_md * cor_bsd * (exwt+exwt_sys) ;
 			float weightdn = weight_t * sfwt_deepak8_md * cor_bsd * (exwt-exwt_sys) ;
@@ -7587,31 +8016,72 @@ if(topjetAK8>=0){
 			float weight_prefiredn = weight1 * PrefireWeight_Down *1./ PrefireWeight;
 			
 			float weight_noptw;
+			float weight_alphaup, weight_alphadn, weight_betaup, weight_betadn;
+			weight_noptw = 1;
+			weight_alphaup = 1; weight_alphadn = 1; weight_betaup = 1; weight_betadn = 1;
+			
 			if(isTTBar && isMC){
 				weight_noptw = weight1*1./SF_toppt;
+				if(ngtop==2){
+				weight_alphaup = weight1 * SF_TOP(1.5*0.0615,0.0005,GenPart_pt[igtop[0]],GenPart_pt[igtop[1]])/SF_toppt;
+				weight_alphadn = weight1 * SF_TOP(0.5*0.0615,0.0005,GenPart_pt[igtop[0]],GenPart_pt[igtop[1]])/SF_toppt;
+				weight_betaup = weight1 * SF_TOP(0.0615,1.5*0.0005,GenPart_pt[igtop[0]],GenPart_pt[igtop[1]])/SF_toppt;
+				weight_betadn = weight1 * SF_TOP(0.0615,0.5*0.0005,GenPart_pt[igtop[0]],GenPart_pt[igtop[1]])/SF_toppt;
+				}
 			}else{
 					weight_noptw = 1;
+					weight_alphaup = weight_alphadn = 1;
+					weight_betaup = weight_betadn = 1;
 				 }
-			
+				 
 			float weight_bcor_up = weight1 * (cor_bsd + 0.5*fabs(1-cor_bsd)) *1./cor_bsd;
 			float weight_bcor_dn = weight1 * (cor_bsd - 0.5*fabs(1-cor_bsd)) *1./cor_bsd;
+				 
+			
+			weight3 = weight_t * sfwt_deepak8_md * cor_bsd * exwt2 ;
+			
+			float weightup3 = weight_t * sfwt_deepak8_md * cor_bsd * (exwt2+exwt_sys2) ;
+			float weightdn3 = weight_t * sfwt_deepak8_md * cor_bsd * (exwt2-exwt_sys2) ;
+			
+			float weight_noptw3;
+			if(isTTBar && isMC){
+				weight_noptw3 = weight3*1./SF_toppt;
+			}else{
+					weight_noptw3 = 1;
+				 }	 
+			
+			float weight_bcor_up3 = weight3 * (cor_bsd + 0.5*fabs(1-cor_bsd)) *1./cor_bsd;
+			float weight_bcor_dn3 = weight3 * (cor_bsd - 0.5*fabs(1-cor_bsd)) *1./cor_bsd;
 			
 		  if(Jet_pt[bjetAK4] > AK4ptcut_fi){
 		    
-		  if((Jet_MatchFatJet[bjetAK4]>=0)&&(FatJet_msoftdrop[Jet_MatchFatJet[bjetAK4]] < bmasscut_fun(FatJet_pt[Jet_MatchFatJet[bjetAK4]]))){
-		 
+		  if((Jet_MatchFatJet[bjetAK4]>=0)&&(FatJet_msoftdrop[Jet_MatchFatJet[bjetAK4]] < bmasscut_fun(FatJet_pt[Jet_MatchFatJet[bjetAK4]]))){	
+			
 				hist_tbmass_md_DeepAK8[imdttag][ibtag][isubbtag]->Fill((tjet+bjet).M(),weight1);
 				hist_tbpt_md_DeepAK8[imdttag][ibtag][isubbtag]->Fill((tjet+bjet).Pt(),weight1);
 				hist_tbrap_md_DeepAK8[imdttag][ibtag][isubbtag]->Fill((tjet+bjet).Rapidity(),weight1);
-			
-				hist_tbmass_md_DeepAK8_pfup[imdttag][ibtag][isubbtag]->Fill((tjet+bjet).M(),weightup);
-				hist_tbmass_md_DeepAK8_pfdn[imdttag][ibtag][isubbtag]->Fill((tjet+bjet).M(),weightdn);
+				
+				hist_tbmass_md_DeepAK8_fine[imdttag][ibtag][isubbtag]->Fill((tjet+bjet).M(),weight1);
+				hist_tbmass_md_DeepAK8_fine_puup[imdttag][ibtag][isubbtag]->Fill((tjet+bjet).M(),weight_puup);
+				hist_tbmass_md_DeepAK8_fine_pudn[imdttag][ibtag][isubbtag]->Fill((tjet+bjet).M(),weight_pudn);
+				h2d_mtb_npu[imdttag][ibtag][isubbtag]->Fill((tjet+bjet).M(),int(Pileup_nTrueInt),weight1);
+				
+				hist_tbmass_md_DeepAK8_trigwt[imdttag][ibtag][isubbtag]->Fill((tjet+bjet).M(),weight_trig);
 				
 				hist_tbmass_md_DeepAK8_puup[imdttag][ibtag][isubbtag]->Fill((tjet+bjet).M(),weight_puup);
 				hist_tbmass_md_DeepAK8_pudn[imdttag][ibtag][isubbtag]->Fill((tjet+bjet).M(),weight_pudn);
 				
 				hist_tbmass_md_DeepAK8_prefireup[imdttag][ibtag][isubbtag]->Fill((tjet+bjet).M(),weight_prefireup);
 				hist_tbmass_md_DeepAK8_prefiredn[imdttag][ibtag][isubbtag]->Fill((tjet+bjet).M(),weight_prefiredn);
+			
+				hist_tbmass_md_DeepAK8_pfup[imdttag][ibtag][isubbtag]->Fill((tjet+bjet).M(),weightup);
+				hist_tbmass_md_DeepAK8_pfdn[imdttag][ibtag][isubbtag]->Fill((tjet+bjet).M(),weightdn);
+				
+				hist_tbmass_md_DeepAK8_2[imdttag][ibtag][isubbtag]->Fill((tjet+bjet).M(),weight3);
+				
+				hist_tbmass_md_DeepAK8_pfup_2[imdttag][ibtag][isubbtag]->Fill((tjet+bjet).M(),weightup3);
+				hist_tbmass_md_DeepAK8_pfdn_2[imdttag][ibtag][isubbtag]->Fill((tjet+bjet).M(),weightdn3);
+			
 				
 				if(fabs(bjet.Rapidity()-tjet.Rapidity()) < rapidity_cut){
 					hist_tbmass_md_DeepAK8_dY[imdttag][ibtag][isubbtag]->Fill((tjet+bjet).M(),weight1);
@@ -7621,6 +8091,9 @@ if(topjetAK8>=0){
 				
 				hist_tbmass_md_DeepAK8_bcorup[imdttag][ibtag][isubbtag]->Fill((tjet+bjet).M(),weight_bcor_up);
 				hist_tbmass_md_DeepAK8_bcordn[imdttag][ibtag][isubbtag]->Fill((tjet+bjet).M(),weight_bcor_dn);
+				
+				hist_tbmass_md_DeepAK8_bcorup_2[imdttag][ibtag][isubbtag]->Fill((tjet+bjet).M(),weight_bcor_up3);
+				hist_tbmass_md_DeepAK8_bcordn_2[imdttag][ibtag][isubbtag]->Fill((tjet+bjet).M(),weight_bcor_dn3);
 				
 				}
 				
@@ -7653,6 +8126,8 @@ if(topjetAK8>=0){
 				
 				if(isMC){
 				
+				#ifndef LHAPDFX
+				
 				if(nLHEPdfWeight>0){
 					
 				for(unsigned ipdf=0; ipdf<nLHEPdfWeight; ipdf++){
@@ -7662,6 +8137,20 @@ if(topjetAK8>=0){
 					hist_topjetsdmass_sel_md_DeepAK8_PDF[imdttag][ibtag][isubbtag][int(ipdf)]->Fill(FatJet_msoftdrop[topjetAK8],weight_pdf);
 					}
 				}
+				
+				#endif
+				
+				#ifdef LHAPDFX
+				// npdfmax = 1 + LHAPDF::numberPDF();
+				for (int jk=0; jk< TMath::Min(npdfmax,1 + LHAPDF::numberPDF()) ;jk++) {
+				
+					LHAPDF::initPDF(jk);
+					float ypdf1 = LHAPDF::xfx(Generator_x1,Generator_scalePDF, Generator_id1);
+					float ypdf2 = LHAPDF::xfx(Generator_x2,Generator_scalePDF, Generator_id2);
+					double weight_pdf = weight1*ypdf1*ypdf2*1./(Generator_xpdf1*Generator_xpdf2);
+				
+				}
+				#endif
 				
 				if(nLHEScaleWeight>0){
 		  
@@ -7733,6 +8222,11 @@ if(topjetAK8>=0){
 			     
 				 hist_tbmass_md_DeepAK8_noptw[imdttag][ibtag][isubbtag]->Fill((tjet+bjet).M(),weight_noptw);
 				 
+				 hist_tbmass_md_DeepAK8_alphaup[imdttag][ibtag][isubbtag]->Fill((tjet+bjet).M(),weight_alphaup);
+				 hist_tbmass_md_DeepAK8_alphadn[imdttag][ibtag][isubbtag]->Fill((tjet+bjet).M(),weight_alphadn);
+				 hist_tbmass_md_DeepAK8_betaup[imdttag][ibtag][isubbtag]->Fill((tjet+bjet).M(),weight_betaup);
+				 hist_tbmass_md_DeepAK8_betadn[imdttag][ibtag][isubbtag]->Fill((tjet+bjet).M(),weight_betadn);
+				 
 				
 				hist_tbmass_md_DeepAK8_dAK8up[imdttag][ibtag][isubbtag]->Fill((tjet+bjet).M(),weight_dAK8up);
 				hist_tbmass_md_DeepAK8_dAK8dn[imdttag][ibtag][isubbtag]->Fill((tjet+bjet).M(),weight_dAK8dn);	
@@ -7762,6 +8256,9 @@ if(topjetAK8>=0){
 						hist_2D_pt_btag_AK4_md_DeepAK8_beta_JES_dn[isubbtag][imdttag][ieta][ijes]->Fill(Jet_pt_jes_dn[ijes][bjetAK4],Jet_btagDeepFlavB[bjetAK4],weight1);
 						}
 					
+					hist_tbmass_md_DeepAK8_JES_up_2[imdttag][ibtag][isubbtag][ijes]->Fill((tjet_jes_up[ijes]+bjet_jes_up[ijes]).M(),weight3);
+					hist_tbmass_md_DeepAK8_JES_dn_2[imdttag][ibtag][isubbtag][ijes]->Fill((tjet_jes_dn[ijes]+bjet_jes_dn[ijes]).M(),weight3);
+					
 					}
 					 
 					 hist_tbmass_md_DeepAK8_JMS_up[imdttag][ibtag][isubbtag]->Fill((tjet_jms_up+bjet_jms_up).M(),weight1);
@@ -7776,6 +8273,8 @@ if(topjetAK8>=0){
 				hist_bjetpt_sel_md_DeepAK8[imdttag][ibtag][isubbtag]->Fill(Jet_pt[bjetAK4],weight1);
 				if(ieta>=0){
 				hist_bjetpt_sel_md_DeepAK8_beta[imdttag][ibtag][isubbtag][ieta]->Fill(Jet_pt[bjetAK4],weight1);
+				hist_tbmass_md_DeepAK8_eta1[imdttag][ibtag][isubbtag][ieta]->Fill(m_tb,weight1);
+				hist_tbmass_md_DeepAK8_eta2[imdttag][ibtag][isubbtag][ieta]->Fill(m_tb,weight3);
 				}
 				if(isMC){				
   					hist_partonflav_AK4_md_DeepAK8[imdttag][ibtag][isubbtag]->Fill(Jet_partonFlavour[bjetAK4],weight1);
@@ -7787,6 +8286,8 @@ if(topjetAK8>=0){
 					hist_2D_pt_btag_AK4_md_DeepAK8[isubbtag][imdttag]->Fill(Jet_pt[bjetAK4],Jet_btagDeepFlavB[bjetAK4],weight1);
 					if(ieta>=0){
 						hist_2D_pt_btag_AK4_md_DeepAK8_beta[isubbtag][imdttag][ieta]->Fill(Jet_pt[bjetAK4],Jet_btagDeepFlavB[bjetAK4],weight1);
+						hist_2D_pt_btag_AK4_md_DeepAK8_beta2[isubbtag][imdttag][ieta]->Fill(Jet_pt[bjetAK4],Jet_btagDeepFlavB[bjetAK4],weight3);
+						hist_2D_mtb_btag_AK4_md_DeepAK8_beta[isubbtag][imdttag][ieta]->Fill(m_tb,Jet_btagDeepFlavB[bjetAK4],weight1);
 						}
 					hist_bjetbtag_sel_md_DeepAK8[imdttag][ibtag][isubbtag]->Fill(Jet_btagDeepFlavB[bjetAK4],weight1);	
 				#endif
