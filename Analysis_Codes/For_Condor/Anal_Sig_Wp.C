@@ -1382,7 +1382,7 @@ int main(int argc, char **argv)
 //   cout <<"Give the input file name"<<endl;
 //   cin>> rootfiles;
    int input_mass = atoi(argv[1]);
-   sprintf(rootfiles,"/home/chatterj/t3store/WPrime/CMSSW_8_0_29/src/NanoAODv5_2017/CMSSW_10_5_0/src/2018_LH/Sig_LH_Wp_CompHEP_2018_M%d.log",input_mass);
+   sprintf(rootfiles,"Sig_LH_Wp_CompHEP_2018_M%d.log",input_mass);
    
    int len = strlen(rootfiles);
 //   strncpy(outfilx, rootfiles, len-4);
