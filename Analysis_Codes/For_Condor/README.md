@@ -1,6 +1,6 @@
-<a href="1">Usage</a> cmsrel CMSSW_10_5_0
+<a href="1">1</a> cmsrel CMSSW_10_5_0
 
-2. cd CMSSW_10_5_0/src
+<a href="2">2</a> cd CMSSW_10_5_0/src
 
 3. Put the codes here
 
