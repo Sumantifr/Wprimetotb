@@ -10,16 +10,14 @@
 
 //#define Anal_2017
 //#define Data_2017B
-
 //#define Anal_2016
 //#define Data_2016H
-
 #define Anal_2018
 //#define HEM_Cor_ON
 
 //#define B_Tight
 
-#define LHAPDFX
+//#define LHAPDFX
 
 using namespace std;
 
@@ -4546,9 +4544,11 @@ for(int it=0; it<ntoptag_DAK8; it++){
    
 	#endif
 
+	#ifdef LHAPDFX
 	sprintf(name,"cteq66");
 	LHAPDF::initPDFSet(name, LHAPDF::LHGRID, 0);
-  
+  	#endif
+
    TTree *T1;
    T1 = (TTree*)fileIn->Get("Events");
 	
